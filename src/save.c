@@ -961,6 +961,12 @@ u8 LoadGameSave(u8 saveType)
     if (VarGet(VAR_ROUTE27_STATE) >= 1){
         FlagSet(FLAG_VISITED_KANTO);
     } 
+    if (gSaveBlock1Ptr->versionId <3){
+        if(FlagGet(FLAG_BADGE09_GET)){
+            VarSet(VAR_SSAQUA_STATE, 7);
+        }
+        gSaveBlock1Ptr->versionId = 3;        
+    }
     return status;
 }
 

@@ -19183,7 +19183,7 @@ static const struct TrainerMonItemCustomMoves sParty_Falkner[] = { //LeaderGroup
     },
     {
     .iv = 100,
-    .lvl = 10,
+    .lvl = 11,
     .species = SPECIES_NOCTOWL,
     .heldItem = ITEM_SITRUS_BERRY,
     .moves = {MOVE_TACKLE, MOVE_MUD_SLAP, MOVE_GROWL, MOVE_PECK}
@@ -21918,7 +21918,7 @@ static const struct TrainerMonNoItemCustomMoves sParty_Ariana2[] = { //RocketAdm
     {
     .iv = 255,
     .lvl = 40,
-    .species = SPECIES_HONCHKROW,
+    .species = SPECIES_MURKROW,
     .moves = {MOVE_PURSUIT, MOVE_TOXIC, MOVE_FAINT_ATTACK, MOVE_FLY}
     },
 };

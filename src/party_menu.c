@@ -2542,13 +2542,17 @@ void DisplayPartyMenuStdMessage(u32 stringId)
             break;
         }
 
-        if (stringId == PARTY_MSG_CHOOSE_MON)
+                if (stringId == PARTY_MSG_CHOOSE_MON)
         {
             if (sPartyMenuInternal->chooseHalf)
                 stringId = PARTY_MSG_CHOOSE_MON_AND_CONFIRM;
+            }
             else if (!ShouldUseChooseMonText())
+            {
                 stringId = PARTY_MSG_CHOOSE_MON_OR_CANCEL;
+            }
         }
+
         DrawStdFrameWithCustomTileAndPalette(*windowPtr, FALSE, 0x4F, 13);
         StringExpandPlaceholders(gStringVar4, sActionStringTable[stringId]);
         AddTextPrinterParameterized(*windowPtr, FONT_NORMAL, gStringVar4, 0, 1, 0, 0);
@@ -4507,9 +4511,18 @@ static bool8 NotUsingHPEVItemOnShedinja(struct Pokemon *mon, u16 item)
 
 static bool8 EV_Item_With_EVs_Disabled(u16 item)
 {
-    if (GetItemEffectType(item) == ITEM_EFFECT_HP_EV || ITEM_EFFECT_ATK_EV || ITEM_EFFECT_SPATK_EV || ITEM_EFFECT_SPDEF_EV || ITEM_EFFECT_SPEED_EV || ITEM_EFFECT_DEF_EV)
+    if ((GetItemEffectType(item) == ITEM_EFFECT_HP_EV) || 
+        (GetItemEffectType(item) == ITEM_EFFECT_ATK_EV) ||
+        (GetItemEffectType(item) == ITEM_EFFECT_SPATK_EV) ||
+        (GetItemEffectType(item) == ITEM_EFFECT_SPDEF_EV) ||
+        (GetItemEffectType(item) == ITEM_EFFECT_SPEED_EV ) ||
+        (GetItemEffectType(item) == ITEM_EFFECT_DEF_EV)) {
         return FALSE;
-    return TRUE;
+    }
+    else 
+    {
+        return TRUE;
+    }
 }
 
 static bool8 IsItemFlute(u16 item)

@@ -1117,8 +1117,7 @@ BattleFrontier_Lounge9_NurseRepeat:
 	.string "If you want, we can battle again!$"
 
 BattleFrontier_Lounge9_NurseRepeat2:
-	.string "I'm the EXPERIENCE NURSE!\n"
-	.string "Should we battle?$"
+	.string "Ready for a battle?$"
 
 @Ability swapper
 
@@ -1208,3 +1207,4 @@ BattleFrontier_Lounge9_Ability_Text_NoChampion:
 	.string "Unfortunately, my back hurts and\n"
 	.string "I can't work today.\p"
 	.string "Come again later!$"
+
