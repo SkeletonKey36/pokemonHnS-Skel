@@ -112,7 +112,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RUNNING_TRIATHLETE_M",
+      "graphics_id": "OBJ_EVENT_GFX_COOLTRAINER_M",
       "x": 34,
       "y": 41,
       "elevation": 0,
@@ -125,7 +125,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POLICEMAN",
+      "graphics_id": "OBJ_EVENT_GFX_MAN",
       "x": 45,
       "y": 47,
       "elevation": 3,
@@ -229,7 +229,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TRAINER_TOWER_DUDE",
+      "graphics_id": "OBJ_EVENT_GFX_MAN",
       "x": 62,
       "y": 18,
       "elevation": 0,
@@ -255,7 +255,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WORKER_F",
+      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
       "x": 10,
       "y": 21,
       "elevation": 0,
@@ -268,7 +268,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WORKER_F",
+      "graphics_id": "OBJ_EVENT_GFX_LASS",
       "x": 16,
       "y": 30,
       "elevation": 0,
@@ -320,7 +320,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ATTENDANT",
+      "graphics_id": "OBJ_EVENT_GFX_OLD_WOMAN",
       "x": 58,
       "y": 55,
       "elevation": 3,
