@@ -111,15 +111,15 @@
       "x": 9,
       "y": 16,
       "elevation": 3,
-      "dest_map": "MAP_ROUTE111",
-      "dest_warp_id": "4"
+      "dest_map": "MAP_BATTLE_TOWER_OUTSIDE",
+      "dest_warp_id": "0"
     },
     {
       "x": 10,
       "y": 16,
       "elevation": 3,
-      "dest_map": "MAP_ROUTE111",
-      "dest_warp_id": "4"
+      "dest_map": "MAP_BATTLE_TOWER_OUTSIDE",
+      "dest_warp_id": "0"
     },
     {
       "x": 9,
