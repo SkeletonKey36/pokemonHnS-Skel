@@ -262,6 +262,16 @@ BattleFrontier_OutsideWest_EventScript_Fisherman1::
 	msgbox BattleFrontier_OutsideWest_Text_ChooseFishingOverBattling, MSGBOX_NPC
 	end
 
+BattleFrontier_OutsideWest_EventScript_Fisherman_Milotic::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_MILOTIC, CRY_MODE_NORMAL
+	msgbox BattleFrontier_OutsideWest_Text_Milotic, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
 @ Unused
 BattleFrontier_OutsideWest_EventScript_UnusedNPC3::
 	msgbox BattleFrontier_OutsideWest_Text_DomeIsHereGrandpa, MSGBOX_NPC
@@ -569,3 +579,6 @@ BattleFrontier_OutsideWest_Text_Reparations4:
     .string "huge help with the repairs!\p"
     .string "Without them, rebuilding after the\n"
     .string "collapse would take forever!$"
+
+BattleFrontier_OutsideWest_Text_Milotic:
+	.string "Milooo!$"
