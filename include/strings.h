@@ -810,9 +810,9 @@ extern const u8 gText_90Pts[];
 extern const u8 gText_100Pts[];
 extern const u8 gText_QuestionMark[];
 
-extern const u8 gText_KissPoster16BP[];
-extern const u8 gText_KissCushion32BP[];
-extern const u8 gText_SmoochumDoll32BP[];
+extern const u8 gText_TreeckoDoll48BP[];
+extern const u8 gText_TorchicDoll48BP[];
+extern const u8 gText_MudkipDoll48BP[];
 extern const u8 gText_TogepiDoll48BP[];
 extern const u8 gText_MeowthDoll48BP[];
 extern const u8 gText_ClefairyDoll48BP[];
@@ -989,9 +989,9 @@ extern const u8 BattleFrontier_Lounge3_Text_GetToBattlePyramid[];
 extern const u8 gText_BP[];
 
 // Battle Frontier Exchange Corner
-extern const u8 BattleFrontier_ExchangeServiceCorner_Text_KissPosterDesc[];
-extern const u8 BattleFrontier_ExchangeServiceCorner_Text_KissCushionDesc[];
-extern const u8 BattleFrontier_ExchangeServiceCorner_Text_SmoochumDollDesc[];
+extern const u8 BattleFrontier_ExchangeServiceCorner_Text_TreeckoDollDesc[];
+extern const u8 BattleFrontier_ExchangeServiceCorner_Text_TorchicDollDesc[];
+extern const u8 BattleFrontier_ExchangeServiceCorner_Text_MudkipDollDesc[];
 extern const u8 BattleFrontier_ExchangeServiceCorner_Text_TogepiDollDesc[];
 extern const u8 BattleFrontier_ExchangeServiceCorner_Text_MeowthDollDesc[];
 extern const u8 BattleFrontier_ExchangeServiceCorner_Text_ClefairyDollDesc[];
