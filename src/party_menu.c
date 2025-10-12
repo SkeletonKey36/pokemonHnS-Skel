@@ -2544,11 +2544,12 @@ void DisplayPartyMenuStdMessage(u32 stringId)
 
         if (stringId == PARTY_MSG_CHOOSE_MON)
         {
-            if (sPartyMenuInternal->chooseHalf)
+            if (sPartyMenuInternal->chooseHalf){
                 stringId = PARTY_MSG_CHOOSE_MON_AND_CONFIRM;
             }
-            else if (!ShouldUseChooseMonText())
+            else if (!ShouldUseChooseMonText()){
                 stringId = PARTY_MSG_CHOOSE_MON_OR_CANCEL;
+            }
         }
 
         DrawStdFrameWithCustomTileAndPalette(*windowPtr, FALSE, 0x4F, 13);
