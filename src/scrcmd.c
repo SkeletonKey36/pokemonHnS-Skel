@@ -2778,15 +2778,31 @@ bool8 ScrCmd_givenamedmon(struct ScriptContext *ctx)
         otId = 5231;
         personality = Random32();
         break;
-    case 4: // DRATINI
-        species = SPECIES_DRATINI;
-        level = 15;
-        item = ITEM_NONE;
-        nickname = NULL;
-        otName = gSaveBlock2Ptr->playerName;
-        otId = gSaveBlock2Ptr->playerTrainerId[0];
-        personality = 0x00000003; 
-        break;
+        case 4: // DRATINI (always shiny)
+        {
+            species = SPECIES_DRATINI;
+            level   = 15;
+            item    = ITEM_NONE;
+            nickname = NULL;
+
+            // Use player's full 32-bit Trainer ID (TID|SID)
+            u32 fullId = ((u32)gSaveBlock2Ptr->playerTrainerId[3] << 24)
+                    | ((u32)gSaveBlock2Ptr->playerTrainerId[2] << 16)
+                    | ((u32)gSaveBlock2Ptr->playerTrainerId[1] <<  8)
+                    | ((u32)gSaveBlock2Ptr->playerTrainerId[0]);
+
+            u16 tid = (u16)(fullId & 0xFFFF);
+            u16 sid = (u16)(fullId >> 16);
+
+            // Pick any low 16 bits; set high 16 so (tid ^ sid ^ hi ^ lo) == 0  → shiny
+            u16 lo = 0;
+            u16 hi = tid ^ sid ^ lo;
+
+            personality = ((u32)hi << 16) | lo; // shiny PID for this TID/SID
+            otName = gSaveBlock2Ptr->playerName;
+            otId   = fullId;
+            break;
+        }
     default:
         gSpecialVar_Result = MON_CANT_GIVE;
         return FALSE;
