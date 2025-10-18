@@ -1083,7 +1083,7 @@ BattleFrontier_Lounge9_Nurse::
 	case MULTI_B_PRESSED, BattleFrontier_Lounge9_Chansey1End
 
 BattleFrontier_Lounge9_NurseBattle::
-	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, TRAINER_NURSE, 0, BattleFrontier_Lounge9_NurseIntro, BattleFrontier_Lounge9_NurseDefeat, BattleFrontier_Lounge9_ChanseyBattleAgain
+	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, TRAINER_JOEY, 0, BattleFrontier_Lounge9_NurseIntro, BattleFrontier_Lounge9_NurseDefeat, BattleFrontier_Lounge9_ChanseyBattleAgain
 	end
 
 BattleFrontier_Lounge9_Chansey1End::
