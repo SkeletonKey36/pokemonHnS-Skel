@@ -167,6 +167,7 @@ const struct RegionMapLocation gRegionMapEntries_Johto[] = {
     [MAPSEC_SS_AQUA] = { 9, 14, 10, 1, sMapName_S_S__AQUA},
     [MAPSEC_EMBEDDED_TOWER] = { 1, 10, 1, 1, sMapName_EMBEDDED_TOWER},
     [MAPSEC_OLIVINE_LIGHTHOUSE] = { 3, 6, 1, 1, sMapName_LIGHTHOUSE},
+    [MAPSEC_TRAINER_HILL] = { 2, 5, 1, 1, sMapName_TRAINER_HILL},
     [MAPSEC_BATTLE_FRONTIER] = { 1, 17, 1, 1, sMapName_},
     [MAPSEC_FORTREE_CITY] = { 1, 17, 1, 1, sMapName_},
     [MAPSEC_LILYCOVE_CITY] = { 2, 17, 1, 1, sMapName_},
@@ -403,28 +404,21 @@ static const struct FlyDest sFlyDests_JK[] = {
 static const u16 sRegionMap_SpecialPlaceLocations[][2] =
 {
     {MAPSEC_UNDERWATER_105,             MAPSEC_ROUTE_30},
-    {MAPSEC_SPROUT_TOWER,             MAPSEC_DARK_CAVE},
     #ifdef BUGFIX
     {MAPSEC_UNDERWATER_125,             MAPSEC_UNION_CAVE},
     #else
     {MAPSEC_UNDERWATER_125,             MAPSEC_CLIFF_CAVE}, // BUG: Map will incorrectly display the name of Route 129 when diving on Route 125 (for Marine Cave only)
     #endif
-    {MAPSEC_SLOWPOKE_WELL,             MAPSEC_ILEX_FOREST},
-    {MAPSEC_BURNED_TOWER,             MAPSEC_NATIONAL_PARK},
-    {MAPSEC_OLIVINE_LIGHTHOUSE,             MAPSEC_WHIRL_ISLANDS},
     {MAPSEC_UNDERWATER_129,             MAPSEC_CLIFF_CAVE},
-    {MAPSEC_TIN_TOWER,      MAPSEC_SOOTOPOLIS_CITY},
     {MAPSEC_UNDERWATER_SEAFLOOR_CAVERN, MAPSEC_WHIRL_ISLANDS},
     {MAPSEC_AQUA_HIDEOUT,               MAPSEC_LILYCOVE_CITY},
     {MAPSEC_AQUA_HIDEOUT_OLD,           MAPSEC_LILYCOVE_CITY},
     {MAPSEC_MAGMA_HIDEOUT,              MAPSEC_ROUTE_37},
     {MAPSEC_UNDERWATER_SEALED_CHAMBER,  MAPSEC_TOHJO_FALLS},
-    {MAPSEC_DRAGONS_DEN,            MAPSEC_ROUTE_29},
     {MAPSEC_JAGGED_PASS,                MAPSEC_ROUTE_37},
     {MAPSEC_MT_PYRE,                    MAPSEC_ROUTE_47},
     {MAPSEC_SKY_PILLAR,                 MAPSEC_LAKE_OF_RAGE},
     {MAPSEC_MIRAGE_TOWER,               MAPSEC_ROUTE_36},
-    {MAPSEC_TRAINER_HILL,               MAPSEC_ROUTE_36},
     {MAPSEC_DESERT_UNDERPASS,           MAPSEC_ROUTE_39},
     {MAPSEC_ALTERING_CAVE,              MAPSEC_ROUTE_28},
     {MAPSEC_ARTISAN_CAVE,               MAPSEC_ROUTE_28},
