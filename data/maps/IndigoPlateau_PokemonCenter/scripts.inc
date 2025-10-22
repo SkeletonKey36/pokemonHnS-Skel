@@ -7,6 +7,7 @@ IndigoPlateau_PokemonCenter_MapScripts::
 	.byte 0
 
 IndigoPlateau_PokemonCenter_OnFrame::
+	setrespawn HEAL_LOCATION_INDIGO_PLATEAU
 	map_script_2 VAR_LEAGUE_STATE, 0, IndigoPlateau_PokemonCenter_Enter
 	map_script_2 VAR_LEAGUE_STATE, 2, IndigoPlateau_PokemonCenter_Enter
 	map_script_2 VAR_LEAGUE_STATE, 3, IndigoPlateau_PokemonCenter_Enter
