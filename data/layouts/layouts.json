@@ -8740,6 +8740,16 @@
       "secondary_tileset": "gTileset_Cave_Default",
       "border_filepath": "data/layouts/Route19_Cave/border.bin",
       "blockdata_filepath": "data/layouts/Route19_Cave/map.bin"
+    },
+    {
+      "id": "LAYOUT_WHIRL_ISLANDS_LUGIA_CHAMBER",
+      "name": "WhirlIslands_LugiaChamber_Layout",
+      "width": 59,
+      "height": 40,
+      "primary_tileset": "gTileset_Johto_NorthEast",
+      "secondary_tileset": "gTileset_WhirlIslands",
+      "border_filepath": "data/layouts/WhirlIslands_LugiaChamber/border.bin",
+      "blockdata_filepath": "data/layouts/WhirlIslands_LugiaChamber/map.bin"
     }
   ]
 }
