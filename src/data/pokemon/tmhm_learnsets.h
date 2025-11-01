@@ -3349,6 +3349,7 @@ const union {
         .ROCK_SMASH = TRUE,
         .WATERFALL = TRUE,
         .WHIRLPOOL = TRUE,
+        .FLY = TRUE,
     } },
 
     [SPECIES_LAPRAS] = { .learnset = {
