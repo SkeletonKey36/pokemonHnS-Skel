@@ -2696,7 +2696,7 @@ void UpdateLightSprite(struct Sprite *sprite) {
         return;
     }
 
-    if (gTimeOfDay != TIME_OF_DAY_NIGHT) {
+    if (gTimeOfDay != TIME_OF_DAY_NIGHT && sprite->data[5] != 4) { //Case 4 (Lighthouse and Glow Lichen) will remain on during daytime
         sprite->invisible = TRUE;
         return;
     }
@@ -2775,10 +2775,11 @@ static void SpawnLightSprite(s16 x, s16 y, s16 camX, s16 camY, u32 lightType) {
         sprite->x += 8;
         sprite->y += 7 + sprite->centerToCornerVecY;
         break;
-    case 4: // Lighthouse
+    case 4: // Lighthouse and Glow Lichen
         sprite->centerToCornerVecX = -(32 >> 1);
         sprite->centerToCornerVecY = -(32 >> 1);
-        sprite->oam.priority = 1;
+        sprite->oam.priority = 2;
+        sprite->subpriority = 0xFF;
         sprite->oam.objMode = 1; // BLEND
         sprite->oam.affineMode = ST_OAM_AFFINE_NORMAL;
         sprite->x += 8;

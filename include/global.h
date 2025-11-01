@@ -568,6 +568,7 @@ struct SaveBlock2
               u16 optionsRunType:3;
               u16 optionsAutorunSurf:1;
               u16 optionsAutorunDive:1;
+              u16 optionsNewBattleUI:1;
 }; // sizeof=0xF2C
 
 extern struct SaveBlock2 *gSaveBlock2Ptr;
