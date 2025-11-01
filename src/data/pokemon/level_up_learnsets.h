@@ -333,6 +333,7 @@ static const u16 sFearowLevelUpLearnset[] = {
     LEVEL_UP_MOVE(35, MOVE_MIRROR_MOVE),
     LEVEL_UP_MOVE(40, MOVE_DRILL_PECK),
     LEVEL_UP_MOVE(47, MOVE_AGILITY),
+    LEVEL_UP_MOVE(50, MOVE_RAZOR_WIND),
     LEVEL_UP_END};
 
 static const u16 sEkansLevelUpLearnset[] = {
