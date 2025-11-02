@@ -73,7 +73,7 @@ GoldenrodCity_BikeShop_Text_Mainshop:
 	.string "our patented gear-changing tech?\p"
 	.string "It's as simple as pressing R when\n"
 	.string "you are on your bike but stopped.\p"
-	.string "Beware! You will then go faster!.\p"
+	.string "Beware! You will then go faster!\p"
 	.string "The main shop is at CERULEAN back\n"
 	.string "in KANTO.\p"
 	.string "Say hello to the shop manager if\n"
