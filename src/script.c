@@ -578,10 +578,18 @@ void CheckNuzlockeMode(void)
 
 void DisableStaticRandomizer(void)
 {
-    gSaveBlock1Ptr->tx_Random_Static = 0;
+    if (gSaveBlock1Ptr->tx_Random_Static == 1)
+    {
+        FlagSet(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER);
+        gSaveBlock1Ptr->tx_Random_Static = 0;
+    }
 }
 
 void EnableStaticRandomizer(void)
 {
-    gSaveBlock1Ptr->tx_Random_Static = 1;
+    if (FlagGet(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER) == 1)
+    {
+        gSaveBlock1Ptr->tx_Random_Static = 1;
+        FlagClear(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER);
+    }
 }

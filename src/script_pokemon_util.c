@@ -117,6 +117,12 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
         species = GetStarterPokemon(VarGet(VAR_STARTER_MON));
         CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     }
+     //If the static randomizer is on, and you got your first Pokémon already, givemons will be randomized
+    else if ((gSaveBlock1Ptr->tx_Random_Static) && (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE))
+    {
+        species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_STATIC, 0);
+        CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    }
     else
         CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     heldItem[0] = item;
@@ -221,6 +227,10 @@ u32 GenerateShinyPersonalityForOtId(u32 otId)
 void CreateShinyScriptedMon(u16 species, u8 level, u16 item)
 {
     u8 heldItem[2];
+    if (gSaveBlock1Ptr->tx_Random_Static)
+        species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_STATIC, 0);
+    if (gSaveBlock1Ptr->tx_Random_Items)
+        item = RandomItemId(item);
     SetNuzlockeChecks();
     ZeroEnemyPartyMons();
 
