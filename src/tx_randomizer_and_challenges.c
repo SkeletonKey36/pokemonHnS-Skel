@@ -48,6 +48,11 @@ bool8 IsRandomItemsActivated(void)
     return gSaveBlock1Ptr->tx_Random_Items;
 }
 
+bool8 IsRandomMovesActivated(void)
+{
+    return gSaveBlock1Ptr->tx_Random_Moves;
+}
+
 bool8 IsDifficultyOptionsActivated(void)
 {
     if (gSaveBlock1Ptr->tx_Challenges_PartyLimit
