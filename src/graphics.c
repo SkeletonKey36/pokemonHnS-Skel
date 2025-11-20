@@ -1062,7 +1062,7 @@ const u32 gEnemyMonShadow_GfxGen4[] = INCBIN_U32("graphics/battle_interface/enem
 const u32 gEnemyMonShadow_GfxGen3[] = INCBIN_U32("graphics/battle_interface/enemy_mon_shadowgen3.4bpp.lz");
 
 const u32 gBattleInterface_BallStatusBarGfxGen4[] = INCBIN_U32("graphics/battle_interface/ball_status_bar.4bpp.lz");
-const u32 gBattleInterface_BallStatusBarGfxGen3[] = INCBIN_U32("graphics/battle_interface/ball_status_bar.4bpp.lz");
+const u32 gBattleInterface_BallStatusBarGfxGen3[] = INCBIN_U32("graphics/battle_interface/ball_status_bargen3.4bpp.lz");
 const u8 ALIGNED(4) gNuzlockeFirstEncounterIndicatorGfx[] = INCBIN_U8("graphics/battle_interface/nuzlocke_indicator.4bpp");
 
 const u8 gMonIcon_Egg[] = INCBIN_U8("graphics/pokemon/egg/icon.4bpp");
