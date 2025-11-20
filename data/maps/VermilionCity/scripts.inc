@@ -123,7 +123,7 @@ VermilionCity_TriggerSuicuneBot::
 	applymovement2 LOCALID_VERMILION_SUICUNE, VermilionCity_Movement_Suicune1
 	waitmovement 0
 	applymovement2 OBJ_EVENT_ID_PLAYER, VermilionCity_Movement_PlayerWalkToRailBot
-	delay 60
+	waitmovement 0
 	applymovement2 LOCALID_VERMILION_EUSINE, VermilionCity_Movement_EusineWalkToRail
 	waitmovement LOCALID_VERMILION_EUSINE
 	waitmovement OBJ_EVENT_ID_PLAYER
