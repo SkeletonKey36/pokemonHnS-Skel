@@ -959,7 +959,7 @@ static void DrawTopBar(void)
     // Right side hint: Exit + Scroll
     {
         // "A/B: Exit  Up/Down: Scroll"
-        static const u8 sViewerExitScrollHint[] = _("WORK IN PROGRESS");
+        static const u8 sViewerExitScrollHint[] = _("Heart & Soul");
         s32 w = GetStringWidth(FONT_SMALL, sViewerExitScrollHint, 0);
         s32 x = 232 - w; // stay a few px from the right edge
         if (x < 0) x = 0;
