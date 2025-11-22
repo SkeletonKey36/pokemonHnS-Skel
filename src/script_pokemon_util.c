@@ -115,7 +115,10 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
         IsOneTypeChallengeActive() && (FlagGet(FLAG_SYS_POKEMON_GET) == FALSE))
     {
         species = GetStarterPokemon(VarGet(VAR_STARTER_MON));
-        CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        if (IsOneTypeChallengeActive() && (gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge == TYPE_DRAGON) && (species == 0))
+            CreateMon(&mon, SPECIES_DRATINI, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        else
+            CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     }
      //If the static randomizer is on, and you got your first Pokémon already, givemons will be randomized
     else if ((gSaveBlock1Ptr->tx_Random_Static) && (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE))
