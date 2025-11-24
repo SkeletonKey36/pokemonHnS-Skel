@@ -672,7 +672,7 @@ NewBarkTown_Lab_Text_ElmMissionFromMrPokemon:
 
 NewBarkTown_Lab_Text_ElmChooseAPokemon:
 	.string "I want you to raise one of\n"
-	.string "the POKéMON contained in these Balls.\p"
+	.string "the POKéMON contained in these BALLS.\p"
 	.string "You'll be that POKéMON's\n"
 	.string "first partner, {PLAYER}!\p"
 	.string "Go on. Pick one!$"
