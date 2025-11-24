@@ -475,7 +475,7 @@ VioletCity_Text_Elm_Call:
 
 VioletCity_Text_Kimono_Girl1:
 .string "Me oh my...\n"
-.string "That Egg must be...!$"
+.string "That EGG must be...!$"
 
 VioletCity_Text_Kimono_Girl2:
 .string "I see...\p"
