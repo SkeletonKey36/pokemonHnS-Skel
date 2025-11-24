@@ -264,4 +264,4 @@ MrPokemonHouse_Text_StrangeCoins:
 	.string "country…$"
 
 MrPokemonHouse_Text_GotExpShare:
-	.string "{PLAYER} received EXP SHARE!$"
+	.string "{PLAYER} received EXP. SHARE!$"
