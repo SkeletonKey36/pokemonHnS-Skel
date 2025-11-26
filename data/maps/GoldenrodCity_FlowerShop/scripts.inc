@@ -92,7 +92,7 @@ GoldenrodCity_FlowerShop_Text_Floria:
 
 GoldenrodCity_FlowerShop_Text_Owner1:
 .string "Apparently, there is an odd tree\n"
-.string "on Route 36.\p"
+.string "on ROUTE 36.\p"
 .string "They say it dances when you water\n"
 .string "it...\p"
 .string "Oh, of course not!\p"
@@ -106,7 +106,7 @@ GoldenrodCity_FlowerShop_Text_Owner1:
 
 GoldenrodCity_FlowerShop_Text_Owner2:
 .string "Apparently, there is an odd tree\n"
-.string "on Route 36.\p"
+.string "on ROUTE 36.\p"
 .string "They say it dances when you water\n"
 .string "it...\p"
 .string "Oh, that's a PLAINBADGE from\n"
