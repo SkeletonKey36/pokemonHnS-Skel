@@ -66,13 +66,13 @@ Route12_Text_FisherMartinAfterBattle:
 Route12_Text_FisherStephenSeen:
 	.string "I feel so content, fishing while\n"
 	.string "listening to some tunes on my\l"
-	.string "RADIO.$"
+	.string "radio.$"
 
 Route12_Text_FisherStephenBeaten:
-	.string "My stupid RADIO distracted me!$"
+	.string "My stupid radio distracted me!$"
 
 Route12_Text_FisherStephenAfterBattle:
-	.string "Have you checked out KANTO's RADIO\n"
+	.string "Have you checked out KANTO's radio\n"
 	.string "programs? We get a good variety\l"
 	.string "here.$"
 
