@@ -96,7 +96,7 @@ GoldenrodCity_RadioTower_4F4_Text_Proton_Seen:
 	.string "Be careful!\p"
 	.string "But since you seem to wish it, I'll\n"
 	.string "show you the full extent of a TEAM\l"
-	.string "ROCKET EXECUTIVE'S wrath!$"
+	.string "ROCKET EXECUTIVE's wrath!$"
 
 GoldenrodCity_RadioTower_4F4_Text_Proton_Beaten:
 	.string "Phew...$"
