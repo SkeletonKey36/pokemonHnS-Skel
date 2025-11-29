@@ -356,7 +356,7 @@ OlivineLighthouse_EventScript_JasmineRefuse::
 	end
 
 OlivineLighthouse_Text_PlayerHandedSecretpotion:
-	.string "{PLAYER} handed the SECRETPOTION to\n"
+	.string "{PLAYER} handed the SECRET POTION to\n"
 	.string "JASMINE.$"
 
 OlivineLighthouse_Text_JasmineDontBeOffended:
