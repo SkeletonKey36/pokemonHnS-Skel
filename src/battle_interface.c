@@ -2065,7 +2065,7 @@ static void UpdateNickInHealthbox(u8 healthboxSpriteId, struct Pokemon *mon)
 
 static void TryAddPokeballIconToHealthbox(u8 healthboxSpriteId, bool8 noStatus)
 {
-    u8 battlerId, healthBarSpriteId;
+    u8 battlerId, healthBarSpriteId, shinyIconOffset;
 
     if (gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
         return;
@@ -2076,26 +2076,13 @@ static void TryAddPokeballIconToHealthbox(u8 healthboxSpriteId, bool8 noStatus)
     if (GetBattlerSide(battlerId) == B_SIDE_PLAYER)
         return;
 
-    if (IsMonShiny(&gEnemyParty[gBattlerPartyIndexes[battlerId]]))
+    if (IsMonShiny(&gEnemyParty[gBattlerPartyIndexes[battlerId]]) && noStatus)
     {
-        healthBarSpriteId = gSprites[healthboxSpriteId].hMain_HealthBarSpriteId;
-
-        if (noStatus)
-        {
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum - 1) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 0) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 1) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 2) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 3) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 4) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 5) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 6) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 7) * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 8) * TILE_SIZE_4BPP), 32);
-        }
+        if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(GetMonData(&gEnemyParty[gBattlerPartyIndexes[battlerId]], MON_DATA_SPECIES)), FLAG_GET_CAUGHT) || (IsNuzlockeActive() && !(NuzlockeIsSpeciesClauseActive || OneTypeChallengeCaptureBlocked || NuzlockeIsCaptureBlocked)))
+            shinyIconOffset = 18;
         else
-            CpuFill32(0, (void*)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 9) * TILE_SIZE_4BPP), 32);
-        return;
+            shinyIconOffset = 17;
+        CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_SHINY_ICON), (void *)(OBJ_VRAM0 + (gSprites[healthboxSpriteId].oam.tileNum + shinyIconOffset) * TILE_SIZE_4BPP), 32);
     }
 
     if (!GetSetPokedexFlag(SpeciesToNationalPokedexNum(GetMonData(&gEnemyParty[gBattlerPartyIndexes[battlerId]], MON_DATA_SPECIES)), FLAG_GET_CAUGHT))
