@@ -1528,7 +1528,7 @@ static void CreateShinyStarSprite(void)
 
     // Create sprite near the mon icon
     // Mon icon is at (56, 40), place star to the bottom-right
-    spriteId = CreateSprite(&sSpriteTemplate_ShinyStarIcon, 70, 48, 0);
+    spriteId = CreateSprite(&sSpriteTemplate_ShinyStarIcon, 180, 58, 0);
     sNamingScreen->shinyStarSprite = &gSprites[spriteId];
     sNamingScreen->shinyStarSprite->oam.priority = 2;
 
