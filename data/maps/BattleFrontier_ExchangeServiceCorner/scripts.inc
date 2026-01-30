@@ -472,15 +472,15 @@ BattleFrontier_ExchangeServiceCorner_Text_PleaseChoosePrize:
 	.string "Please choose a prize from this list.$"
 
 BattleFrontier_ExchangeServiceCorner_Text_ConfirmTreeckoDoll:
-	.string "You've chosen the KISS POSTER.\n"
+	.string "You've chosen the TREECKO DOLL.\n"
 	.string "Is that correct?$"
 
 BattleFrontier_ExchangeServiceCorner_Text_ConfirmTorchicDoll:
-	.string "You've chosen the KISS CUSHION.\n"
+	.string "You've chosen the TORCHIC DOLL.\n"
 	.string "Is that correct?$"
 
 BattleFrontier_ExchangeServiceCorner_Text_ConfirmMudkipDoll:
-	.string "You've chosen the SMOOCHUM DOLL.\n"
+	.string "You've chosen the MUDKIP DOLL.\n"
 	.string "Is that correct?$"
 
 BattleFrontier_ExchangeServiceCorner_Text_ConfirmTogepiDoll:

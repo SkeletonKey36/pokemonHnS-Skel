@@ -36,7 +36,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_BIG_SNORLAX",
+      "graphics_id": "OBJ_EVENT_GFX_SNORLAX_STATIC",
       "x": 61,
       "y": 13,
       "elevation": 0,

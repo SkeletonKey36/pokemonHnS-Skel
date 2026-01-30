@@ -1354,6 +1354,9 @@ $(OBJEVENTGFXDIR)/pokemon/shiny_gyarados.4bpp: %.4bpp: %.png
 $(OBJEVENTGFXDIR)/dolls/big_lapras_doll.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -mwidth 4 -mheight 4
 
+$(OBJEVENTGFXDIR)/dolls/big_lapras_static.4bpp: %.4bpp: %.png
+	$(GFX) $< $@ -mwidth 4 -mheight 4
+
 $(OBJEVENTGFXDIR)/pokemon/natu.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -mwidth 4 -mheight 4
 
