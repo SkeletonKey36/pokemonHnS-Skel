@@ -528,6 +528,10 @@ static void Task_HandleStarterChooseInput(u8 taskId)
         spriteId = CreateSprite(&sSpriteTemplate_StarterCircle, sPokeballCoords[selection][0], sPokeballCoords[selection][1], 1);
         gTasks[taskId].tCircleSpriteId = spriteId;
 
+        #ifndef NDEBUG
+        MgbaPrintf(MGBA_LOG_DEBUG, "******** StarterChooseInput ********");
+        #endif
+
         // Create Pokémon sprites. It is now divided in 3 lines as every starter has it's own function so that their sprites are handled individually.
         // This allows individual control in the case of one starter being shiny but the rest not. 
         // Keeping this as one line makes all starters shiny as there is no individual control.
@@ -681,12 +685,15 @@ static u8 CreatePokemonFrontSpriteCyndaquil(u16 species, u8 x, u8 y)
     // If it matches a number that could make a POKéMON shiny, forces a shiny sprite, only on the selected starter.
     // Uses a static u32 because if not, the random number would be generated every time each starter is selected.
     if (isShinyCyndaquil == 0)
+    {
         isShinyCyndaquil = (Random() % (65536 / SHINY_ODDS)) + 1; // adding 1 so 0 cannot be generated
+        isShinyCyndaquil = 1;
+    }
 
     if (isShinyCyndaquil < shinyChance)
     {
         FlagSet(FLAG_SHINY_STARTER_1);
-        if (shinyChance == 1)
+        if (shinyChance == 2)
         {
             spriteId = CreateMonPicSprite_Affine(species, TRUE, 0, MON_PIC_AFFINE_FRONT, x, y, 14, TAG_NONE);
         }

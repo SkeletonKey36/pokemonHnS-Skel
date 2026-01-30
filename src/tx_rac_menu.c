@@ -2880,8 +2880,8 @@ static void DrawChoices_Features_ShinyChance(int selection, int y)
     // This means that a value of 0 results in a shiny rate of 1/8192 (the Gen III shiny rate),
     // a value of 1 results in a shiny rate of 1/4096 (the Gen Gen VI+ shiny rate),
     // and increasing values increase the shiny rate to 1/2048, 1/1024, 1/512, etc.
-    u32 maxShinyChance = 4;
-    if (selection < 0 || selection >= maxShinyChance)
+    const u32 maxShinyChance = 4;
+    if (selection >= maxShinyChance)
         gSaveBlock1Ptr->tx_Features_ShinyChance = maxShinyChance;
     else
         gSaveBlock1Ptr->tx_Features_ShinyChance = selection;

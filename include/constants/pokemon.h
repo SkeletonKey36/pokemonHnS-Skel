@@ -93,7 +93,8 @@
 #define MAX_STAT_STAGE    12
 
 // Shiny odds
-#define SHINY_ODDS 8 // Actual shiny rate is (SHINY_ODDS * pow(2, gSaveBlock1Ptr->tx_Features_ShinyChance)) / 65536
+#define SHINY_BITS 3
+#define SHINY_ODDS (1 << SHINY_BITS) // default: 1 << 3 = 8. Actual shiny rate is (SHINY_ODDS * pow(2, gSaveBlock1Ptr->tx_Features_ShinyChance)) / 65536
 /*
 Assuming SHINY_ODDS = 8:
 tx_Features_ShinyChance = 0     ->  shiny rate 1/8192
