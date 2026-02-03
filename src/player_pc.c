@@ -228,13 +228,14 @@ static const u16 sNewGamePCItems[][2] =
     { ITEM_NONE, 0 }
 };
 
-
+/* Commented out in favor of dynamic addition based on tx_randomizer_and_challenges.h settings
 static const u16 sNewGamePCItemsInfiniteRareCandy[][2] =
 {
     { ITEM_INFINITE_RARE_CANDIES, 1 },
     { ITEM_POTION, 1 },
     { ITEM_NONE, 0 }
 };
+*/
 
 const struct MenuAction gMailboxMailOptions[] =
 {
@@ -365,9 +366,20 @@ static const u8 sSwapArrowTextColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRA
 
 void NewGameInitPCItems(void)
 {
-    u8 i = 0;
+    /* u8 i = 0; */
     ClearItemSlots(gSaveBlock1Ptr->pcItems, PC_ITEMS_COUNT);
 
+    // Add infinite rare candies if enabled
+    if (gSaveBlock1Ptr->tx_Nuzlocke_RareCandy)
+        AddPCItem(ITEM_INFINITE_RARE_CANDIES, 1);
+
+    if (gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel)
+        AddPCItem(ITEM_INFINITE_REPEL, 1);
+    
+    // Always add default items
+    AddPCItem(ITEM_POTION, 1);
+
+    /* Commented out in favor of dynamic addition based on tx_randomizer_and_challenges.h settings
     if (gSaveBlock1Ptr->tx_Nuzlocke_RareCandy){  
         while (TRUE)
         {
@@ -389,6 +401,7 @@ void NewGameInitPCItems(void)
             i++;
         }
     }
+    */
 };
 
 void BedroomPC(void)
