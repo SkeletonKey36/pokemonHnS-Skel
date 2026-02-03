@@ -5126,7 +5126,6 @@ const union {
         .REST = TRUE,
         .ATTRACT = TRUE,
         .SKILL_SWAP = TRUE,
-        .CALM_MIND = TRUE,
         .CUT = TRUE,
         .FLASH = TRUE,
     } },

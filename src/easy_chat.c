@@ -1483,9 +1483,11 @@ static const u16 sInterviewPasswords[7][4] = {
 // Return 1..7 if the chosen 4 words exactly match one of the above; else 0.
 static u16 EvaluateInterviewPassword(const u16 *w)  // expects 4 words
 {
-    for (int i = 0; i < 7; i++) {
+    int i, k;
+    
+    for (i = 0; i < 7; i++) {
         bool8 ok = TRUE;
-        for (int k = 0; k < 4; k++) {
+        for (k = 0; k < 4; k++) {
             if (w[k] != sInterviewPasswords[i][k]) { ok = FALSE; break; }
         }
         if (ok) return (u16)(i + 1);

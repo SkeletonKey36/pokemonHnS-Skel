@@ -1543,6 +1543,10 @@ u8 CreatePartyStatusSummarySprites(u8 battlerId, struct HpAndStatus *partyInfo, 
     u8 summaryBarSpriteId;
     u8 ballIconSpritesIds[PARTY_SIZE];
     u8 taskId;
+    struct CompressedSpriteSheet statusSummaryBarSheet;
+    struct SpriteSheet statusSummaryBallsSheet;
+    struct SpritePalette statusSummaryBarPal;
+    struct SpritePalette statusSummaryBallsPal;
 
     if (!skipPlayer || GetBattlerPosition(battlerId) != B_POSITION_OPPONENT_RIGHT)
     {
@@ -1574,11 +1578,10 @@ u8 CreatePartyStatusSummarySprites(u8 battlerId, struct HpAndStatus *partyInfo, 
         bar_data0 = 5;
     }
 
-    // Declare local variables to hold the structs
-    struct CompressedSpriteSheet statusSummaryBarSheet = GetStatusSummaryBarSpriteSheet();
-    struct SpriteSheet statusSummaryBallsSheet = GetStatusSummaryBallsSpriteSheet();
-    struct SpritePalette statusSummaryBarPal = GetStatusSummaryBarSpritePal();
-    struct SpritePalette statusSummaryBallsPal = GetStatusSummaryBallsSpritePal();
+    statusSummaryBarSheet = GetStatusSummaryBarSpriteSheet();
+    statusSummaryBallsSheet = GetStatusSummaryBallsSpriteSheet();
+    statusSummaryBarPal = GetStatusSummaryBarSpritePal();
+    statusSummaryBallsPal = GetStatusSummaryBallsSpritePal();
 
     // Pass pointers to these locals (which are valid lvalues)
     LoadCompressedSpriteSheetUsingHeap(&statusSummaryBarSheet);
@@ -2815,6 +2818,10 @@ bool32 CanThrowLastUsedBall(void)
 
 void TryAddLastUsedBallItemSprites(void)
 {
+    u16 firstBall;
+    struct SpritePalette palette;
+    struct SpriteSheet sheet;
+
     if (gSaveBlock2Ptr->optionsBallPrompt == 1)
     {
         return;
@@ -2823,7 +2830,7 @@ void TryAddLastUsedBallItemSprites(void)
       || (gLastThrownBall != 0 && !CheckBagHasItem(gLastThrownBall, 1)))
     {
         // we're out of the last used ball, so just set it to the first ball in the bag
-        u16 firstBall = ITEM_NONE;
+        firstBall = ITEM_NONE;
 
         // we have to compact the bag first bc it is typically only compacted when you open it
         CompactItemsInBagPocket(&gBagPockets[BALLS_POCKET]);
@@ -2848,9 +2855,9 @@ void TryAddLastUsedBallItemSprites(void)
     }
 
     // window
-    struct SpritePalette palette = GetAbilityPopUpPalette();
+    palette = GetAbilityPopUpPalette();
     LoadSpritePalette(&palette);
-    struct SpriteSheet sheet = GetLastUsedBallWindowSpriteSheet();
+    sheet = GetLastUsedBallWindowSpriteSheet();
     if (GetSpriteTileStartByTag(LAST_BALL_WINDOW_TAG) == 0xFFFF)
         LoadSpriteSheet(&sheet);
 

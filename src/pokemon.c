@@ -2848,12 +2848,12 @@ static const u8 gSpeciesMapping[NUM_SPECIES+1] =
     [SPECIES_WEAVILE]           = EVO_TYPE_1,
     [SPECIES_YANMEGA]           = EVO_TYPE_1,
     [SPECIES_ANNIHILAPE]        = EVO_TYPE_2,
-    [SPECIES_FARIGIRAF - 1]     = EVO_TYPE_1,
-    [SPECIES_DUDUNSPARCE - 1]   = EVO_TYPE_1,
-    [SPECIES_WYRDEER - 1] = EVO_TYPE_1,
-    [SPECIES_URSALUNA - 1] = EVO_TYPE_2,
-    [SPECIES_URSALUNA_BLOODMOON - 1] = EVO_TYPE_2,
-    [SPECIES_KLEAVOR - 1] = EVO_TYPE_1,
+    [SPECIES_FARIGIRAF]         = EVO_TYPE_1,
+    [SPECIES_DUDUNSPARCE]       = EVO_TYPE_1,
+    [SPECIES_WYRDEER]           = EVO_TYPE_1,
+    [SPECIES_URSALUNA]           = EVO_TYPE_2,
+    [SPECIES_URSALUNA_BLOODMOON] = EVO_TYPE_2,
+    [SPECIES_KLEAVOR]            = EVO_TYPE_1,
     //[SPECIES_UNUSED_SPACE5 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE6 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE7 - 1] = EVO_TYPE_LEGENDARY,
@@ -4289,7 +4289,7 @@ const u16 gEvolutionLines[NUM_SPECIES][EVOS_PER_LINE] =
     [SPECIES_DIGLETT ... SPECIES_DUGTRIO]       = {SPECIES_DIGLETT, SPECIES_DUGTRIO},
     [SPECIES_MEOWTH ... SPECIES_PERSIAN]        = {SPECIES_MEOWTH, SPECIES_PERSIAN},
     [SPECIES_PSYDUCK ... SPECIES_GOLDUCK]       = {SPECIES_PSYDUCK, SPECIES_GOLDUCK},
-    [SPECIES_MANKEY ... SPECIES_PRIMEAPE]       = {SPECIES_MANKEY, SPECIES_PRIMEAPE},
+    // [SPECIES_MANKEY ... SPECIES_PRIMEAPE]       = {SPECIES_MANKEY, SPECIES_PRIMEAPE},
     [SPECIES_MANKEY ... SPECIES_PRIMEAPE]     = {SPECIES_MANKEY, SPECIES_PRIMEAPE, SPECIES_ANNIHILAPE},
     [SPECIES_ANNIHILAPE]                      = {SPECIES_MANKEY, SPECIES_PRIMEAPE, SPECIES_ANNIHILAPE},
     [SPECIES_GROWLITHE ... SPECIES_ARCANINE]    = {SPECIES_GROWLITHE, SPECIES_ARCANINE},
@@ -4329,7 +4329,7 @@ const u16 gEvolutionLines[NUM_SPECIES][EVOS_PER_LINE] =
     [SPECIES_HAPPINY]                           = {SPECIES_HAPPINY, SPECIES_CHANSEY, SPECIES_BLISSEY},
     [SPECIES_TANGELA]                           = {SPECIES_TANGELA, SPECIES_TANGROWTH},
     [SPECIES_TANGROWTH]                         = {SPECIES_TANGELA, SPECIES_TANGROWTH},
-    [SPECIES_KOFFING ... SPECIES_WEEZING]       = {SPECIES_KOFFING, SPECIES_WEEZING},
+    // [SPECIES_KOFFING ... SPECIES_WEEZING]       = {SPECIES_KOFFING, SPECIES_WEEZING},
     [SPECIES_HORSEA ... SPECIES_SEADRA]         = {SPECIES_HORSEA, SPECIES_SEADRA, SPECIES_KINGDRA},
     [SPECIES_KINGDRA]                           = {SPECIES_HORSEA, SPECIES_SEADRA, SPECIES_KINGDRA},
     [SPECIES_GOLDEEN ... SPECIES_SEAKING]       = {SPECIES_GOLDEEN, SPECIES_SEAKING},
@@ -4395,7 +4395,9 @@ const u16 gEvolutionLines[NUM_SPECIES][EVOS_PER_LINE] =
     [SPECIES_SNUBBULL ... SPECIES_GRANBULL]     = {SPECIES_SNUBBULL, SPECIES_GRANBULL},
     [SPECIES_SNEASEL]                           = {SPECIES_SNEASEL, SPECIES_WEAVILE},
     [SPECIES_WEAVILE]                           = {SPECIES_SNEASEL, SPECIES_WEAVILE},
-    [SPECIES_TEDDIURSA ... SPECIES_URSARING]    = {SPECIES_TEDDIURSA, SPECIES_URSARING},
+    [SPECIES_TEDDIURSA ... SPECIES_URSARING]    = {SPECIES_TEDDIURSA, SPECIES_URSARING, SPECIES_URSALUNA, SPECIES_URSALUNA_BLOODMOON},
+    [SPECIES_URSALUNA]                          = {SPECIES_TEDDIURSA, SPECIES_URSARING, SPECIES_URSALUNA, SPECIES_URSALUNA_BLOODMOON},
+    [SPECIES_URSALUNA_BLOODMOON]                = {SPECIES_TEDDIURSA, SPECIES_URSARING, SPECIES_URSALUNA, SPECIES_URSALUNA_BLOODMOON},
     [SPECIES_SLUGMA ... SPECIES_MAGCARGO]       = {SPECIES_SLUGMA, SPECIES_MAGCARGO},
     [SPECIES_SWINUB ... SPECIES_PILOSWINE]      = {SPECIES_SWINUB, SPECIES_PILOSWINE, SPECIES_MAMOSWINE},
     [SPECIES_MAMOSWINE]                         = {SPECIES_SWINUB, SPECIES_PILOSWINE, SPECIES_MAMOSWINE},
@@ -4442,7 +4444,7 @@ const u16 gEvolutionLines[NUM_SPECIES][EVOS_PER_LINE] =
     [SPECIES_DUSKNOIR]                          = {SPECIES_DUSKULL, SPECIES_DUSCLOPS, SPECIES_DUSKNOIR},
     [SPECIES_SLAKOTH ... SPECIES_SLAKING]       = {SPECIES_SLAKOTH, SPECIES_VIGOROTH, SPECIES_SLAKING},
     [SPECIES_ROSELIA]                           = {SPECIES_BUDEW, SPECIES_ROSELIA, SPECIES_ROSERADE},
-    [SPECIES_BUDEW ... SPECIES_ROSERADE]        = {SPECIES_BUDEW, SPECIES_ROSELIA, SPECIES_ROSERADE},
+    [SPECIES_BUDEW]                             = {SPECIES_BUDEW, SPECIES_ROSELIA, SPECIES_ROSERADE},
     [SPECIES_ROSERADE]                          = {SPECIES_BUDEW, SPECIES_ROSELIA, SPECIES_ROSERADE},
     [SPECIES_GULPIN ... SPECIES_SWALOT]         = {SPECIES_GULPIN, SPECIES_SWALOT},
     [SPECIES_WHISMUR ... SPECIES_EXPLOUD]       = {SPECIES_WHISMUR, SPECIES_LOUDRED, SPECIES_EXPLOUD},
@@ -4943,7 +4945,7 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
             {
                 value = Random32();
                 shinyValue = GET_SHINY_VALUE(value, personality);
-            } while (shinyValue = 0);
+            } while (shinyValue == 0);
         else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 0) // 1/8192
             do
             {
@@ -12144,42 +12146,47 @@ void FixSavePokemon1(struct BoxPokemon *boxMon)
 
     if (substruct0->species != SPECIES_NONE)
     {    
-        uint32_t b0 = ((uint32_t*)substruct3)[0];
-        uint32_t b1 = ((uint32_t*)substruct3)[1];
-        uint32_t b2 = ((uint32_t*)substruct3)[2];
+        uint32_t b0, b1, b2;
+        uint32_t hiMask, hiKeep, hiShift;
+        uint32_t mdMask, mdShift, lastHiBit;
+        uint32_t loMask, loKeep, loShift, lastMdBit;
+        
+        b0 = ((uint32_t*)substruct3)[0];
+        b1 = ((uint32_t*)substruct3)[1];
+        b2 = ((uint32_t*)substruct3)[2];
         
         /* u32 b2 95:64 */
-        // Identify bits to remain unchanged - 95:93
-            // bit 91 (worldRibbon) will overwrite bit 92 (unusedRibbons)
-        uint32_t hiMask = 0b11100000000000000000000000000000;
-        uint32_t hiKeep = b2 & hiMask;
+        /* Identify bits to remain unchanged - 95:93 */
+        /* bit 91 (worldRibbon) will overwrite bit 92 (unusedRibbons) */
+        hiMask = 0xE0000000; /* 0b11100000000000000000000000000000 */
+        hiKeep = b2 & hiMask;
         
-        // Identify bits to be shifted - 91:64
-        hiMask = 0b11110000000000000000000000000000; // exclude bit 92
-        hiMask = ~hiMask; // flip mask
-        uint32_t hiShift = b2 & hiMask;
+        /* Identify bits to be shifted - 91:64 */
+        hiMask = 0xF0000000; /* 0b11110000000000000000000000000000 - exclude bit 92 */
+        hiMask = ~hiMask; /* flip mask */
+        hiShift = b2 & hiMask;
         
         /* u32 b1 63:32 */
-        // Identify bits to be shifted - 63:32 (all of them)
-        uint32_t mdMask = 0b11111111111111111111111111111111;
-        uint32_t mdShift = b1 & mdMask;
+        /* Identify bits to be shifted - 63:32 (all of them) */
+        mdMask = 0xFFFFFFFF; /* 0b11111111111111111111111111111111 */
+        mdShift = b1 & mdMask;
         
-        // Retrieve the leftmost bit of mdShift, which will become the rightmost of hiShift
-        uint32_t lastHiBit = mdShift >> 31;
+        /* Retrieve the leftmost bit of mdShift, which will become the rightmost of hiShift */
+        lastHiBit = mdShift >> 31;
         
         /* u32 b0 31:0 */
-        // Identify bits to remain unchanged - 30:0
-        uint32_t loMask = 0b01111111111111111111111111111111;
-        uint32_t loKeep = b0 & loMask;
+        /* Identify bits to remain unchanged - 30:0 */
+        loMask = 0x7FFFFFFF; /* 0b01111111111111111111111111111111 */
+        loKeep = b0 & loMask;
         
-        // Identify bits to be shifted - 63:31
+        /* Identify bits to be shifted - 63:31 */
         loMask = ~loMask;
-        uint32_t loShift = b0 & loMask;
+        loShift = b0 & loMask;
         
-        // Retrieve the leftmost bit of loShift, which will become the rightmost of mdShift
-        uint32_t lastMdBit = (uint32_t)(loShift >> 31);
+        /* Retrieve the leftmost bit of loShift, which will become the rightmost of mdShift */
+        lastMdBit = (uint32_t)(loShift >> 31);
         
-        // Shift the relevant bits, and recombine with the unchanged bits
+        /* Shift the relevant bits, and recombine with the unchanged bits */
         b2 = hiKeep | ((hiShift << 1) | lastHiBit);
         b1 = (mdShift << 1) | lastMdBit;
         b0 = loKeep | (loShift << 1);

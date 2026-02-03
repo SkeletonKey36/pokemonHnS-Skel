@@ -362,6 +362,8 @@ static inline void Viewer_ClearRow(u8 visRow, bool8 selected)
 static void Viewer_DrawBoolRow(u8 rowIndex, const u8 *label, u8 sel, bool8 selected)
 {
     const int y = rowIndex * 16;
+    const u8 *offStyle;
+    const u8 *onStyle;
 
     // Clear background for this row (normal or highlighted)
     Viewer_ClearRow(rowIndex, selected);
@@ -371,8 +373,8 @@ static void Viewer_DrawBoolRow(u8 rowIndex, const u8 *label, u8 sel, bool8 selec
                                  sColorLeftActive, TEXT_SKIP_DRAW, label);
 
     // Right choices: selected one in red, the other in gray (menu style)
-    const u8 *offStyle = (sel == 0) ? sColorRightRed  : sColorRightGray;
-    const u8 *onStyle  = (sel == 1) ? sColorRightRed  : sColorRightGray;
+    offStyle = (sel == 0) ? sColorRightRed  : sColorRightGray;
+    onStyle  = (sel == 1) ? sColorRightRed  : sColorRightGray;
 
     AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                  offStyle, TEXT_SKIP_DRAW, sText_Off);
@@ -386,6 +388,7 @@ static void Viewer_DrawBoolRow(u8 rowIndex, const u8 *label, u8 sel, bool8 selec
 static void Viewer_DrawSingleValueRow(u8 rowIndex, const u8 *label, const u8 *valueText, bool8 selected)
 {
     const int y = rowIndex * 16;
+    int xRight;
 
     // Clear background for this row (normal or highlighted)
     Viewer_ClearRow(rowIndex, selected);
@@ -395,7 +398,7 @@ static void Viewer_DrawSingleValueRow(u8 rowIndex, const u8 *label, const u8 *va
                                  sColorLeftActive, TEXT_SKIP_DRAW, label);
 
     // Single value on the right (red/highlighted)
-    int xRight = GetStringRightAlignXOffset(1, valueText, 198);
+    xRight = GetStringRightAlignXOffset(1, valueText, 198);
     AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xRight, y, 0, 0,
                                  sColorRightRed, TEXT_SKIP_DRAW, valueText);
 }
@@ -606,6 +609,10 @@ struct ViewerPage
 static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
 {
     const bool8 selected = (idx == sCurIndex);
+    u8 sel;
+    const u8 *leftStyle;
+    const u8 *rightStyle;
+    int xr;
 
     switch (idx)
     {
@@ -615,12 +622,12 @@ static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_ModernMoves_Label);
-        u8 sel = GetSel_ModernMoves();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
+        sel = GetSel_ModernMoves();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Original);
-        int xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
+        xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_Modern);
         break;
@@ -631,12 +638,12 @@ static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Synchronize_Label);
-        u8 sel = GetSel_Synchronize();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
+        sel = GetSel_Synchronize();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Original);
-        int xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
+        xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_Modern);
         break;
@@ -647,12 +654,12 @@ static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Sturdy_Label);
-        u8 sel = GetSel_Sturdy();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
+        sel = GetSel_Sturdy();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Original);
-        int xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
+        xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_Modern);
         break;
@@ -663,12 +670,12 @@ static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_NewCitrus_Label);
-        u8 sel = GetSel_NewCitrus();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
+        sel = GetSel_NewCitrus();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "ORIGINAL"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "MODERN"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Original);
-        int xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
+        xr = GetStringRightAlignXOffset(1, sText_Modern, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_Modern);
         break;
@@ -688,6 +695,11 @@ static void Viewer_DrawRow_Page1(u8 visRow, u16 idx)
 static void Viewer_DrawRow_Page2(u8 visRow, u16 idx)
 {
     const bool8 selected = (idx == sCurIndex);
+    u8 sel, sc;
+    const u8 *leftStyle;
+    const u8 *rightStyle;
+    int xr;
+
     switch (idx)
     {
     case 0: // RTC TYPE
@@ -696,19 +708,19 @@ static void Viewer_DrawRow_Page2(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_RTCType_Label);
-        u8 sel = GetSel_Feature_RTCType();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "RTC"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "FakeRTC"
+        sel = GetSel_Feature_RTCType();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "RTC"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "FakeRTC"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_RTC);
-        int xr = GetStringRightAlignXOffset(1, sText_FakeRTC, 198);
+        xr = GetStringRightAlignXOffset(1, sText_FakeRTC, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_FakeRTC);
         break;
     }
     case 1: // SHINY CHANCE
     {
-        u8 sc = gSaveBlock1Ptr->tx_Features_ShinyChance;
+        sc = gSaveBlock1Ptr->tx_Features_ShinyChance;
         if (sc > 4) sc = 0;
         Viewer_DrawSingleValueRow(visRow, sText_ShinyChance_Label,
                                   sText_Challenges_ShinyChance_Strings[sc], selected);
@@ -720,12 +732,12 @@ static void Viewer_DrawRow_Page2(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_FrontierBans_Label);
-        u8 sel = GetSel_Feature_FrontierBans();
-        const u8 *leftStyle  = (sel == 1) ? sColorRightRed : sColorRightGray; // "BAN"
-        const u8 *rightStyle = (sel == 0) ? sColorRightRed : sColorRightGray; // "UNBAN"
+        sel = GetSel_Feature_FrontierBans();
+        leftStyle  = (sel == 1) ? sColorRightRed : sColorRightGray; // "BAN"
+        rightStyle = (sel == 0) ? sColorRightRed : sColorRightGray; // "UNBAN"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Frontier_Ban);
-        int xr = GetStringRightAlignXOffset(1, sText_Frontier_Unban, 198);
+        xr = GetStringRightAlignXOffset(1, sText_Frontier_Unban, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_Frontier_Unban);
         break;
@@ -752,6 +764,10 @@ static void Viewer_DrawRow_Page3(u8 visRow, u16 idx)
 static void Viewer_DrawRow_Page4(u8 visRow, u16 idx)
 {
     const bool8 selected = (idx == sCurIndex);
+    u8 sel;
+    const u8 *leftStyle;
+    const u8 *rightStyle;
+    int xr;
     switch (idx)
     {
     case 0:
@@ -769,12 +785,12 @@ static void Viewer_DrawRow_Page4(u8 visRow, u16 idx)
             Viewer_ClearRow(visRow, selected);
             AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                         sColorLeftActive, TEXT_SKIP_DRAW, sText_Nuz_Fainting);
-            u8 sel = GetSel_Nuz_Deletion();
-            const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "CEMETERY"
-            const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "RELEASE"
+            sel = GetSel_Nuz_Deletion();
+            leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "CEMETERY"
+            rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "RELEASE"
             AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                         leftStyle, TEXT_SKIP_DRAW, sText_Nuz_Fainting_Cemetery);
-            int xr = GetStringRightAlignXOffset(1, sText_Nuz_Fainting_Release, 198);
+            xr = GetStringRightAlignXOffset(1, sText_Nuz_Fainting_Release, 198);
             AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                         rightStyle, TEXT_SKIP_DRAW, sText_Nuz_Fainting_Release);
             break;
@@ -793,6 +809,10 @@ static void Viewer_DrawRow_Page4(u8 visRow, u16 idx)
 static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
 {
     const bool8 selected = (idx == sCurIndex);
+    u8 sel;
+    const u8 *leftStyle;
+    const u8 *rightStyle;
+    int xr;
 
     switch (idx)
     {
@@ -823,12 +843,12 @@ static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Diff_NoItemPlayer);
-        u8 sel = GetSel_Diff_NoItemPlayer();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Diff_NoItemPlayer();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -839,12 +859,12 @@ static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Diff_NoItemTrainer);
-        u8 sel = GetSel_Diff_NoItemTrainer();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Diff_NoItemTrainer();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -870,12 +890,12 @@ static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Diff_PlayerEVs);
-        u8 sel = GetSel_Diff_PlayerEVs();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Diff_PlayerEVs();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -894,12 +914,12 @@ static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Diff_EscapeRopeDig);
-        u8 sel = GetSel_Diff_EscapeRopeDig();
-        const u8 *leftStyle  = (sel == 1) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 0) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Diff_EscapeRopeDig();
+        leftStyle  = (sel == 1) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 0) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -920,6 +940,10 @@ static void Viewer_DrawRow_Page5(u8 visRow, u16 idx)
 static void Viewer_DrawRow_Page6(u8 visRow, u16 idx)
 {
     const bool8 selected = (idx == sCurIndex);
+    u8 sel;
+    const u8 *leftStyle;
+    const u8 *rightStyle;
+    int xr;
 
     switch (idx)
     {
@@ -929,12 +953,12 @@ static void Viewer_DrawRow_Page6(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Chk_PkmnCenter);
-        u8 sel = GetSel_Chk_PkmnCenter();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Chk_PkmnCenter();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -945,12 +969,12 @@ static void Viewer_DrawRow_Page6(u8 visRow, u16 idx)
         Viewer_ClearRow(visRow, selected);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y + 1, 0, 0,
                                      sColorLeftActive, TEXT_SKIP_DRAW, sText_Chk_PCHeal);
-        u8 sel = GetSel_Chk_PCHeal();
-        const u8 *leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
-        const u8 *rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
+        sel = GetSel_Chk_PCHeal();
+        leftStyle  = (sel == 0) ? sColorRightRed : sColorRightGray; // "YES"
+        rightStyle = (sel == 1) ? sColorRightRed : sColorRightGray; // "NO"
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 104, y, 0, 0,
                                      leftStyle, TEXT_SKIP_DRAW, sText_Yes);
-        int xr = GetStringRightAlignXOffset(1, sText_No, 198);
+        xr = GetStringRightAlignXOffset(1, sText_No, 198);
         AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, xr, y, 0, 0,
                                      rightStyle, TEXT_SKIP_DRAW, sText_No);
         break;
@@ -1010,18 +1034,20 @@ static u8 sTopIndex;           // index of the first row currently visible
 
 static void Viewer_RedrawList(void)
 {
+    const struct ViewerPage *pg;
+    u32 total, vis, i, idx;
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
 
-    const struct ViewerPage *pg = &sPages[sPage];
-    u32 total = pg->count;
-    u32 vis   = VIEWER_VISIBLE_ROWS;
+    pg = &sPages[sPage];
+    total = pg->count;
+    vis   = VIEWER_VISIBLE_ROWS;
 
     if (sTopIndex > 0 && sTopIndex + vis > total)
         sTopIndex = (total > vis) ? (total - vis) : 0;
 
-    for (u32 i = 0; i < vis; i++)
+    for (i = 0; i < vis; i++)
     {
-        u32 idx = sTopIndex + i;
+        idx = sTopIndex + i;
         if (idx >= total)
             break;
 
@@ -1239,6 +1265,8 @@ static void Task_ViewerFadeIn(u8 taskId)
 
 static void Task_ViewerInput(u8 taskId)
 {
+    u32 total;
+
     if (JOY_NEW(A_BUTTON) || JOY_NEW(B_BUTTON))
     {
         gTasks[taskId].func = Task_ViewerFadeOutBegin;
@@ -1270,7 +1298,7 @@ static void Task_ViewerInput(u8 taskId)
     }
 
     // Existing vertical scroll
-    u32 total = sPages[sPage].count;
+    total = sPages[sPage].count;
 
         // Move cursor and auto-scroll
     if (JOY_NEW(DPAD_UP) || JOY_REPEAT(DPAD_UP))

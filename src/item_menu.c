@@ -2234,7 +2234,7 @@ static void Task_ItemContext_Sell(u8 taskId)
         StringExpandPlaceholders(gStringVar4, gText_CantBuyKeyItem);
         DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, CloseItemMessage);
     }
-    else if ((ItemId_GetPrice(gSpecialVar_ItemId) == 0) && (FlagGet(FLAG_FINITE_TMS) == FALSE) || (gBagPosition.pocket == TMHM_POCKET) && (FlagGet(FLAG_FINITE_TMS) == FALSE))
+    else if (((ItemId_GetPrice(gSpecialVar_ItemId) == 0) && (FlagGet(FLAG_FINITE_TMS) == FALSE)) || ((gBagPosition.pocket == TMHM_POCKET) && (FlagGet(FLAG_FINITE_TMS) == FALSE)))
     {
         CopyItemName(gSpecialVar_ItemId, gStringVar2);
         StringExpandPlaceholders(gStringVar4, gText_CantBuyKeyItem);

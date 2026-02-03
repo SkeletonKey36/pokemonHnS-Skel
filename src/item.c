@@ -807,7 +807,7 @@ bool8 AddPyramidBagItem(u16 itemId, u16 count)
             if (newQuantities[i] > MAX_BAG_ITEM_CAPACITY)
             {
                 count = newQuantities[i] - MAX_BAG_ITEM_CAPACITY;
-                newQuantities[i] = MAX_BAG_ITEM_CAPACITY;
+                newQuantities[i] = (u8)MAX_BAG_ITEM_CAPACITY;
             }
             else
             {
@@ -830,7 +830,7 @@ bool8 AddPyramidBagItem(u16 itemId, u16 count)
                 if (newQuantities[i] > MAX_BAG_ITEM_CAPACITY)
                 {
                     count = newQuantities[i] - MAX_BAG_ITEM_CAPACITY;
-                    newQuantities[i] = MAX_BAG_ITEM_CAPACITY;
+                    newQuantities[i] = (u8)MAX_BAG_ITEM_CAPACITY;
                 }
                 else
                 {

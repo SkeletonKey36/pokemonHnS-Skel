@@ -1178,7 +1178,7 @@ u8 GetScaledLevel(u8 lvl)
 
     if (!FlagGet(FLAG_IS_CHAMPION))
     {
-        if ((IsTrainerReadyForRematch() == TRUE) || (gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 2)) 
+        if ((IsTrainerReadyForRematch() == TRUE || gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 2)) 
         //hardmode rematches level cap
         {
             if ((lvl >= 36) && (badgeCount == 5))
@@ -1190,7 +1190,7 @@ u8 GetScaledLevel(u8 lvl)
             else if ((lvl >= 64) && (badgeCount == 8))
                 lvl = 57;
         }
-        else if ((IsTrainerReadyForRematch() == TRUE) || (gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 1)) 
+        else if ((IsTrainerReadyForRematch() == TRUE || gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 1)) 
         //normal mode rematch level cap
         {
             if ((lvl >= 33) && (badgeCount == 5))
@@ -1202,7 +1202,7 @@ u8 GetScaledLevel(u8 lvl)
             else if ((lvl >= 58) && (badgeCount == 8))
                 lvl = 53;
         }
-        else if ((IsTrainerReadyForRematch() == TRUE) || (gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 0)) 
+        else if ((IsTrainerReadyForRematch() == TRUE || gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_INTERVIEWER) && (gSaveBlock2Ptr->optionsDifficulty == 0)) 
         //easy mode rematch level cap
         {
             if ((lvl >= 30) && (badgeCount == 5))

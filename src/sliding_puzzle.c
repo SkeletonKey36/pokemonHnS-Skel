@@ -45,8 +45,8 @@ static void SpriteCB_Cursor(struct Sprite *);
 static EWRAM_DATA struct SlidingPuzzle *sSlidingPuzzle = NULL;
 
 // Keep the player's original Button Mode (e.g., Normal / L=R / L=A)
-static u8 sSavedButtonMode = 0;
-static bool8 sSavedButtonModeValid = FALSE;
+static u8 sSavedButtonMode;
+static bool8 sSavedButtonModeValid;
 
 
 static const u32 sSlidingPuzzle_Gfx[]     = INCBIN_U32("graphics/sliding_puzzle/bg.4bpp.lz");

@@ -2417,6 +2417,7 @@ static void Cmd_datahpupdate(void)
                 if (gSpecialStatuses[gActiveBattler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[gActiveBattler].shellBellDmg = gHpDealt;
                 if (gSaveBlock2Ptr->optionStyle == 0)
+                {
                     if (IS_MOVE_PHYSICAL(gCurrentMove) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2447,7 +2448,9 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
-                if (gSaveBlock2Ptr->optionStyle == 1)
+                }
+                if (gSaveBlock2Ptr->optionStyle == 1) 
+                {
                     if (IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2478,6 +2481,7 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
+                }
             }
             gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
 
@@ -4007,19 +4011,21 @@ static void Cmd_getexp(void)
                 if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP) && !GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG))
                 {
                     if (FlagGet(FLAG_EXP_SHARE) == TRUE)
+                    {
                         if (gBattleStruct->sentInPokes & (1 << gBattleStruct->expGetterMonId))
                             gBattleMoveDamage = *exp;
                         else if (gExpShareCheck)
                             gBattleMoveDamage += gExpShareExp;
                         else
                             gBattleMoveDamage = 0;
-
+                    }
                     if (FlagGet(FLAG_EXP_SHARE) == FALSE)
+                    {
                         if (gBattleStruct->sentInPokes & 1)
                             gBattleMoveDamage = *exp;
                         else
                             gBattleMoveDamage = 0;
-
+                    }
                     if ((holdEffect == HOLD_EFFECT_EXP_SHARE) && ((FlagGet(FLAG_EXP_SHARE) == FALSE)))
                         gBattleMoveDamage += gExpShareExp;
                     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)

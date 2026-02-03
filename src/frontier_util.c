@@ -2029,7 +2029,7 @@ static u8 AppendCaughtBannedMonSpeciesName(u16 species, u8 count, s32 numBannedM
 static void AppendIfValid(u16 species, u16 heldItem, u16 hp, u8 lvlMode, u8 monLevel, u16 *speciesArray, u16 *itemsArray, u8 *count)
 {
     s32 i = 0;
-    u16* gFrontierBannedSpecies;
+    const u16* gFrontierBannedSpecies;
     if (gSaveBlock1Ptr->tx_Features_FrontierBans == 0)
         gFrontierBannedSpecies = gFrontierBannedSpeciesNormal;
     else if (gSaveBlock1Ptr->tx_Features_FrontierBans == 1)
@@ -2129,12 +2129,13 @@ static void CheckPartyIneligibility(void)
     {
         s32 i;
         s32 caughtBannedMons = 0;
-        u16* gFrontierBannedSpecies;
+        const u16* gFrontierBannedSpecies;
+        s32 species;
         if (gSaveBlock1Ptr->tx_Features_FrontierBans == 0)
             gFrontierBannedSpecies = gFrontierBannedSpeciesNormal;
         else if (gSaveBlock1Ptr->tx_Features_FrontierBans == 1)
             gFrontierBannedSpecies = gFrontierBannedSpeciesEasy;
-        s32 species = gFrontierBannedSpecies[0];
+        species = gFrontierBannedSpecies[0];
         for (i = 0; species != 0xFFFF; i++, species = gFrontierBannedSpecies[i])
         {
             if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT))

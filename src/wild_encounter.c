@@ -300,7 +300,7 @@ static u8 ChooseWildMonLevel(const struct WildPokemon *wildPokemon)
         u8 ability = GetMonAbility(&gPlayerParty[0]);
         if (ability == ABILITY_HUSTLE || ability == ABILITY_VITAL_SPIRIT || ability == ABILITY_PRESSURE)
         {
-            if (Random() % 2 == 0) //Max level of the mon + (n), only for Hard Difficulty
+            if (Random() % 2 == 0) {//Max level of the mon + (n), only for Hard Difficulty
                 if (gSaveBlock2Ptr->optionsDifficulty == 2 && FlagGet(FLAG_SYS_GAME_CLEAR))
                     return max + 10;
                 else if (gSaveBlock2Ptr->optionsDifficulty == 2 && FlagGet(FLAG_BADGE08_GET))
@@ -319,7 +319,7 @@ static u8 ChooseWildMonLevel(const struct WildPokemon *wildPokemon)
                     return max + 1;
                 else
                     return max;
-
+            }
             if (rand != 0)
                 rand--;
         }
