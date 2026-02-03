@@ -2069,6 +2069,7 @@ static const u8 *const sBirchDexRatingTexts[] =
 void BufferPokedexRatingForMatchCall(u8 *destStr)
 {
     int numSeen, numCaught;
+    u8 *buffer;
     u8 *str;
     u8 dexRatingLevel;
 
@@ -2085,7 +2086,7 @@ void BufferPokedexRatingForMatchCall(u8 *destStr)
         return;
     }
 
-    u8 *buffer = Alloc(sizeof(gStringVar4));
+    buffer = Alloc(sizeof(gStringVar4));
     if (!buffer)
     {
         destStr[0] = EOS;

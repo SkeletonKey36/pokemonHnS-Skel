@@ -111,8 +111,8 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
     // So, this is only run once: when you haven't got the "POKéMON" option yet, and when RANDOM STARTER and ONE TYPE CHALLENGE are enabled.
     // That's why it's set after obtaining the starter. Afterwards, it never works again as the flag never gets disabled, as it should.
     // All the shiny code above doesn't affect HnS, but it's set anyway in case someone uses the code
-    if (((gSaveBlock1Ptr->tx_Random_Starter) == 1) && (FlagGet(FLAG_SYS_POKEMON_GET) == FALSE) ||
-        IsOneTypeChallengeActive() && (FlagGet(FLAG_SYS_POKEMON_GET) == FALSE))
+    if ((((gSaveBlock1Ptr->tx_Random_Starter) == 1) && (FlagGet(FLAG_SYS_POKEMON_GET) == FALSE)) ||
+        (IsOneTypeChallengeActive() && (FlagGet(FLAG_SYS_POKEMON_GET) == FALSE)))
     {
         species = GetStarterPokemon(VarGet(VAR_STARTER_MON));
         //Fixes Missigno appearing in Monotype Dragon runs, as the game lacks Dragon species
@@ -123,8 +123,8 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 unused2, u8 u
         //First, if in Normal or Fairy type Monotype run and you see a Togepi, it gets re-rolled into CLEFFA. 
         //Doesn't take into account randomizer because it's not relevant here.
         else if (IsOneTypeChallengeActive() 
-        && ((gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge == TYPE_NORMAL) || (gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge == TYPE_FAIRY)  
-        && (species == SPECIES_TOGEPI)))
+        && ((gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge == TYPE_NORMAL) || ((gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge == TYPE_FAIRY)  
+        && (species == SPECIES_TOGEPI))))
             CreateMon(&mon, SPECIES_CLEFFA, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
         //If not playing a Normal or Fairy type Monorun, but you're using Random Starters and a Togepi is set as a starter, re-roll into CLEFFA.
         else if ((gSaveBlock1Ptr->tx_Random_Starter == TRUE) && (species == SPECIES_TOGEPI))
@@ -241,6 +241,7 @@ u32 GenerateShinyPersonalityForOtId(u32 otId)
 
 void CreateShinyScriptedMon(u16 species, u8 level, u16 item)
 {
+    u32 otId, shinyPersonality;
     u8 heldItem[2];
     if (gSaveBlock1Ptr->tx_Random_Static)
         species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_STATIC, 0);
@@ -248,12 +249,12 @@ void CreateShinyScriptedMon(u16 species, u8 level, u16 item)
         item = RandomItemId(item);
     ZeroEnemyPartyMons();
 
-    u32 otId = gSaveBlock2Ptr->playerTrainerId[0]
+    otId = gSaveBlock2Ptr->playerTrainerId[0]
              | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
              | (gSaveBlock2Ptr->playerTrainerId[2] << 16)
              | (gSaveBlock2Ptr->playerTrainerId[3] << 24);
 
-    u32 shinyPersonality = GenerateShinyPersonalityForOtId(otId);
+    shinyPersonality = GenerateShinyPersonalityForOtId(otId);
 
     CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, TRUE, shinyPersonality, OT_ID_PLAYER_ID, 0);
 

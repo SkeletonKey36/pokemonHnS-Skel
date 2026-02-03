@@ -275,13 +275,16 @@ static const u32 *sActiveMapTilemapLZ;
 
 static void GetMapSecRectFromLayout(u16 mapSecId, u16 *x, u16 *y, u16 *width, u16 *height)
 {
+    u16 yy;
+    u16 xx;
+
     u16 minx = MAP_WIDTH,  miny = MAP_HEIGHT;
     u16 maxx = 0,          maxy = 0;
     bool32 found = FALSE;
 
-    for (u16 yy = 0; yy < MAP_HEIGHT; yy++)
+    for (yy = 0; yy < MAP_HEIGHT; yy++)
     {
-        for (u16 xx = 0; xx < MAP_WIDTH; xx++)
+        for (xx = 0; xx < MAP_WIDTH; xx++)
         {
             if (sActiveRegionLayout[yy][xx] == mapSecId)
             {
@@ -565,7 +568,7 @@ static const u8 sMapHealLocations[][3] =
     [MAPSEC_BLACKTHORN_CITY] = {MAP_GROUP(BLACKTHORN_CITY), MAP_NUM(BLACKTHORN_CITY), HEAL_LOCATION_BLACKTHORN_CITY},
     [MAPSEC_CHERRYGROVE_CITY] = {MAP_GROUP(CHERRYGROVE_CITY), MAP_NUM(CHERRYGROVE_CITY), HEAL_LOCATION_CHERRYGROVE_CITY},
     [MAPSEC_ROUTE_26] = {MAP_GROUP(ROUTE26NORTH), MAP_NUM(ROUTE26NORTH), HEAL_LOCATION_ROUTE26NORTH},
-    [MAPSEC_ROUTE_26] = {MAP_GROUP(ROUTE26), MAP_NUM(ROUTE26), HEAL_LOCATION_ROUTE26NORTH},
+    /* [MAPSEC_ROUTE_26] = {MAP_GROUP(ROUTE26), MAP_NUM(ROUTE26), HEAL_LOCATION_ROUTE26NORTH}, */
     /*
     [MAPSEC_FORTREE_CITY] = {MAP_GROUP(FORTREE_CITY), MAP_NUM(FORTREE_CITY), HEAL_LOCATION_FORTREE_CITY},
     [MAPSEC_LILYCOVE_CITY] = {MAP_GROUP(LILYCOVE_CITY), MAP_NUM(LILYCOVE_CITY), HEAL_LOCATION_LILYCOVE_CITY},
@@ -1252,15 +1255,19 @@ static u16 GetMapSecIdAt(u16 x, u16 y)
 
 static void InitMapBasedOnPlayerLocation(void)
 {
-    // 1) Pick the map variant for THIS screen (sets sActiveRegionLayout & sActiveEntries)
-    ChooseMapVariant();
-
     const struct MapHeader *mapHeader;
     u16 mapWidth, mapHeight;
     u16 x, y;
     u16 dimensionScale;
     u16 xOnMap;
     struct WarpData *warp;
+    u16 ex, ey, ew, eh;
+    u16 minx, miny, maxx, maxy;
+    bool32 found;
+    u16 xx, yy;
+
+    // 1) Pick the map variant for THIS screen (sets sActiveRegionLayout & sActiveEntries)
+    ChooseMapVariant();
 
     // S.S. Tidal special handling
     if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(SS_TIDAL_CORRIDOR)
@@ -1349,13 +1356,12 @@ static void InitMapBasedOnPlayerLocation(void)
 
     // 3) Get the section rect from the *active layout grid* (matches the art on screen)
     //    If the section isn’t present on this layout, fall back to the active entries table.
-    u16 ex = 0, ey = 0, ew = 1, eh = 1;
+    ex = 0; ey = 0; ew = 1; eh = 1;
+    minx = MAP_WIDTH; miny = MAP_HEIGHT; maxx = 0; maxy = 0;
+    found = FALSE;
+    for (yy = 0; yy < MAP_HEIGHT; yy++)
     {
-        u16 minx = MAP_WIDTH, miny = MAP_HEIGHT, maxx = 0, maxy = 0;
-        bool32 found = FALSE;
-        for (u16 yy = 0; yy < MAP_HEIGHT; yy++)
-        {
-            for (u16 xx = 0; xx < MAP_WIDTH; xx++)
+        for (xx = 0; xx < MAP_WIDTH; xx++)
             {
                 if (sActiveRegionLayout[yy][xx] == sRegionMap->mapSecId)
                 {
@@ -1373,9 +1379,8 @@ static void InitMapBasedOnPlayerLocation(void)
         }
         else
         {
-            const struct RegionMapLocation *e = &sActiveEntries[sRegionMap->mapSecId];
-            ex = e->x; ey = e->y; ew = e->width ? e->width : 1; eh = e->height ? e->height : 1;
-        }
+        const struct RegionMapLocation *e = &sActiveEntries[sRegionMap->mapSecId];
+        ex = e->x; ey = e->y; ew = e->width ? e->width : 1; eh = e->height ? e->height : 1;
     }
 
     // 4) Convert world coords to local tile coords within the section rect
@@ -1425,14 +1430,19 @@ static void InitMapBasedOnPlayerLocation(void)
 
 static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
 {
-    // 1) Pick the variant for THIS screen so layout matches art
-    ChooseMapVariant();
-
     u16 x = 0, y = 0;
     u8 mapGroup, mapNum;
     s16 xOnMap, yOnMap;
     const struct MapHeader *mapHeader;
     u16 mapSecId;
+    u16 ex, ey, ew, eh;
+    u16 minx, miny, maxx, maxy;
+    bool32 found;
+    u16 xx, yy;
+    u16 dim;
+    
+    // 1) Pick the variant for THIS screen so layout matches art
+    ChooseMapVariant();
 
     switch (GetSSTidalLocation(&mapGroup, &mapNum, &xOnMap, &yOnMap))
     {
@@ -1454,64 +1464,13 @@ static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
         mapSecId  = mapHeader->regionMapSectionId;
 
         // Get section rect from active layout (fallback to entries if absent)
+        ex = 0; ey = 0; ew = 1; eh = 1;
+        minx = MAP_WIDTH; miny = MAP_HEIGHT; maxx = 0; maxy = 0;
+        found = FALSE;
+
+        for (yy = 0; yy < MAP_HEIGHT; yy++)
         {
-            u16 ex = 0, ey = 0, ew = 1, eh = 1;
-            u16 minx = MAP_WIDTH, miny = MAP_HEIGHT, maxx = 0, maxy = 0;
-            bool32 found = FALSE;
-
-            for (u16 yy = 0; yy < MAP_HEIGHT; yy++)
-            {
-                for (u16 xx = 0; xx < MAP_WIDTH; xx++)
-                {
-                    if (sActiveRegionLayout[yy][xx] == mapSecId)
-                    {
-                        found = TRUE;
-                        if (xx < minx) minx = xx;
-                        if (yy < miny) miny = yy;
-                        if (xx > maxx) maxx = xx;
-                        if (yy > maxy) maxy = yy;
-                    }
-                }
-            }
-            if (found)
-            {
-                ex = minx; ey = miny; ew = (maxx - minx) + 1; eh = (maxy - miny) + 1;
-            }
-            else
-            {
-                const struct RegionMapLocation *e = &sActiveEntries[mapSecId];
-                ex = e->x; ey = e->y; ew = e->width ? e->width : 1; eh = e->height ? e->height : 1;
-            }
-
-            // Convert world coords to local tile coords within the section rect
-            u16 dim = ew ? (mapHeader->mapLayout->width / ew) : 1;
-            if (dim == 0) dim = 1;
-            x = (u16)(xOnMap / dim);
-            if (ew && x >= ew) x = ew - 1;
-
-            dim = eh ? (mapHeader->mapLayout->height / eh) : 1;
-            if (dim == 0) dim = 1;
-            y = (u16)(yOnMap / dim);
-            if (eh && y >= eh) y = eh - 1;
-
-            // Stash the rect for final placement
-            // (We recompute below for clarity; you can hoist ex/ey if you prefer.)
-        }
-        break;
-    }
-
-    sRegionMap->playerIsInCave = FALSE;
-    sRegionMap->mapSecId = mapSecId;
-
-    // Final on-screen placement using the ACTIVE layout rect
-    {
-        u16 ex = 0, ey = 0, ew = 1, eh = 1;
-        u16 minx = MAP_WIDTH, miny = MAP_HEIGHT, maxx = 0, maxy = 0;
-        bool32 found = FALSE;
-
-        for (u16 yy = 0; yy < MAP_HEIGHT; yy++)
-        {
-            for (u16 xx = 0; xx < MAP_WIDTH; xx++)
+            for (xx = 0; xx < MAP_WIDTH; xx++)
             {
                 if (sActiveRegionLayout[yy][xx] == mapSecId)
                 {
@@ -1533,9 +1492,56 @@ static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
             ex = e->x; ey = e->y; ew = e->width ? e->width : 1; eh = e->height ? e->height : 1;
         }
 
-        sRegionMap->cursorPosX = ex + x + MAPCURSOR_X_MIN;
-        sRegionMap->cursorPosY = ey + y + MAPCURSOR_Y_MIN;
+        // Convert world coords to local tile coords within the section rect
+        dim = ew ? (mapHeader->mapLayout->width / ew) : 1;
+        if (dim == 0) dim = 1;
+        x = (u16)(xOnMap / dim);
+        if (ew && x >= ew) x = ew - 1;
+
+        dim = eh ? (mapHeader->mapLayout->height / eh) : 1;
+        if (dim == 0) dim = 1;
+        y = (u16)(yOnMap / dim);
+        if (eh && y >= eh) y = eh - 1;
+
+        // Stash the rect for final placement
+        // (We recompute below for clarity; you can hoist ex/ey if you prefer.)
+        break;
     }
+
+    sRegionMap->playerIsInCave = FALSE;
+    sRegionMap->mapSecId = mapSecId;
+
+    // Final on-screen placement using the ACTIVE layout rect
+    ex = 0; ey = 0; ew = 1; eh = 1;
+    minx = MAP_WIDTH; miny = MAP_HEIGHT; maxx = 0; maxy = 0;
+    found = FALSE;
+
+    for (yy = 0; yy < MAP_HEIGHT; yy++)
+    {
+        for (xx = 0; xx < MAP_WIDTH; xx++)
+        {
+            if (sActiveRegionLayout[yy][xx] == mapSecId)
+            {
+                found = TRUE;
+                if (xx < minx) minx = xx;
+                if (yy < miny) miny = yy;
+                if (xx > maxx) maxx = xx;
+                if (yy > maxy) maxy = yy;
+            }
+        }
+    }
+    if (found)
+    {
+        ex = minx; ey = miny; ew = (maxx - minx) + 1; eh = (maxy - miny) + 1;
+    }
+    else
+    {
+        const struct RegionMapLocation *e = &sActiveEntries[mapSecId];
+        ex = e->x; ey = e->y; ew = e->width ? e->width : 1; eh = e->height ? e->height : 1;
+    }
+
+    sRegionMap->cursorPosX = ex + x + MAPCURSOR_X_MIN;
+    sRegionMap->cursorPosY = ey + y + MAPCURSOR_Y_MIN;
 }
 
 
@@ -2149,25 +2155,25 @@ static void DrawFlyDestTextWindow(void)
     if (sFlyMap->regionMap.mapSecType > MAPSECTYPE_NONE && sFlyMap->regionMap.mapSecType <= MAPSECTYPE_BATTLE_FRONTIER)
     {
         namePrinted = FALSE;
-        for (i = 0; i < ARRAY_COUNT(sMultiNameFlyDestinations); i++)
-        {
-            if (sFlyMap->regionMap.mapSecId == sMultiNameFlyDestinations[i].mapSecId)
-            {
-                if (FlagGet(sMultiNameFlyDestinations[i].flag))
-                {
-                    StringLength(sMultiNameFlyDestinations[i].name[sFlyMap->regionMap.posWithinMapSec]);
-                    namePrinted = TRUE;
-                    ClearStdWindowAndFrameToTransparent(0, FALSE);
-                    DrawStdFrameWithCustomTileAndPalette(1, FALSE, 101, 13);
-                    AddTextPrinterParameterized(1, FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
-                    name = sMultiNameFlyDestinations[i].name[sFlyMap->regionMap.posWithinMapSec];
-                    AddTextPrinterParameterized(1, FONT_NORMAL, name, GetStringRightAlignXOffset(FONT_NORMAL, name, 96), 17, 0, NULL);
-                    ScheduleBgCopyTilemapToVram(0);
-                    sDrawFlyDestTextWindow = TRUE;
-                }
-                break;
-            }
-        }
+        // for (i = 0; i < ARRAY_COUNT(sMultiNameFlyDestinations); i++)
+        // {
+        //     if (sFlyMap->regionMap.mapSecId == sMultiNameFlyDestinations[i].mapSecId)
+        //     {
+        //         if (FlagGet(sMultiNameFlyDestinations[i].flag))
+        //         {
+        //             StringLength(sMultiNameFlyDestinations[i].name[sFlyMap->regionMap.posWithinMapSec]);
+        //             namePrinted = TRUE;
+        //             ClearStdWindowAndFrameToTransparent(0, FALSE);
+        //             DrawStdFrameWithCustomTileAndPalette(1, FALSE, 101, 13);
+        //             AddTextPrinterParameterized(1, FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
+        //             name = sMultiNameFlyDestinations[i].name[sFlyMap->regionMap.posWithinMapSec];
+        //             AddTextPrinterParameterized(1, FONT_NORMAL, name, GetStringRightAlignXOffset(FONT_NORMAL, name, 96), 17, 0, NULL);
+        //             ScheduleBgCopyTilemapToVram(0);
+        //             sDrawFlyDestTextWindow = TRUE;
+        //         }
+        //         break;
+        //     }
+        // }
         if (!namePrinted)
         {
             if (sDrawFlyDestTextWindow == TRUE)
@@ -2203,8 +2209,8 @@ static void DrawFlyDestTextWindow(void)
 
 static void LoadFlyDestIcons(void)
 {
-    ChooseMapVariant();
     struct SpriteSheet sheet;
+    ChooseMapVariant();
 
     LZ77UnCompWram(sFlyTargetIcons_Gfx, sFlyMap->tileBuffer);
     sheet.data = sFlyMap->tileBuffer;
@@ -2222,15 +2228,19 @@ static void LoadFlyDestIcons(void)
 
 static void CreateFlyDestIcons(void)
 {
+    const struct FlyDest *list;
+    u16 i;
+    
     ChooseMapVariant();
-    const struct FlyDest *list = FlagGet(FLAG_VISITED_KANTO) ? sFlyDests_JK : sFlyDests_Johto;
 
-    for (u16 i = 0; list[i].mapSec != MAPSEC_NONE; i++)
+    list = FlagGet(FLAG_VISITED_KANTO) ? sFlyDests_JK : sFlyDests_Johto;
+
+    for (i = 0; list[i].mapSec != MAPSEC_NONE; i++)
     {
-        u16 mapSecId = list[i].mapSec;
-        u16 x, y, width, height;
-        u16 shape;
+        u16 mapSecId, x, y, width, height, shape;
         u8 spriteId;
+
+        mapSecId = list[i].mapSec;
 
         GetMapSecDimensions(mapSecId, &x, &y, &width, &height);
         x = (x + MAPCURSOR_X_MIN) * 8 + 4;

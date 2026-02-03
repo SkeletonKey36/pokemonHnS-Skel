@@ -157,9 +157,10 @@ static bool8 Dex_FindLayoutRect(u16 mapSecId, u16 *outX, u16 *outY, u16 *outW, u
 
     u16 minx = MAP_WIDTH, miny = MAP_HEIGHT, maxx = 0, maxy = 0;
     bool8 found = FALSE;
+    u16 x, y;
 
-    for (u16 y = 0; y < MAP_HEIGHT; y++)
-        for (u16 x = 0; x < MAP_WIDTH; x++)
+    for (y = 0; y < MAP_HEIGHT; y++)
+        for (x = 0; x < MAP_WIDTH; x++)
             if (grid[y][x] == mapSecId) {
                 found = TRUE;
                 if (x < minx) minx = x;
@@ -742,12 +743,15 @@ static void FindMapsWithMon(u16 species)
         //hides the pkm that are part from the list from above. Certain pkm will still overlap, but it's a solution for now
         if (gSaveBlock1Ptr->tx_Mode_AlternateSpawns == 0)
         {
-            for (i = 0; i < ARRAY_COUNT(sSpeciesHiddenFromAreaScreenModern); i++)
-            {
-                if (VarGet(VAR_TIME_BASED_ENCOUNTER) >= 0 && VarGet(VAR_TIME_BASED_ENCOUNTER) <= 2)
-                    if (sSpeciesHiddenFromAreaScreenModern[i] == species)
-                        return;
-            }
+            // if (ARRAY_COUNT(sSpeciesHiddenFromAreaScreenModern) > 0)
+            // {
+            //     for (i = 0; i < ARRAY_COUNT(sSpeciesHiddenFromAreaScreenModern); i++)
+            //     {
+            //         if (VarGet(VAR_TIME_BASED_ENCOUNTER) <= 2)
+            //             if (sSpeciesHiddenFromAreaScreenModern[i] == species)
+            //                 return;
+            //     }
+            // }
             for (i = 0; sHiddenPokemon[i][0] != NUM_SPECIES; i++)
             {
                 if (species == sHiddenPokemon[i][0])
@@ -1231,29 +1235,29 @@ static void CreateAreaMarkerSprites(void)
     u16 i;
     u16 mapSecId;
     u16 numSprites = 0;
-
-    LoadSpriteSheet(&sAreaMarkerSpriteSheet);
-    LoadSpritePalette(&sAreaMarkerSpritePalette);
-
+    u16 rx, ry, rw, rh;
+    s16 x, y;
     // Screen origin for the 28x15 grid on this screen
     const u16 originX = MAPCURSOR_X_MIN;      // tile coords
     const u16 originY = MAPCURSOR_Y_MIN;      // tile coords
     // Y has an extra +8px shift on this screen (matches existing 28px base)
     const u16 extraYPixels = 8;
 
+    LoadSpriteSheet(&sAreaMarkerSpriteSheet);
+    LoadSpritePalette(&sAreaMarkerSpritePalette);
+
     for (i = 0; i < sPokedexAreaScreen->numSpecialAreas; i++)
     {
         mapSecId = sPokedexAreaScreen->specialAreaRegionMapSectionIds[i];
 
         // Get this section's rect from the *active* layout.
-        u16 rx, ry, rw, rh;
         if (!Dex_FindLayoutRect(mapSecId, &rx, &ry, &rw, &rh))
             continue; // not on this layout (e.g., Kanto dungeon while viewing Johto) → skip
 
         // Convert rect center to screen pixels.
         // Center = (origin + rect) in tiles → pixels; add half-size to center multi-tile sections.
-        s16 x = 8 * (originX + rx) + 4 + 4 * (rw - 1);
-        s16 y = 8 * (originY + ry) + 4 + 4 * (rh - 1) + extraYPixels;
+        x = 8 * (originX + rx) + 4 + 4 * (rw - 1);
+        y = 8 * (originY + ry) + 4 + 4 * (rh - 1) + extraYPixels;
 
         spriteId = CreateSprite(&sAreaMarkerSpriteTemplate, x, y, 0);
         if (spriteId != MAX_SPRITES)

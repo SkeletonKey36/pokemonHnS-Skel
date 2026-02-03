@@ -942,7 +942,7 @@ const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
 };
 
 // Add to the top of berry.c, alongside other global variables
-static u8 sLastPickedBerryType = BERRY_NONE;
+static u8 sLastPickedBerryType;
 
 const struct BerryTree gBlankBerryTree = {};
 

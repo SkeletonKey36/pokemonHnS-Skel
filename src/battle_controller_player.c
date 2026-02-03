@@ -1722,11 +1722,12 @@ u8 TypeEffectiveness(u8 targetId)
 {
     u8 moveFlags;
     u16 move;
+    struct ChooseMoveStruct *moveInfo;
 
     if (gSaveBlock2Ptr->optionTypeEffective == 1)
         return 10;
 
-    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
     move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
     move = gBattleMons[gActiveBattler].moves[gMoveSelectionCursor[gActiveBattler]];
     moveFlags = AI_TypeDisplay(move, gBattleMons[targetId].species, gBattleMons[targetId].ability);

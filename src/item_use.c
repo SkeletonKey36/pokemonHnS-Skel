@@ -253,8 +253,9 @@ static void DisplayRadioMessage(u8 taskId, bool8 isUsingRegisteredKeyItemOnField
             gText_OakTalk_LavenderTower,
             gText_OakTalk_TentacruelWhirl,
         };
+        const u8 *selectedMsg;
         SeedRng(gMain.vblankCounter1);
-        const u8 *selectedMsg = sOakRadioMessages[Random() % ARRAY_COUNT(sOakRadioMessages)];
+        selectedMsg = sOakRadioMessages[Random() % ARRAY_COUNT(sOakRadioMessages)];
         DisplayCannotUseItemMessage(taskId, isUsingRegisteredKeyItemOnField, selectedMsg);
         PlayBGM(MUS_HG_RADIO_OAK);
     }

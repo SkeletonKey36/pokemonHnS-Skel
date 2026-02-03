@@ -22,6 +22,14 @@ static bool32 IsPlayerDefeated(u32 battleOutcome);
 static u32 sBugContestStartTime;
 static bool8 sBugContestTimerActive;
 
+// Reward tables
+static const u16 sFirstPlaceRewards[]  = { ITEM_MOON_STONE, ITEM_SUN_STONE, ITEM_LEAF_STONE};
+static const u16 sSecondPlaceRewards[] = { ITEM_FIRE_STONE, ITEM_THUNDER_STONE, ITEM_WATER_STONE };
+static const u16 sThirdPlaceRewards[]  = {
+    ITEM_ORAN_BERRY, ITEM_CHERI_BERRY, ITEM_PERSIM_BERRY,
+    ITEM_PECHA_BERRY, ITEM_RAWST_BERRY, ITEM_ASPEAR_BERRY, ITEM_CHESTO_BERRY
+};
+
 
 bool32 GetBugContestFlag(void)
 {
@@ -51,10 +59,12 @@ void ExitBugContestMode(void)
 
 bool8 BugContestCheckTimeLimit(void)
 {
+    u32 elapsed;
+    
     if (!FlagGet(FLAG_SYS_BUG_CONTEST_MODE) || !sBugContestTimerActive)
         return FALSE;
 
-    u32 elapsed = gMain.vblankCounter1 - sBugContestStartTime;
+    elapsed = gMain.vblankCounter1 - sBugContestStartTime;
     if (elapsed >= BUG_CONTEST_TIME_LIMIT_FRAMES) // 5 minutes by default
     {
         sBugContestTimerActive = FALSE;
@@ -129,14 +139,6 @@ bool8 JudgeBugContestMon(void)
         placement = gSpecialVar_Result;
     }
 
-        // Reward tables
-    static const u16 sFirstPlaceRewards[]  = { ITEM_MOON_STONE, ITEM_SUN_STONE, ITEM_LEAF_STONE};
-    static const u16 sSecondPlaceRewards[] = { ITEM_FIRE_STONE, ITEM_THUNDER_STONE, ITEM_WATER_STONE };
-    static const u16 sThirdPlaceRewards[]  = {
-        ITEM_ORAN_BERRY, ITEM_CHERI_BERRY, ITEM_PERSIM_BERRY,
-        ITEM_PECHA_BERRY, ITEM_RAWST_BERRY, ITEM_ASPEAR_BERRY, ITEM_CHESTO_BERRY
-    };
-
     switch (placement)
     {
     case 1:
@@ -177,10 +179,13 @@ static bool32 IsPlayerDefeated(u32 battleOutcome)
 
 void CB2_EndBugContestBattle(void)
 {
+    u8 partyCount = 0;
+    u8 i;
+    
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
-    u8 partyCount = 0;
-    for (u8 i = 0; i < PARTY_SIZE; i++)
+    
+    for (i = 0; i < PARTY_SIZE; i++)
     {
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
             partyCount++;

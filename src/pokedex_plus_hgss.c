@@ -6528,10 +6528,13 @@ static void Task_HandleEvolutionScreenInput(u8 taskId)
 
         if (JOY_NEW(A_BUTTON))
         {
+            u16 targetSpecies;
+            u16 dexNum;
+            
             if (sPokedexView->isSearchResults && sPokedexView->originalSearchSelectionNum == 0)
                 sPokedexView->originalSearchSelectionNum = sPokedexListItem->dexNum;
-            u16 targetSpecies   = sPokedexView->sEvoScreenData.targetSpecies[sPokedexView->sEvoScreenData.menuPos];
-            u16 dexNum          = SpeciesToNationalPokedexNum(targetSpecies);
+            targetSpecies   = sPokedexView->sEvoScreenData.targetSpecies[sPokedexView->sEvoScreenData.menuPos];
+            dexNum          = SpeciesToNationalPokedexNum(targetSpecies);
             sPokedexListItem->dexNum = dexNum;
             sPokedexListItem->seen   = GetSetPokedexFlag(dexNum, FLAG_GET_SEEN);
             sPokedexListItem->owned  = GetSetPokedexFlag(dexNum, FLAG_GET_CAUGHT);

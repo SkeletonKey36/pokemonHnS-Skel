@@ -69,7 +69,7 @@ const u32 gBirchBagGrass_Gfx[] = INCBIN_U32("graphics/starter_choose/tiles.4bpp.
 const u32 gPokeballSelection_Gfx[] = INCBIN_U32("graphics/starter_choose/pokeball_selection.4bpp.lz");
 static const u32 sStarterCircle_Gfx[] = INCBIN_U32("graphics/starter_choose/starter_circle.4bpp.lz");
 
-EWRAM_DATA static u16 sStarterList[3] = {0};
+EWRAM_DATA static u16 sStarterList[3];
 
 static const struct WindowTemplate sWindowTemplates[] =
 {
@@ -289,7 +289,7 @@ static const union AffineAnimCmd sAffineAnim_StarterCircle[] =
     AFFINEANIMCMD_END,
 };
 
-static const union AffineAnimCmd * const sAffineAnims_StarterPokemon = {sAffineAnim_StarterPokemon};
+static const union AffineAnimCmd * const sAffineAnims_StarterPokemon[] = {sAffineAnim_StarterPokemon};
 static const union AffineAnimCmd * const sAffineAnims_StarterCircle[] = {sAffineAnim_StarterCircle};
 
 static const struct CompressedSpriteSheet sSpriteSheet_PokeballSelect[] =
@@ -538,7 +538,7 @@ static void Task_HandleStarterChooseInput(u8 taskId)
         else if (selection == 2)
             spriteId = CreatePokemonFrontSpriteTotodile(GetStarterPokemon(2), sPokeballCoords[selection][0], sPokeballCoords[selection][1]);
         //spriteId = CreatePokemonFrontSprite(GetStarterPokemon(gTasks[taskId].tStarterSelection), sPokeballCoords[selection][0], sPokeballCoords[selection][1]);
-        gSprites[spriteId].affineAnims = &sAffineAnims_StarterPokemon;
+        gSprites[spriteId].affineAnims = sAffineAnims_StarterPokemon;
         gSprites[spriteId].callback = SpriteCB_StarterPokemon;
 
         gTasks[taskId].tPkmnSpriteId = spriteId;
@@ -674,7 +674,7 @@ static void Task_CreateStarterLabel(u8 taskId)
 static u8 CreatePokemonFrontSpriteCyndaquil(u16 species, u8 x, u8 y)
 {
     u8 spriteId;
-    static u32 isShinyCyndaquil = 0;
+    static u32 isShinyCyndaquil;
     
     // Take a number between 0 and 8192 and compare it to the SHINY_ODDS selected. If it matches a number that could make a POKéMON shiny, forces a 
     // shiny sprite, only on the selected starter. Uses a static u32 because if not, the random number would be generated every time each starter is selected.
@@ -715,7 +715,7 @@ static u8 CreatePokemonFrontSpriteCyndaquil(u16 species, u8 x, u8 y)
 static u8 CreatePokemonFrontSpriteChikorita(u16 species, u8 x, u8 y)
 {
     u8 spriteId;
-    static u32 isShinyChikorita = 0;
+    static u32 isShinyChikorita;
 
     if (isShinyChikorita == 0)
         isShinyChikorita = (Random()% 8192);
@@ -754,7 +754,7 @@ static u8 CreatePokemonFrontSpriteChikorita(u16 species, u8 x, u8 y)
 static u8 CreatePokemonFrontSpriteTotodile(u16 species, u8 x, u8 y)
 {
     u8 spriteId;
-    static u32 isShinyTotodile = 0;
+    static u32 isShinyTotodile;
 
     if (isShinyTotodile == 0)
         isShinyTotodile = (Random()% 8192);

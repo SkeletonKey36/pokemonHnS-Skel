@@ -494,7 +494,8 @@ static void BattleScene_DrawChoices(u8 selection)
 
 static u8 BattleStyle_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT)) 
+    {
         if (gSaveBlock2Ptr->optionsDifficulty == 2)
         {
             PlaySE(SE_FAILURE);
@@ -504,6 +505,7 @@ static u8 BattleStyle_ProcessInput(u8 selection)
             selection ^= 1;
             sArrowPressed = TRUE;
         }
+    }
 
     return selection;
 }

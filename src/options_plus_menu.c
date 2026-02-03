@@ -1300,7 +1300,8 @@ static int ProcessInput_FrameType(int selection)
 
 static int ProcessInput_BattleStyle(int selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT)) 
+    {
         if ((gSaveBlock2Ptr->optionsDifficulty == 2) && (gSaveBlock1Ptr->tx_Features_LimitDifficulty == 1) && (FlagGet(FLAG_SYS_GAME_CLEAR)))
         {
             selection ^= 1;
@@ -1313,7 +1314,7 @@ static int ProcessInput_BattleStyle(int selection)
         {
             selection ^= 1;
         }
-
+    }
     return selection;
 }
 
@@ -1436,6 +1437,7 @@ static void DrawChoices_BattleScene(int selection, int y)
     DrawOptionMenuChoice(gText_BattleSceneOff, GetStringRightAlignXOffset(FONT_NORMAL, gText_BattleSceneOff, 198), y, styles[1], active);
 }
 
+// TODO: Re-implement difficulty option
 /*static void DrawChoices_Difficulty(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_MAIN_DIFFICULTY);

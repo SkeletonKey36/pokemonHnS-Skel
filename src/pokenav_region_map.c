@@ -526,12 +526,14 @@ static void FreeCityZoomViewGfx(void)
 
 static void LoadPokenavRegionMapGfx(struct Pokenav_RegionMapGfx *state)
 {
+    const struct WindowTemplate *tpl;
+
     BgDmaFill(1, PIXEL_FILL(0), 0x40, 1);
     BgDmaFill(1, PIXEL_FILL(1), 0x41, 1);
     CpuFill16(0x1040, state->tilemapBuffer, 0x800);
     SetBgTilemapBuffer(1, state->tilemapBuffer);
     // choose left vs right window based on active region variant
-    const struct WindowTemplate *tpl = IsJohtoOnlyMap()
+    tpl = IsJohtoOnlyMap()
         ? &sMapSecInfoWindowTemplate_Right
         : &sMapSecInfoWindowTemplate;
 

@@ -52,6 +52,9 @@ bool32 IsMirageIslandPresent(void)
     struct Pokemon * curMon = &gPlayerParty[0];
     struct Pokemon * partyEnd = &gPlayerParty[PARTY_SIZE];
 
+    struct BoxPokemon * curBoxMon;
+    struct BoxPokemon * boxMonEnd;
+
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_MEW)
             return TRUE;
@@ -66,8 +69,8 @@ bool32 IsMirageIslandPresent(void)
             return TRUE;
     } while (++curMon < partyEnd);
 
-    struct BoxPokemon * curBoxMon = &(gPokemonStoragePtr->boxes[0][0]);
-    struct BoxPokemon * boxMonEnd = &(gPokemonStoragePtr->boxes[TOTAL_BOXES_COUNT][IN_BOX_COUNT]);
+    curBoxMon = &(gPokemonStoragePtr->boxes[0][0]);
+    boxMonEnd = &(gPokemonStoragePtr->boxes[TOTAL_BOXES_COUNT][IN_BOX_COUNT]);
 
     do {
         species = curBoxMon->hasSpecies;

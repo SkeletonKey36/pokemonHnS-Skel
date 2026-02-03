@@ -5868,7 +5868,7 @@ static bool8 GetBattleEntryEligibility(struct Pokemon *mon)
 {
     u16 i = 0;
     u16 species;
-    u16* gFrontierBannedSpecies;
+    const u16* gFrontierBannedSpecies;
     if (gSaveBlock1Ptr->tx_Features_FrontierBans == 0)
         gFrontierBannedSpecies = gFrontierBannedSpeciesNormal;
     else if (gSaveBlock1Ptr->tx_Features_FrontierBans == 1)

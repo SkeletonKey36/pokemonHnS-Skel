@@ -1335,6 +1335,12 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
 // Create (FR pattern: decompress into temp buffer, then LoadSpriteSheet/Palette)
 static void CreateShinyStarObj(u16 tileTag, u16 palTag)
 {
+    struct SpriteSheet sheet;
+    struct SpritePalette pal;
+    struct SpriteTemplate tmpl;
+
+    u8 spriteId;
+
     void *gfxBuffer = NULL;
 
     if (sShinyStarObjData != NULL)
@@ -1351,13 +1357,13 @@ static void CreateShinyStarObj(u16 tileTag, u16 palTag)
 
     LZ77UnCompWram(sStarObjTiles, gfxBuffer);
 
-    struct SpriteSheet sheet = {
+    sheet = (struct SpriteSheet){
         .data = gfxBuffer,
         .size = 0x20 * 2, // safe for 1–2 tiles
         .tag  = tileTag,
     };
-    struct SpritePalette pal = { .data = sFriendshipIcon_Pal, .tag = palTag };
-    struct SpriteTemplate tmpl = {
+    pal = (struct SpritePalette){ .data = sFriendshipIcon_Pal, .tag = palTag };
+    tmpl = (struct SpriteTemplate){
         .tileTag = tileTag,
         .paletteTag = palTag,
         .oam = &sStarObjOamData,
@@ -1372,7 +1378,7 @@ static void CreateShinyStarObj(u16 tileTag, u16 palTag)
 
     // Position: bottom-left, just below the Poké Ball (ball is at 16,136 in your file).
     // Tweak a couple pixels if you want it tighter/looser.
-    u8 spriteId = CreateSprite(&tmpl, 68, 37, 0); //HnS Shiny star location
+    spriteId = CreateSprite(&tmpl, 68, 37, 0); //HnS Shiny star location
     sShinyStarObjData->sprite = &gSprites[spriteId];
     sShinyStarObjData->tileTag = tileTag;
     sShinyStarObjData->palTag  = palTag;
@@ -3838,7 +3844,7 @@ static void BufferIvOrEvStats(u8 mode)
         break;
     case 2:
     default:
-        const s8 *natureMod = gNatureStatTable[
+        natureMod = gNatureStatTable[
             (sMonSummaryScreen->summary.hiddenNature == HIDDEN_NATURE_NONE) ? sMonSummaryScreen->summary.nature : sMonSummaryScreen->summary.hiddenNature];
         BufferStat(currHPString, 0, hp, 0, 3);
         BufferStat(gStringVar1, 0, hp2, 1, 3);
