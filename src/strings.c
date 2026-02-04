@@ -2089,7 +2089,21 @@ const u8 gText_infiniteRepelOn[] = _("Turned on the Inf. Repel.{PAUSE_UNTIL_PRES
 const u8 gText_infiniteRepelOff[] = _("Turned off the Inf. Repel.{PAUSE_UNTIL_PRESS}");
 // Inf. Candies
 const u8 gText_infiniteCandies[] = _("You obtained 999 RARE\nCANDIES!{PAUSE_UNTIL_PRESS}");
+// Healing Heart
 const u8 gText_HealingHeart[] = _("The soft HEALING HEART\nfully healed your party!{PAUSE 120}{WAIT_SE}");
+// DexNav
+const u8 gText_NoWildPokemonHere[] = _("No wild POKéMON\nare found here.{PAUSE_UNTIL_PRESS}");
+const u8 gText_EncountersInArea[] = _("Encounters for this area:\n(Special: Rock Smash/Headbutt)\p");
+const u8 gText_GrassEncounters[] = _("Land: ");
+const u8 gText_GrassEncountersDay[] = _("Land (Day): ");
+const u8 gText_GrassEncountersNight[] = _("Land (Night): ");
+const u8 gText_WaterEncounters[] = _("Water: ");
+const u8 gText_OldRodEncounters[] = _("Old Rod: ");
+const u8 gText_GoodRodEncounters[] = _("Good Rod: ");
+const u8 gText_SuperRodEncounters[] = _("Super Rod: ");
+const u8 gText_RockSmashEncounters[] = _("Special: ");
+const u8 gText_CommaSpace2[] = _(", ");
+const u8 gText_ParagraphSpace[] = _("\p");
 
 //tx_randomizer_and_challenges
 const u8 gText_NuzlockeCantThrowPokeBallRoute[]             = _("You have already used your encounter\nfor this area!{PAUSE_UNTIL_PRESS}");

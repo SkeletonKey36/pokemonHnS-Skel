@@ -77,6 +77,7 @@ NewBarkTown_PlayersHouse_1F_EventScript_MomsIntro::
 	waitmovement 0
 	msgbox NewBarkTown_PlayersHouse_1F_Text_ElmsLookingForYou, MSGBOX_DEFAULT
 	call NewBarkTown_PlayersHouse_1F_EventScript_GivePokeGear
+	call NewBarkTown_PlayersHouse_1F_EventScript_GiveDexNav
 	call NewBarkTown_PlayersHouse_1F_EventScript_GiveRunningShoes
 	applymovement LOCALID_MOM, NewBarkTown_PlayersHouse_1F_MomMovement_2
 	waitmovement 0
@@ -104,6 +105,16 @@ NewBarkTown_PlayersHouse_1F_EventScript_GivePokeGear::
 	closemessage
 	delay 30
 	return
+
+NewBarkTown_PlayersHouse_1F_EventScript_GiveDexNav::
+    msgbox NewBarkTown_PlayersHouse_1F_Text_GiveDexNav, MSGBOX_DEFAULT
+    waitmessage
+    closemessage
+    giveitem ITEM_DEXNAV
+    msgbox NewBarkTown_PlayersHouse_1F_Text_ExplainDexNav, MSGBOX_DEFAULT
+    closemessage
+    delay 30
+    return
 	
 NewBarkTown_PlayersHouse_1F_EventScript_GiveRunningShoes::
 	msgbox NewBarkTown_PlayersHouse_1F_Text_WearTheseRunningShoes, MSGBOX_DEFAULT
@@ -172,6 +183,14 @@ NewBarkTown_PlayersHouse_1F_Text_ExplainPokeGear:
 	.string "in memory.\p"
 	.string "Just choose a name you want to call.\p"
 	.string "Gee, isn't that convenient?$"
+
+NewBarkTown_PlayersHouse_1F_Text_GiveDexNav:
+	.string "Oh! This also came in the mail\n"
+	.string "for you. It's called a DEXNAV.$"
+
+NewBarkTown_PlayersHouse_1F_Text_ExplainDexNav:
+    .string "It says just use it from your bag\n"
+    .string "to see nearby wild POKéMON!$"
 
 NewBarkTown_PlayersHouse_1F_Text_WearTheseRunningShoes:
 	.string "Oh, and don't forget your\n"

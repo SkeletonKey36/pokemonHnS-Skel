@@ -15,6 +15,7 @@
 #include "event_scripts.h"
 #include "fieldmap.h"
 #include "field_effect.h"
+#include "field_message_box.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
 #include "field_weather.h"
@@ -23,6 +24,7 @@
 #include "item_use.h"
 #include "mail.h"
 #include "main.h"
+#include "malloc.h"
 #include "menu.h"
 #include "menu_helpers.h"
 #include "metatile_behavior.h"
@@ -45,6 +47,7 @@
 #include "script_pokemon_util.h"
 #include "random.h"
 #include "constants/region_map_sections.h"
+#include "wild_encounter.h"
 
 #include "tx_randomizer_and_challenges.h"
 #include "battle_setup.h" //tx_randomizer_and_challenges
@@ -54,6 +57,7 @@ static void FieldCB_UseItemOnField(void);
 static void Task_CallItemUseOnFieldCallback(u8);
 static void Task_UseItemfinder(u8);
 static void Task_CloseItemfinderMessage(u8);
+static void Task_ShowDexNavMessage(u8);
 static void Task_HiddenItemNearby(u8);
 static void Task_StandingOnHiddenItem(u8);
 static bool8 ItemfinderCheckForHiddenItems(const struct MapEvents *, u8);
@@ -78,6 +82,11 @@ static void Task_CloseCantUseKeyItemMessage(u8);
 static void SetDistanceOfClosestHiddenItem(u8, s16, s16);
 static void CB2_OpenPokeblockFromBag(void);
 static void ItemUseOnFieldCB_Fertilizer(u8);
+static void BuildEncounterInfoString(u16 headerId);
+static u8 *BuildEncounterList(u8 *str, const struct WildPokemon *wildMon, u8 count);
+static u8 *BuildFishingEncounterList(u8 *str, const struct WildPokemon *wildMon);
+static u16 FindNightEncounterHeaderId(u16 dayHeaderId);
+static bool8 HasValidSpecies(const struct WildPokemon *wildMon, u8 count);
 
 // EWRAM variables
 EWRAM_DATA static void(*sItemUseOnFieldCB)(u8 taskId) = NULL;
@@ -831,6 +840,234 @@ void ItemUseOutOfBattle_InfiniteRareCandies(u8 taskId)
         DisplayItemMessage(taskId, 1, gText_infiniteCandies, CloseItemMessage);
         UpdatePocketItemList(ITEMS_POCKET);
     }
+}
+
+#define HEADER_NONE 0xFFFF
+
+static void Task_ShowDexNavMessage(u8 taskId)
+{
+    if (IsWeatherNotFadingIn() == 1)
+    {
+        DisplayItemMessageOnField(taskId, gStringVar4, Task_CloseItemfinderMessage);
+    }
+}
+
+static void FieldCB_ShowDexNavInfo(void)
+{
+    FadeInFromBlack();
+    CreateTask(Task_ShowDexNavMessage, 8);
+}
+
+void ItemUseOutOfBattle_DexNav(u8 taskId)
+{
+    u16 headerId = GetCurrentMapWildMonHeaderId();
+    
+    if (headerId == HEADER_NONE)
+    {
+        // No encounters in this area
+        if (gTasks[taskId].tUsingRegisteredKeyItem)
+            DisplayItemMessageOnField(taskId, gText_NoWildPokemonHere, Task_CloseCantUseKeyItemMessage);
+        else
+            DisplayItemMessage(taskId, FONT_NORMAL, gText_NoWildPokemonHere, CloseItemMessage);
+        return;
+    }
+    
+    // Play sound effect
+    PlaySE(SE_ITEMFINDER);
+    
+    // Build encounter information string
+    BuildEncounterInfoString(headerId);
+    
+    // If using as registered key item, show message directly without fade
+    if (gTasks[taskId].tUsingRegisteredKeyItem)
+    {
+        DisplayItemMessageOnField(taskId, gStringVar4, Task_CloseItemfinderMessage);
+        return;
+    }
+    
+    // Close bag and show field message with fade transition
+    if (!InBattlePyramid())
+    {
+        gFieldCallback = FieldCB_ShowDexNavInfo;
+        gBagMenu->newScreenCallback = CB2_ReturnToField;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        gPyramidBagMenu->newScreenCallback = CB2_ReturnToField;
+        CloseBattlePyramidBag(taskId);
+    }
+}
+
+static void BuildEncounterInfoString(u16 headerId)
+{
+    const struct WildPokemonHeader *header = &gWildMonHeaders[headerId];
+    u16 nightHeaderId;
+    const struct WildPokemonHeader *nightHeader = NULL;
+    
+    u8 *str = gStringVar4; // Use gStringVar4 for field messages
+    
+    // Build the encounter text
+    str = StringCopy(str, gText_EncountersInArea);
+    
+    // Check for night encounters
+    nightHeaderId = FindNightEncounterHeaderId(headerId);
+    if (nightHeaderId != HEADER_NONE)
+        nightHeader = &gWildMonHeaders[nightHeaderId];
+    
+    // Land encounters (Day)
+    if (header->landMonsInfo != NULL && HasValidSpecies(header->landMonsInfo->wildPokemon, LAND_WILD_COUNT))
+    {
+        if (nightHeader != NULL)
+            str = StringCopy(str, gText_GrassEncountersDay);
+        else
+            str = StringCopy(str, gText_GrassEncounters);
+        str = BuildEncounterList(str, header->landMonsInfo->wildPokemon, LAND_WILD_COUNT);
+    }
+    
+    // Land encounters (Night)
+    if (nightHeader != NULL && nightHeader->landMonsInfo != NULL && HasValidSpecies(nightHeader->landMonsInfo->wildPokemon, LAND_WILD_COUNT))
+    {
+        str = StringCopy(str, gText_GrassEncountersNight);
+        str = BuildEncounterList(str, nightHeader->landMonsInfo->wildPokemon, LAND_WILD_COUNT);
+    }
+    
+    // Water encounters
+    if (header->waterMonsInfo != NULL && HasValidSpecies(header->waterMonsInfo->wildPokemon, WATER_WILD_COUNT))
+    {
+        str = StringCopy(str, gText_WaterEncounters);
+        str = BuildEncounterList(str, header->waterMonsInfo->wildPokemon, WATER_WILD_COUNT);
+    }
+    
+    // Fishing encounters (broken down by rod type)
+    if (header->fishingMonsInfo != NULL)
+    {
+        str = BuildFishingEncounterList(str, header->fishingMonsInfo->wildPokemon);
+    }
+    
+    // Rock Smash/Headbutt encounters
+    if (header->rockSmashMonsInfo != NULL && HasValidSpecies(header->rockSmashMonsInfo->wildPokemon, ROCK_WILD_COUNT))
+    {
+        str = StringCopy(str, gText_RockSmashEncounters);
+        str = BuildEncounterList(str, header->rockSmashMonsInfo->wildPokemon, ROCK_WILD_COUNT);
+    }
+}
+
+static u8 *BuildEncounterList(u8 *str, const struct WildPokemon *wildMon, u8 count)
+{
+    u16 uniqueMons[count];
+    u8 uniqueCount = 0;
+    u8 i, j;
+    u8 lineLength = 0;
+    u8 currentLine = 0;
+    const u8 MAX_LINE_LENGTH = 35; // ~3 Pokémon names per line comfortably
+    const u8 MAX_LINES_PER_PAGE = 2; // 2 lines per message box page
+    
+    // Get unique species (avoid duplicates)
+    for (i = 0; i < count; i++)
+    {
+        bool8 isDuplicate = FALSE;
+        for (j = 0; j < uniqueCount; j++)
+        {
+            if (uniqueMons[j] == wildMon[i].species)
+            {
+                isDuplicate = TRUE;
+                break;
+            }
+        }
+        
+        if (!isDuplicate)
+        {
+            uniqueMons[uniqueCount++] = wildMon[i].species;
+        }
+    }
+    
+    // Build string with species names
+    for (i = 0; i < uniqueCount; i++)
+    {
+        u8 nameLen = StringLength(gSpeciesNames[uniqueMons[i]]);
+        
+        // Check if adding this name would exceed line length
+        if (lineLength > 0 && lineLength + nameLen + 2 > MAX_LINE_LENGTH) // +2 for ", "
+        {
+            str = StringCopy(str, gText_NewLine);
+            lineLength = 0;
+            currentLine++;
+            
+            // If we've filled 2 lines, start a new page
+            if (currentLine >= MAX_LINES_PER_PAGE)
+            {
+                str = StringCopy(str, gText_ParagraphSpace); // Start new page
+                currentLine = 0;
+            }
+        }
+        
+        str = StringCopy(str, gSpeciesNames[uniqueMons[i]]);
+        lineLength += nameLen;
+        
+        // Add comma and space if not the last item
+        if (i < uniqueCount - 1)
+        {
+            str = StringCopy(str, gText_CommaSpace2);
+            lineLength += 2;
+        }
+    }
+    
+    str = StringCopy(str, gText_ParagraphSpace); // Paragraph break between encounter types
+    return str;
+}
+
+static u8 *BuildFishingEncounterList(u8 *str, const struct WildPokemon *wildMon)
+{
+    // Old Rod: indices 0-1
+    str = StringCopy(str, gText_OldRodEncounters);
+    str = BuildEncounterList(str, &wildMon[0], 2);
+    
+    // Good Rod: indices 2-4
+    str = StringCopy(str, gText_GoodRodEncounters);
+    str = BuildEncounterList(str, &wildMon[2], 3);
+    
+    // Super Rod: indices 5-9
+    str = StringCopy(str, gText_SuperRodEncounters);
+    str = BuildEncounterList(str, &wildMon[5], 5);
+    
+    return str;
+}
+
+static u16 FindNightEncounterHeaderId(u16 dayHeaderId)
+{
+    u16 i;
+    const struct WildPokemonHeader *dayHeader = &gWildMonHeaders[dayHeaderId];
+    
+    // Search for a header with the same mapGroup and mapNum but different encounters
+    // Night headers typically come right after day headers in the array
+    for (i = dayHeaderId + 1; i < 500; i++) // reasonable upper limit
+    {
+        if (gWildMonHeaders[i].mapGroup == 0 && gWildMonHeaders[i].mapNum == 0)
+            break; // End of headers
+            
+        if (gWildMonHeaders[i].mapGroup == dayHeader->mapGroup 
+            && gWildMonHeaders[i].mapNum == dayHeader->mapNum)
+        {
+            // Found a matching map - assume it's the night version
+            return i;
+        }
+    }
+    
+    return HEADER_NONE;
+}
+
+static bool8 HasValidSpecies(const struct WildPokemon *wildMon, u8 count)
+{
+    u8 i;
+    
+    for (i = 0; i < count; i++)
+    {
+        if (wildMon[i].species != SPECIES_NONE)
+            return TRUE;
+    }
+    
+    return FALSE;
 }
 
 void ItemUseOutOfBattle_HealingHeart(u8 taskId)
