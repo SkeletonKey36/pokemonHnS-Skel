@@ -30,6 +30,7 @@ SECTIONS {
         data/*.o(.bss);
         *libc.a:*.o(.bss*);
         *libnosys.a:*.o(.bss*);
+        *libgcc.a:*.o(.bss*);
 
         /* .bss.code starts at 0x3001AA8 */
         src/m4a.o(.bss.code);
@@ -39,6 +40,7 @@ SECTIONS {
         gflib/*.o(COMMON);          /**/
         *libc.a:*.o(COMMON);        
         *libnosys.a:*.o(COMMON);
+        *libgcc.a:*.o(COMMON);
         } > IWRAM
 
     /* BEGIN ROM DATA */
