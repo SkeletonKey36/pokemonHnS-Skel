@@ -26,6 +26,7 @@ bool8 AreFeaturesActivated(void)
 bool8 IsRandomizerActivated(void)
 {
     if (gSaveBlock1Ptr->tx_Random_Chaos
+        || gSaveBlock1Ptr->tx_Random_StatDistribution
         || gSaveBlock1Ptr->tx_Random_WildPokemon
         || gSaveBlock1Ptr->tx_Random_Similar
         || gSaveBlock1Ptr->tx_Random_MapBased
