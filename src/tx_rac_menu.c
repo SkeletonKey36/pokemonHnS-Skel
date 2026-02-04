@@ -86,6 +86,7 @@ enum
     MENUITEM_RANDOM_EVOLUTIONS_METHODS,
     MENUITEM_RANDOM_TYPE_EFFEC,
     MENUITEM_RANDOM_ITEMS,
+    MENUITEM_RANDOM_STAT_DISTRIBUTION,
     MENUITEM_RANDOM_CHAOS,
     MENUITEM_RANDOM_NEXT,
     MENUITEM_RANDOM_COUNT,
@@ -271,6 +272,7 @@ static void DrawChoices_Random_Evolutions(int selection, int y);
 static void DrawChoices_Random_EvolutionMethods(int selection, int y);
 static void DrawChoices_Random_TypeEffect(int selection, int y);
 static void DrawChoices_Random_Items(int selection, int y);
+static void DrawChoices_Random_StatDistribution(int selection, int y);
 static void DrawChoices_Random_OffChaos(int selection, int y);
 
 static void DrawChoices_Nuzlocke_OnOff(int selection, int y, bool8 active);
@@ -414,6 +416,7 @@ struct // MENU_RANDOMIZER
     [MENUITEM_RANDOM_EVOLUTIONS_METHODS]        = {DrawChoices_Random_EvolutionMethods, ProcessInput_Options_Two},
     [MENUITEM_RANDOM_TYPE_EFFEC]                = {DrawChoices_Random_TypeEffect,       ProcessInput_Options_Two},
     [MENUITEM_RANDOM_ITEMS]                     = {DrawChoices_Random_Items,            ProcessInput_Options_Two},
+    [MENUITEM_RANDOM_STAT_DISTRIBUTION]         = {DrawChoices_Random_StatDistribution, ProcessInput_Options_Two},
     [MENUITEM_RANDOM_CHAOS]                     = {DrawChoices_Random_OffChaos,         ProcessInput_Options_Two},
     [MENUITEM_RANDOM_NEXT]                      = {NULL, NULL},
 };
@@ -546,6 +549,7 @@ static const u8 sText_Evolutions[] =                _("EVOLUTIONS");
 static const u8 sText_EvolutionMethods[] =          _("EVO LINES");
 static const u8 sText_TypeEff[] =                   _("EFFECTIVENESS");
 static const u8 sText_Items[] =                     _("ITEMS");
+static const u8 sText_StatDistribution[] =          _("STAT SPREAD");
 static const u8 sText_Chaos[] =                     _("CHAOS MODE");
 static const u8 *const sOptionMenuItemsNamesRandom[MENUITEM_RANDOM_COUNT] =
 {
@@ -563,6 +567,7 @@ static const u8 *const sOptionMenuItemsNamesRandom[MENUITEM_RANDOM_COUNT] =
     [MENUITEM_RANDOM_EVOLUTIONS_METHODS]        = sText_EvolutionMethods,
     [MENUITEM_RANDOM_TYPE_EFFEC]                = sText_TypeEff,
     [MENUITEM_RANDOM_ITEMS]                     = sText_Items,
+    [MENUITEM_RANDOM_STAT_DISTRIBUTION]         = sText_StatDistribution,
     [MENUITEM_RANDOM_CHAOS]                     = sText_Chaos,
     [MENUITEM_RANDOM_NEXT]                      = sText_Next,
 };
@@ -713,6 +718,7 @@ static bool8 CheckConditions(int selection)
             case MENUITEM_RANDOM_EVOLUTIONS_METHODS:        return sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON];
             case MENUITEM_RANDOM_TYPE_EFFEC:                return sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON];
             case MENUITEM_RANDOM_ITEMS:                     return sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON];
+            case MENUITEM_RANDOM_STAT_DISTRIBUTION:         return sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON] && (sOptions->sel_challenges[MENUITEM_CHALLENGES_BASE_STAT_EQUALIZER] == 0);
             case MENUITEM_RANDOM_CHAOS:                     return sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON] && (sOptions->sel_randomizer[MENUITEM_RANDOM_WILD_PKMN]
                                                                 || sOptions->sel_randomizer[MENUITEM_RANDOM_STARTER]
                                                                 || sOptions->sel_randomizer[MENUITEM_RANDOM_TRAINER]
@@ -722,7 +728,8 @@ static bool8 CheckConditions(int selection)
                                                                 || sOptions->sel_randomizer[MENUITEM_RANDOM_ABILITIES]
                                                                 || sOptions->sel_randomizer[MENUITEM_RANDOM_EVOLUTIONS]
                                                                 || sOptions->sel_randomizer[MENUITEM_RANDOM_EVOLUTIONS_METHODS]
-                                                                || sOptions->sel_randomizer[MENUITEM_RANDOM_TYPE_EFFEC]);
+                                                                || sOptions->sel_randomizer[MENUITEM_RANDOM_TYPE_EFFEC]
+                                                                || sOptions->sel_randomizer[MENUITEM_RANDOM_STAT_DISTRIBUTION]);
             default:                                        return TRUE;
         }
     case MENU_NUZLOCKE:
@@ -763,9 +770,10 @@ static bool8 CheckConditions(int selection)
     case MENU_CHALLENGES:
         switch(selection)
         {
-        case MENUITEM_CHALLENGES_PCHEAL:        return !sOptions->sel_challenges[MENUITEM_DIFFICULTY_POKECENTER];
-        case MENUITEM_CHALLENGES_MIRROR_THIEF:  return sOptions->sel_challenges[MENUITEM_CHALLENGES_MIRROR];
-        default:                                return TRUE;
+        case MENUITEM_CHALLENGES_PCHEAL:            return !sOptions->sel_challenges[MENUITEM_DIFFICULTY_POKECENTER];
+        case MENUITEM_CHALLENGES_MIRROR_THIEF:      return sOptions->sel_challenges[MENUITEM_CHALLENGES_MIRROR];
+        case MENUITEM_CHALLENGES_BASE_STAT_EQUALIZER: return !sOptions->sel_randomizer[MENUITEM_RANDOM_STAT_DISTRIBUTION];
+        default:                                    return TRUE;
         }
     }
 }
@@ -888,6 +896,8 @@ static const u8 sText_Description_Random_Effectiveness_Off[]        = _("Type ef
 static const u8 sText_Description_Random_Effectiveness_On[]         = _("Randomize type effectiveness.\n{COLOR 7}{COLOR 8}WARNING: CAN BE BUGGY!");
 static const u8 sText_Description_Random_Items_Off[]                = _("All found or received items are the\nsame as in the base game.");
 static const u8 sText_Description_Random_Items_On[]                 = _("Randomize found, hidden and revieved\nitems. KEY items are excluded!");
+static const u8 sText_Description_Random_Stat_Distribution_Off[]    = _("POKéMON base stats stay the same as\nin the base game.");
+static const u8 sText_Description_Random_Stat_Distribution_On[]     = _("Randomizes POKéMON base stats\ndistribution (Keeps BST).");
 static const u8 sText_Description_Random_ChaosMode_Off[]            = _("Chaos mode disabled.");
 static const u8 sText_Description_Random_ChaosMode_On[]             = _("Every above chosen option will be\nvery chaotic. {COLOR 7}{COLOR 8}NOT recommended!");
 static const u8 sText_Description_Random_Next[]                     = _("Continue to Nuzlocke options.");
@@ -907,6 +917,7 @@ static const u8 *const sOptionMenuItemDescriptionsRandomizer[MENUITEM_RANDOM_COU
     [MENUITEM_RANDOM_EVOLUTIONS_METHODS]        = {sText_Description_Random_Evo_Methods_Off,       sText_Description_Random_Evo_Methods_On},
     [MENUITEM_RANDOM_TYPE_EFFEC]                = {sText_Description_Random_Effectiveness_Off,     sText_Description_Random_Effectiveness_On},
     [MENUITEM_RANDOM_ITEMS]                     = {sText_Description_Random_Items_Off,             sText_Description_Random_Items_On},
+    [MENUITEM_RANDOM_STAT_DISTRIBUTION]         = {sText_Description_Random_Stat_Distribution_Off, sText_Description_Random_Stat_Distribution_On},
     [MENUITEM_RANDOM_CHAOS]                     = {sText_Description_Random_ChaosMode_Off,               sText_Description_Random_ChaosMode_On},
     [MENUITEM_RANDOM_NEXT]                      = {sText_Description_Random_Next,                  sText_Empty},
 };
@@ -1481,6 +1492,7 @@ void CB2_InitTxRandomizerChallengesMenu(void)
         gSaveBlock1Ptr->tx_Random_EvolutionMethods          = TX_RANDOM_EVOLUTION_METHODE;
         gSaveBlock1Ptr->tx_Random_TypeEffectiveness         = TX_RANDOM_TYPE_EFFECTIVENESS;
         gSaveBlock1Ptr->tx_Random_Items                     = TX_RANDOM_ITEMS;
+        gSaveBlock1Ptr->tx_Random_StatDistribution          = FALSE;
         gSaveBlock1Ptr->tx_Random_Chaos                     = TX_RANDOM_CHAOS_MODE;
         gSaveBlock1Ptr->tx_Challenges_LessEscapes           = TX_CHALLENGES_LESS_ESCAPES;
 
@@ -1556,6 +1568,7 @@ void CB2_InitTxRandomizerChallengesMenu(void)
         sOptions->sel_randomizer[MENUITEM_RANDOM_EVOLUTIONS_METHODS]         = gSaveBlock1Ptr->tx_Random_EvolutionMethods;
         sOptions->sel_randomizer[MENUITEM_RANDOM_TYPE_EFFEC]                 = gSaveBlock1Ptr->tx_Random_TypeEffectiveness;
         sOptions->sel_randomizer[MENUITEM_RANDOM_ITEMS]                      = gSaveBlock1Ptr->tx_Random_Items;
+        sOptions->sel_randomizer[MENUITEM_RANDOM_STAT_DISTRIBUTION]          = gSaveBlock1Ptr->tx_Random_StatDistribution;
         sOptions->sel_randomizer[MENUITEM_RANDOM_CHAOS]                      = gSaveBlock1Ptr->tx_Random_Chaos;
 
         // MENU_NUZLOCKE
@@ -1912,6 +1925,7 @@ void SaveData_TxRandomizerAndChallenges(void)
         gSaveBlock1Ptr->tx_Random_EvolutionMethods   = sOptions->sel_randomizer[MENUITEM_RANDOM_EVOLUTIONS_METHODS];
         gSaveBlock1Ptr->tx_Random_TypeEffectiveness  = sOptions->sel_randomizer[MENUITEM_RANDOM_TYPE_EFFEC];
         gSaveBlock1Ptr->tx_Random_Items              = sOptions->sel_randomizer[MENUITEM_RANDOM_ITEMS];
+        gSaveBlock1Ptr->tx_Random_StatDistribution   = sOptions->sel_randomizer[MENUITEM_RANDOM_STAT_DISTRIBUTION];
         gSaveBlock1Ptr->tx_Random_Chaos              = sOptions->sel_randomizer[MENUITEM_RANDOM_CHAOS];
     }
     else
@@ -1929,6 +1943,7 @@ void SaveData_TxRandomizerAndChallenges(void)
         gSaveBlock1Ptr->tx_Random_Evolutions         = FALSE;
         gSaveBlock1Ptr->tx_Random_EvolutionMethods   = FALSE;
         gSaveBlock1Ptr->tx_Random_TypeEffectiveness  = FALSE;
+        gSaveBlock1Ptr->tx_Random_StatDistribution   = FALSE;
         gSaveBlock1Ptr->tx_Random_Chaos              = FALSE;
     } 
     //MENU_NUZLOCKE
@@ -2411,6 +2426,11 @@ static void DrawChoices_Random_TypeEffect(int selection, int y)
 static void DrawChoices_Random_Items(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_RANDOM_ITEMS);
+    DrawChoices_Random_OffRandom(selection, y, active);
+}
+static void DrawChoices_Random_StatDistribution(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_RANDOM_STAT_DISTRIBUTION);
     DrawChoices_Random_OffRandom(selection, y, active);
 }
 
