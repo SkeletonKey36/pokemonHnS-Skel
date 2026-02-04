@@ -45,5 +45,6 @@ void ItemUseOutOfBattle_SootSack(u8);
 u16 GetAshCount(void);
 void ItemUseOutOfBattle_Mints(u8 taskId);
 void ItemUseOutOfBattle_Fertilizer(u8 taskId);
+void ItemUseOutOfBattle_DexNav(u8 taskId);
 
 #endif // GUARD_ITEM_USE_H

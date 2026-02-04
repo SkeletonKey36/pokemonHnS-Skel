@@ -1794,6 +1794,11 @@ static const u8 sInfiniteRareCandy[] = _(
     "CANDIES for your\n"
     "personal uses.");
 
+static const u8 sDexNavDesc[] = _(
+    "A high-tech device\n"
+    "that details\n"
+    "nearby POKéMON.");
+
 static const u8 sHealingHeart[] = _(
     "This soft heart\n"
     "fully heals your\n"
