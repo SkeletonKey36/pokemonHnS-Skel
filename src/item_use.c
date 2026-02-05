@@ -960,7 +960,7 @@ static u8 *BuildEncounterList(u8 *str, const struct WildPokemon *wildMon, u8 cou
     u8 i, j;
     u8 lineLength = 0;
     u8 currentLine = 0;
-    const u8 MAX_LINE_LENGTH = 35; // ~3 Pokémon names per line comfortably
+    const u8 MAX_LINE_LENGTH = 28; // tighter line length to avoid overflow in non-monospace font
     const u8 MAX_LINES_PER_PAGE = 2; // 2 lines per message box page
     
     // Get unique species (avoid duplicates)
