@@ -11580,24 +11580,24 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
     u8 type;
 
     if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 0) 
-    && (species == SPECIES_ARBOK 
-    || species == SPECIES_PARASECT 
-    || species == SPECIES_GOLDUCK
-    || species == SPECIES_KINGLER
-    || species == SPECIES_MEGANIUM
-    || species == SPECIES_TYPHLOSION
-    || species == SPECIES_FERALIGATR
-    || species == SPECIES_NOCTOWL
-    || species == SPECIES_SUNFLORA
-    || species == SPECIES_STANTLER
-    || species == SPECIES_GROVYLE
-    || species == SPECIES_SCEPTILE
-    || species == SPECIES_MASQUERAIN
-    || species == SPECIES_DELCATTY
-    || species == SPECIES_GULPIN
-    || species == SPECIES_SWALOT
-    || species == SPECIES_LUVDISC
-    || species == SPECIES_ELECTIVIRE))
+        && (species == SPECIES_ARBOK 
+        || species == SPECIES_PARASECT 
+        || species == SPECIES_GOLDUCK
+        || species == SPECIES_KINGLER
+        || species == SPECIES_MEGANIUM
+        || species == SPECIES_TYPHLOSION
+        || species == SPECIES_FERALIGATR
+        || species == SPECIES_NOCTOWL
+        || species == SPECIES_SUNFLORA
+        || species == SPECIES_STANTLER
+        || species == SPECIES_GROVYLE
+        || species == SPECIES_SCEPTILE
+        || species == SPECIES_MASQUERAIN
+        || species == SPECIES_DELCATTY
+        || species == SPECIES_GULPIN
+        || species == SPECIES_SWALOT
+        || species == SPECIES_LUVDISC
+        || species == SPECIES_ELECTIVIRE))
     {
         if (typeNum == 1)
             type = gSpeciesInfo[species].types_old[0];
@@ -11605,26 +11605,26 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
             type = gSpeciesInfo[species].types_old[1];
     }
     else if ((gSaveBlock1Ptr->tx_Mode_Fairy_Types == 0) 
-    && (species == SPECIES_JIGGLYPUFF 
-    || species == SPECIES_WIGGLYTUFF
-    || species == SPECIES_CLEFAIRY
-    || species == SPECIES_CLEFABLE
-    || species == SPECIES_MR_MIME
-    || species == SPECIES_CLEFFA
-    || species == SPECIES_IGGLYBUFF
-    || species == SPECIES_TOGEPI
-    || species == SPECIES_TOGETIC
-    || species == SPECIES_MARILL
-    || species == SPECIES_AZUMARILL
-    || species == SPECIES_SNUBBULL
-    || species == SPECIES_GRANBULL
-    || species == SPECIES_RALTS
-    || species == SPECIES_KIRLIA
-    || species == SPECIES_GARDEVOIR
-    || species == SPECIES_AZURILL
-    || species == SPECIES_MAWILE
-    || species == SPECIES_MIME_JR
-    || species == SPECIES_TOGEKISS))
+        && (species == SPECIES_JIGGLYPUFF 
+        || species == SPECIES_WIGGLYTUFF
+        || species == SPECIES_CLEFAIRY
+        || species == SPECIES_CLEFABLE
+        || species == SPECIES_MR_MIME
+        || species == SPECIES_CLEFFA
+        || species == SPECIES_IGGLYBUFF
+        || species == SPECIES_TOGEPI
+        || species == SPECIES_TOGETIC
+        || species == SPECIES_MARILL
+        || species == SPECIES_AZUMARILL
+        || species == SPECIES_SNUBBULL
+        || species == SPECIES_GRANBULL
+        || species == SPECIES_RALTS
+        || species == SPECIES_KIRLIA
+        || species == SPECIES_GARDEVOIR
+        || species == SPECIES_AZURILL
+        || species == SPECIES_MAWILE
+        || species == SPECIES_MIME_JR
+        || species == SPECIES_TOGEKISS))
     {
         if (typeNum == 1)
             type = gSpeciesInfo[species].types_old[0];
@@ -11632,8 +11632,8 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
             type = gSpeciesInfo[species].types_old[1];
     }
     else if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 1) 
-    && (species == SPECIES_SNUBBULL
-    || species == SPECIES_GRANBULL))
+        && (species == SPECIES_SNUBBULL
+        || species == SPECIES_GRANBULL))
     {
         if (typeNum == 1)
             type = gSpeciesInfo[species].types_new[0];
