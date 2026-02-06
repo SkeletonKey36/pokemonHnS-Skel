@@ -3886,7 +3886,7 @@ static void Cmd_getexp(void)
                             holdEffect = ItemId_GetHoldEffect(item);
                         
                         // Track the number of Mons getting hold/key item Exp
-                        if (FlagGet(FLAG_EXP_SHARE) || holdEffect == HOLD_EFFECT_EXP_SHARE)
+                        if (holdEffect == HOLD_EFFECT_EXP_SHARE)
                             viaExpShare++;
                     }
                 }
@@ -3988,10 +3988,8 @@ static void Cmd_getexp(void)
                     else
                         gBattleMoveDamage = 0;
 
-                    // Give Exp from Exp Share S, Exp All, or Both (stacking is intended)
-                    if (holdEffect == HOLD_EFFECT_EXP_SHARE)
-                        gBattleMoveDamage += gExpShareExp;
-                    if (FlagGet(FLAG_EXP_SHARE))
+                    // Give Exp from Exp Share S, Exp All, or Both (stacking is removed)
+                    if (FlagGet(FLAG_EXP_SHARE) || (holdEffect == HOLD_EFFECT_EXP_SHARE))
                         gBattleMoveDamage += gExpShareExp;
 
                     // Apply Lucky Egg and/or Trainer Battle Exp Multipliers
@@ -4047,8 +4045,7 @@ static void Cmd_getexp(void)
                     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
 
                     // Only Print this Mon's Exp gained if participated, has exp-boosting held item, or gets traded boost
-                    if (!FlagGet(FLAG_EXP_SHARE)
-                        || (holdEffect == HOLD_EFFECT_EXP_SHARE)
+                    if ((!FlagGet(FLAG_EXP_SHARE) && (holdEffect == HOLD_EFFECT_EXP_SHARE))
                         || (holdEffect == HOLD_EFFECT_LUCKY_EGG)
                         || (gBattleStruct->sentInPokes & 1)
                         || (
@@ -4183,9 +4180,8 @@ static void Cmd_getexp(void)
                         else
                             holdEffect = ItemId_GetHoldEffect(item);
 
-                        if ((holdEffect == HOLD_EFFECT_EXP_SHARE)   // Exp All yield doubled
+                        if ((gBitTable[i] & sentIn)                  // Participated
                         || (holdEffect == HOLD_EFFECT_LUCKY_EGG)    // Exp All yield x1.5
-                        || (gBitTable[i] & sentIn)                  // Participated
                         || (
                             IsTradedMon(&gPlayerParty[i])           // Exp All yield x1.5
                             && !(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && i >= 3)
