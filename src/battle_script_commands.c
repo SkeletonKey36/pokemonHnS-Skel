@@ -56,14 +56,26 @@
 #include "debug.h"
 #include "tx_randomizer_and_challenges.h"
 
-// --- EXP ALL (Large EXP Share) tuning ---------------------------------------
-// Non-participant share = baseExp * EXPALL_SHARE_NUM / EXPALL_SHARE_DEN
-// Participant share     = normalShare * EXPALL_PARTICIPANT_NUM / EXPALL_PARTICIPANT_DEN
+// --- EXP ALL (Large EXP Share) 1.2.2 tuning ---------------------------------------
+// When Exp All is on, 1/3 of the total yield is distributed equally across all Participants
+// When Exp All is on, 2/3 of the total yield is distributed equally across all valid Mons, regardless of participation
+// This is paired with the baseline total yield being doubled between 1.2.1 and 1.2.2,
+//   which was done because in 1.2.1, with a full party of 6 mons, the party would receive a bonus 140% of the intended total Exp Yield.
+// Alongside the 2/3 distributed across participants, and the intended 7/25 for recipients,
+//   this increased the Total Effective Exp Yield to 235% of what the yield without the Exp All would be.
+// This occurred because the yield given by the Exp All was not *distributed across* the party,
+//   but simply *given*, undivided, effectively multiplying the effective yield of the Exp All by the number of recipients.
 #ifndef EXPALL_TUNING
-#define EXPALL_SHARE_NUM          7
-#define EXPALL_SHARE_DEN          25
-#define EXPALL_PARTICIPANT_NUM    2
+#define EXPALL_SHARE_NUM          2
+#define EXPALL_SHARE_DEN          3
+#define EXPALL_PARTICIPANT_NUM    1
 #define EXPALL_PARTICIPANT_DEN    3
+#else
+// If EXPALL_TUNING was defined elsewhere, use official game Exp All calculations
+#define EXPALL_SHARE_NUM          1
+#define EXPALL_SHARE_DEN          2
+#define EXPALL_PARTICIPANT_NUM    1
+#define EXPALL_PARTICIPANT_DEN    2
 #endif
 // ---------------------------------------------------------------------------
 
@@ -3842,6 +3854,7 @@ static void Cmd_getexp(void)
             {
                 // Total Exp Yield of the defeated Mon
                 calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
+                calculatedExp *= 2; // Exp All 1.2.1 more than doubled total Exp Yield on average
 
                 #ifndef NDEBUG
                 MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Original calculatedExp %d ********", calculatedExp);
@@ -3891,14 +3904,35 @@ static void Cmd_getexp(void)
                     }
                 }
 
+                s32 participantNumerator = 1;
+                s32 participantDenominator = 1;
+                s32 recipientNumerator = 0;
+                s32 recipientDenominator = 1;
+
                 // At least one Mon is getting Exp via Exp Share
                 if (viaExpShare)
                 {
-                    viaSentIn *= 2;     // Half of total Exp yield distributed evenly across all participants
-                    viaExpShare *= 2;   // Other half of total Exp yield distributed evenly across all Mons holding Exp Share
+                    if (FlagGet(FLAG_EXP_SHARE))
+                    {
+                        // One-third of total Exp yield distributed evenly across all participants
+                        participantNumerator = EXPALL_PARTICIPANT_NUM;
+                        participantDenominator = EXPALL_PARTICIPANT_DEN;
+                        // Other two-thirds of total Exp yield distributed evenly across all Mons receiving from Exp All
+                        recipientNumerator = EXPALL_SHARE_NUM;
+                        recipientDenominator = EXPALL_SHARE_DEN;
+                    }
+                    else
+                    {
+                        // Half of total Exp yield distributed evenly across all participants
+                        participantNumerator = 1;
+                        participantDenominator = 2;
+                        // Other half of total Exp yield distributed evenly across all Mons holding Exp Share
+                        recipientNumerator = 1;
+                        recipientDenominator = 2;
+                    } 
                 }
                     
-                *exp = SAFE_DIV(calculatedExp, viaSentIn);
+                *exp = SAFE_DIV(calculatedExp * participantNumerator, viaSentIn * participantDenominator);
                 if (*exp == 0)
                     *exp = 1;
                 
@@ -3906,7 +3940,7 @@ static void Cmd_getexp(void)
                 MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Exp per participant %d ********", *exp);
                 #endif
 
-                gExpShareExp = SAFE_DIV(calculatedExp, viaExpShare);
+                gExpShareExp = SAFE_DIV(calculatedExp * recipientNumerator, viaExpShare * recipientDenominator);
                 if (gExpShareExp == 0 && viaExpShare)
                     gExpShareExp = 1;
 
