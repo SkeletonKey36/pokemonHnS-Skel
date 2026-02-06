@@ -2445,10 +2445,10 @@ static void InitDomeTrainers(void)
                 || species == SPECIES_SWALOT
                 || species == SPECIES_LUVDISC
                 || species == SPECIES_ELECTIVIRE))
-                {
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[0]];
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[1]];
-                }
+            {
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[0]];
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[1]];
+            }
             else if ((gSaveBlock1Ptr->tx_Mode_Fairy_Types == 0) 
                 && (species == SPECIES_JIGGLYPUFF 
                 || species == SPECIES_WIGGLYTUFF
@@ -2470,17 +2470,17 @@ static void InitDomeTrainers(void)
                 || species == SPECIES_MAWILE
                 || species == SPECIES_MIME_JR
                 || species == SPECIES_TOGEKISS))
-                {
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[0]];
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[1]];
-                }
+            {
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[0]];
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_old[1]];
+            }
             else if ((gSaveBlock1Ptr->tx_Mode_Fairy_Types == 1) 
                 && (species == SPECIES_SNUBBULL 
                 || species == SPECIES_GRANBULL))
-                {
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_new[0]];
-                    monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_new[1]];
-                }
+            {
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_new[0]];
+                monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types_new[1]];
+            }
             else
             {
                 monTypesBits |= gBitTable[gSpeciesInfo[gFacilityTrainerMons[DOME_MONS[i][j]].species].types[0]];
