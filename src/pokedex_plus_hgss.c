@@ -170,7 +170,7 @@ static EWRAM_DATA struct PokedexView *sPokedexView = NULL;
 static EWRAM_DATA u16 sLastSelectedPokemon = 0;
 static EWRAM_DATA u8 sPokeBallRotation = 0;
 static EWRAM_DATA struct PokedexListItem *sPokedexListItem = NULL;
-static EWRAM_DATA void (*sPartyMenuReturnCallback)(void) = NULL;
+static EWRAM_DATA void (*sExternalReturnCallback)(void) = NULL;
 //Pokedex Plus HGSS_Ui
 #ifndef BATTLE_ENGINE
 #define MOVES_COUNT_TOTAL (EGG_MOVES_ARRAY_COUNT + MAX_LEVEL_UP_MOVES + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + TUTOR_MOVE_COUNT)
@@ -385,7 +385,6 @@ static void Task_WaitForScroll(u8);
 static void Task_HandlePokedexStartMenuInput(u8);
 static void Task_OpenInfoScreenAfterMonMovement(u8);
 static void Task_WaitForExitInfoScreen(u8);
-static void Task_ExitInfoScreenToPartyMenu(u8);
 static void Task_WaitForExitSearch(u8);
 static void Task_ClosePokedex(u8);
 static void Task_OpenSearchResults(u8);
@@ -429,23 +428,23 @@ static void Task_HandleInfoScreenInput(u8);
 static void Task_SwitchScreensFromInfoScreen(u8);
 static void Task_LoadInfoScreenWaitForFade(u8);
 static void Task_ExitInfoScreen(u8);
-static void Task_ExitInfoScreenToPartyMenu(u8);
+static void Task_ExitInfoScreenToExternal(u8);
 static void Task_LoadAreaScreen(u8);
 static void Task_WaitForAreaScreenInput(u8 taskId);
 static void Task_SwitchScreensFromAreaScreen(u8);
 static void Task_ExitAreaScreen(u8);
-static void Task_ExitAreaScreenToPartyMenu(u8);
+static void Task_ExitAreaScreenToExternal(u8);
 static void Task_LoadCryScreen(u8);
 static void Task_HandleCryScreenInput(u8);
 static void Task_SwitchScreensFromCryScreen(u8);
 static void LoadPlayArrowPalette(bool8);
 static void Task_ExitCryScreen(u8);
-static void Task_ExitCryScreenToPartyMenu(u8);
+static void Task_ExitCryScreenToExternal(u8);
 static void Task_LoadSizeScreen(u8);
 static void Task_HandleSizeScreenInput(u8);
 static void Task_SwitchScreensFromSizeScreen(u8);
 static void Task_ExitSizeScreen(u8);
-static void Task_ExitSizeScreenToPartyMenu(u8);
+static void Task_ExitSizeScreenToExternal(u8);
 static void LoadScreenSelectBarMain(u16);
 static void HighlightScreenSelectBarItem(u8, u16);
 static void HighlightSubmenuScreenSelectBarItem(u8, u16);
@@ -507,7 +506,7 @@ static void Task_HandleStatsScreenInput(u8 taskId);
 static void Task_LoadStatsScreen(u8 taskId);
 static void Task_SwitchScreensFromStatsScreen(u8 taskId);
 static void Task_ExitStatsScreen(u8 taskId);
-static void Task_ExitStatsScreenToPartyMenu(u8 taskId);
+static void Task_ExitStatsScreenToExternal(u8 taskId);
 static bool8 CalculateMoves(void);
 static void PrintStatsScreen_NameGender(u8 taskId, u32 num, u32 value);
 static void PrintStatsScreen_DestroyMoveItemIcon(u8 taskId);
@@ -524,7 +523,7 @@ static void Task_LoadEvolutionScreen(u8 taskId);
 static void Task_HandleEvolutionScreenInput(u8 taskId);
 static void Task_SwitchScreensFromEvolutionScreen(u8 taskId);
 static void Task_ExitEvolutionScreen(u8 taskId);
-static void Task_ExitEvolutionScreenToPartyMenu(u8 taskId);
+static void Task_ExitEvolutionScreenToExternal(u8 taskId);
 static u8 PrintEvolutionTargetSpeciesAndMethod(u8 taskId, u16 species, u8 depth, u8 depth_i);
 static u8 PrintPreEvolutions(u8 taskId, u16 species);
 //Stat bars on scrolling screens
@@ -542,7 +541,7 @@ static void Task_HandleFormsScreenInput(u8 taskId);
 static void PrintForms(u8 taskId, u16 species);
 static void Task_SwitchScreensFromFormsScreen(u8 taskId);
 static void Task_ExitFormsScreen(u8 taskId);
-static void Task_ExitFormsScreenToPartyMenu(u8 taskId);
+static void Task_ExitFormsScreenToExternal(u8 taskId);
 #endif
 
 //HGSS_UI Physical Special Split icon for BattleEngine (rhh)
@@ -3763,7 +3762,7 @@ static u8 LoadInfoScreen(struct PokedexListItem *item, u8 monSpriteId)
     u8 taskId;
 
     // Clear party menu callback when opening from normal Pokédex
-    sPartyMenuReturnCallback = NULL;
+    sExternalReturnCallback = NULL;
     
     sPokedexListItem = item;
     taskId = CreateTask(Task_LoadInfoScreen, 0);
@@ -3796,7 +3795,7 @@ static bool8 IsInfoScreenScrolling(u8 taskId)
 static u8 StartInfoScreenScroll(struct PokedexListItem *item, u8 taskId)
 {
     // Clear party menu callback when scrolling in normal Pokédex
-    sPartyMenuReturnCallback = NULL;
+    sExternalReturnCallback = NULL;
     
     sPokedexListItem = item;
     gTasks[taskId].tScrolling = TRUE;
@@ -3956,8 +3955,8 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     {
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         // Use special exit handler if called from party menu
-        if (sPartyMenuReturnCallback != NULL)
-            gTasks[taskId].func = Task_ExitInfoScreenToPartyMenu;
+        if (sExternalReturnCallback != NULL)
+            gTasks[taskId].func = Task_ExitInfoScreenToExternal;
         else
             gTasks[taskId].func = Task_ExitInfoScreen;
         PlaySE(SE_PC_OFF);
@@ -4015,7 +4014,7 @@ static void Task_ExitInfoScreen(u8 taskId)
     }
 }
 
-static void Task_ExitInfoScreenToPartyMenu(u8 taskId)
+static void Task_ExitInfoScreenToExternal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
@@ -4023,10 +4022,10 @@ static void Task_ExitInfoScreenToPartyMenu(u8 taskId)
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
         
-        if (sPartyMenuReturnCallback != NULL)
+        if (sExternalReturnCallback != NULL)
         {
-            void (*callback)(void) = sPartyMenuReturnCallback;
-            sPartyMenuReturnCallback = NULL;
+            void (*callback)(void) = sExternalReturnCallback;
+            sExternalReturnCallback = NULL;
             SetMainCallback2(callback);
         }
     }
@@ -4059,7 +4058,7 @@ void OpenPokedexInfoScreen(u16 species, void (*returnCallback)(void))
     #define tTrainerSpriteId data[5]
     
     // Store the return callback
-    sPartyMenuReturnCallback = returnCallback;
+    sExternalReturnCallback = returnCallback;
     
     // Convert species to dex number
     dexNum = SpeciesToNationalPokedexNum(species);
@@ -4179,8 +4178,8 @@ static void Task_SwitchScreensFromAreaScreen(u8 taskId)
             break;
         case 3:
             // Use special exit handler if called from party menu
-            if (sPartyMenuReturnCallback != NULL)
-                gTasks[taskId].func = Task_ExitAreaScreenToPartyMenu;
+            if (sExternalReturnCallback != NULL)
+                gTasks[taskId].func = Task_ExitAreaScreenToExternal;
             else
                 gTasks[taskId].func = Task_ExitAreaScreen;
             break;
@@ -4197,14 +4196,14 @@ static void Task_ExitAreaScreen(u8 taskId)
     }
 }
 
-static void Task_ExitAreaScreenToPartyMenu(u8 taskId)
+static void Task_ExitAreaScreenToExternal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 
@@ -5456,8 +5455,8 @@ static void Task_HandleStatsScreenInput(u8 taskId)
     {
         BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
         // Use special exit handler if called from party menu
-        if (sPartyMenuReturnCallback != NULL)
-            gTasks[taskId].func = Task_ExitStatsScreenToPartyMenu;
+        if (sExternalReturnCallback != NULL)
+            gTasks[taskId].func = Task_ExitStatsScreenToExternal;
         else
             gTasks[taskId].func = Task_ExitStatsScreen;
         PlaySE(SE_PC_OFF);
@@ -6442,7 +6441,7 @@ static void Task_ExitStatsScreen(u8 taskId)
     }
 }
 
-static void Task_ExitStatsScreenToPartyMenu(u8 taskId)
+static void Task_ExitStatsScreenToExternal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
@@ -6456,8 +6455,8 @@ static void Task_ExitStatsScreenToPartyMenu(u8 taskId)
         FreeAndDestroyMonPicSprite(gTasks[taskId].tMonSpriteId);
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 
@@ -6733,8 +6732,8 @@ static void Task_HandleEvolutionScreenInput(u8 taskId)
     {
         BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
         // Use special exit handler if called from party menu
-        if (sPartyMenuReturnCallback != NULL)
-            gTasks[taskId].func = Task_ExitEvolutionScreenToPartyMenu;
+        if (sExternalReturnCallback != NULL)
+            gTasks[taskId].func = Task_ExitEvolutionScreenToExternal;
         else
             gTasks[taskId].func = Task_ExitEvolutionScreen;
         PlaySE(SE_PC_OFF);
@@ -7212,7 +7211,7 @@ static void Task_ExitEvolutionScreen(u8 taskId)
     }
 }
 
-static void Task_ExitEvolutionScreenToPartyMenu(u8 taskId)
+static void Task_ExitEvolutionScreenToExternal(u8 taskId)
 {
     u8 i;
     if (!gPaletteFade.active)
@@ -7227,8 +7226,8 @@ static void Task_ExitEvolutionScreenToPartyMenu(u8 taskId)
 
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 
@@ -7372,8 +7371,8 @@ static void Task_HandleFormsScreenInput(u8 taskId)
         {
             BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
             // Use special exit handler if called from party menu
-            if (sPartyMenuReturnCallback != NULL)
-                gTasks[taskId].func = Task_ExitFormsScreenToPartyMenu;
+            if (sExternalReturnCallback != NULL)
+                gTasks[taskId].func = Task_ExitFormsScreenToExternal;
             else
                 gTasks[taskId].func = Task_ExitFormsScreen;
             PlaySE(SE_PC_OFF);
@@ -7543,7 +7542,7 @@ static void Task_ExitFormsScreen(u8 taskId)
     }
 }
 
-static void Task_ExitFormsScreenToPartyMenu(u8 taskId)
+static void Task_ExitFormsScreenToExternal(u8 taskId)
 {
     u8 i;
     if (!gPaletteFade.active)
@@ -7558,8 +7557,8 @@ static void Task_ExitFormsScreenToPartyMenu(u8 taskId)
 
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 #endif
@@ -7703,8 +7702,8 @@ static void Task_HandleCryScreenInput(u8 taskId)
             BeginNormalPaletteFade(PALETTES_ALL & ~(0x14), 0, 0, 0x10, RGB_BLACK);
             m4aMPlayContinue(&gMPlayInfo_BGM);
             // Use special exit handler if called from party menu
-            if (sPartyMenuReturnCallback != NULL)
-                gTasks[taskId].func = Task_ExitCryScreenToPartyMenu;
+            if (sExternalReturnCallback != NULL)
+                gTasks[taskId].func = Task_ExitCryScreenToExternal;
             else
                 gTasks[taskId].func = Task_ExitCryScreen;
             PlaySE(SE_PC_OFF);
@@ -7773,7 +7772,7 @@ static void Task_ExitCryScreen(u8 taskId)
     }
 }
 
-static void Task_ExitCryScreenToPartyMenu(u8 taskId)
+static void Task_ExitCryScreenToExternal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
@@ -7781,8 +7780,8 @@ static void Task_ExitCryScreenToPartyMenu(u8 taskId)
         FreeAndDestroyMonPicSprite(gTasks[taskId].tMonSpriteId);
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 
@@ -7906,8 +7905,8 @@ static void Task_HandleSizeScreenInput(u8 taskId)
     {
         BeginNormalPaletteFade(PALETTES_ALL & ~(0x14), 0, 0, 0x10, RGB_BLACK);
         // Use special exit handler if called from party menu
-        if (sPartyMenuReturnCallback != NULL)
-            gTasks[taskId].func = Task_ExitSizeScreenToPartyMenu;
+        if (sExternalReturnCallback != NULL)
+            gTasks[taskId].func = Task_ExitSizeScreenToExternal;
         else
             gTasks[taskId].func = Task_ExitSizeScreen;
         PlaySE(SE_PC_OFF);
@@ -7952,7 +7951,7 @@ static void Task_ExitSizeScreen(u8 taskId)
     }
 }
 
-static void Task_ExitSizeScreenToPartyMenu(u8 taskId)
+static void Task_ExitSizeScreenToExternal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
@@ -7960,8 +7959,8 @@ static void Task_ExitSizeScreenToPartyMenu(u8 taskId)
         FreeAndDestroyTrainerPicSprite(gTasks[taskId].tTrainerSpriteId);
         FreeInfoScreenWindowAndBgBuffers();
         DestroyTask(taskId);
-        if (sPartyMenuReturnCallback != NULL)
-            SetMainCallback2(sPartyMenuReturnCallback);
+        if (sExternalReturnCallback != NULL)
+            SetMainCallback2(sExternalReturnCallback);
     }
 }
 
