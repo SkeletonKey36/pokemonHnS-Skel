@@ -2668,12 +2668,13 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
 
         sPartyMenuInternal->numActions = 0;
 
-        if (HMsOverwriteOptionActive())
+        if (HMsOverwriteOptionActive()) //tx_randomizer_and_challenges
         {
             if (slotId == 0)
-            {
+            { /* slot 0 */
                 for (i = 0; i < MAX_MON_MOVES; i++)
-                {
+                { 
+                    /* Checks the first mon's moves for field moves, and adds them to the action list. */
                     for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
                     {
                         if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
@@ -2687,34 +2688,39 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
                         }
                     }
                 }
+                /* These lines will add FLY and FLASH to the action list if the player has the corresponding HMs in 
+                    their bag and the **first mon** does not already know those moves - DOES NOT CHECK FOR LEARNABILITY. 
+                    (Gives players in challenges the ability to Fly and Flash regardless of team composition) */
                 if (CheckBagHasItem(ITEM_HM02, 1) && !hasFlyAlready)
                     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
                 if (CheckBagHasItem(ITEM_HM05, 1) && !hasFlashAlready)
                     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
             }
             else
-            {
+            { /* slots 1-5 */
+                /* Goes through the pokemon's moves and adds the field moves to the action list. */
                 for (i = 0; i < MAX_MON_MOVES; i++)
                 {
                     for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
                     {
                         if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
                         {
-                            if (sFieldMoves[j] != MOVE_FLY)
-                                if (sFieldMoves[j] != MOVE_FLASH)
+                            if (sFieldMoves[j] != MOVE_FLY) // If Mon already knows FLY, prevent it from being added to action list (Cause it gets added at the end)
+                                if (sFieldMoves[j] != MOVE_FLASH) // If Mon already knows FLASH, prevent it from being added to action list (Cause it gets added at the end)
                                     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
                             break;
                         }
                     }
                 }
-                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01))
+                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01) && CheckBagHasItem(ITEM_HM02, 1)) // If Mon can learn HM02 & present in bag, add FLY to action list
                     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
-                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01) && CheckBagHasItem(ITEM_HM05, 1)) // If Mon can learn HM05 & present in bag, add FLASH to action list
                     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
             }
         }
-        else
-        {
+        else 
+        { /* If not in challenge mode, checks for field moves as normal, 
+                prevent Fly or Flash from being added cause of tail end code */
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
                 for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
@@ -2727,10 +2733,11 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
                         break;
                     }
                 }
-            }
-            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01))
+            } /* If the pokemon can learn the move & the move is present in the bag,
+                add Fly/Flash to action items */
+            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01) && CheckBagHasItem(ITEM_HM02, 1)) // If Mon can learn HM02 & present in bag, add FLY to action list
                 AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
-            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01) && CheckBagHasItem(ITEM_HM05, 1)) // If Mon can learn HM05 & present in bag, add FLASH to action list
                 AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
         }
         
