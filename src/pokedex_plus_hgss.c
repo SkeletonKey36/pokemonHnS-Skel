@@ -4044,7 +4044,7 @@ static void CB2_PartyPokedexInfoScreen(void)
 }
 
 // Called from party menu to open Pokedex detail view for a specific Pokemon
-void OpenPokedexInfoScreenFromParty(u16 species, void (*returnCallback)(void))
+void OpenPokedexInfoScreen(u16 species, void (*returnCallback)(void))
 {
     u8 taskId;
     u16 dexNum;
@@ -4076,7 +4076,7 @@ void OpenPokedexInfoScreenFromParty(u16 species, void (*returnCallback)(void))
     /* Note from Skeletonkey36: 
     - You can change the Task_LoadInfoScreen to a different Task_LoadXXXScreen if you want to 
         start on a different screen
-    - Reminder if you change Task_LoadInfoScreen, be sure to update name of OpenPokedexInfoScreenFromParty() 
+    - Reminder if you change Task_LoadInfoScreen, be sure to update name of OpenPokedexInfoScreen() 
         above as well just for code clarity (and the call in party_menu.c)
     */
     taskId = CreateTask(Task_LoadInfoScreen, 0);

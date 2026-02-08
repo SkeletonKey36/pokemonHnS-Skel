@@ -2912,7 +2912,7 @@ static void CB2_ShowPokedexEntry(void)
     u16 species = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES);
     
     // Open the Pokédex info screen for this specific Pokémon
-    OpenPokedexInfoScreenFromParty(species, CB2_ReturnToPartyMenuFromPokedex);
+    OpenPokedexInfoScreen(species, CB2_ReturnToPartyMenuFromPokedex);
 }
 
 static void CB2_ShowPokemonSummaryScreen(void)
