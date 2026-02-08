@@ -1888,7 +1888,7 @@ static void Task_OpenPokedexFromSummary(u8 taskId)
         DestroyTask(taskId);
         
         // Open the Pokédex info screen for this specific Pokémon
-        OpenPokedexInfoScreenFromParty(species, CB2_ReturnToSummaryFromPokedex);
+        OpenPokedexInfoScreen(species, CB2_ReturnToSummaryFromPokedex);
     }
 }
 
