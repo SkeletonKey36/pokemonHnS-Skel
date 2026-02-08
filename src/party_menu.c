@@ -74,6 +74,8 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "tx_randomizer_and_challenges.h"
+#include "pokedex.h"
+#include "pokedex_plus_hgss.h"
 
 enum {
     MENU_SUMMARY,
@@ -95,6 +97,7 @@ enum {
     MENU_TRADE1,
     MENU_TRADE2,
     MENU_TOSS,
+    MENU_POKEDEX,
     MENU_FIELD_MOVES
 };
 
@@ -197,7 +200,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[8];
+    u8 actions[9];
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -479,6 +482,8 @@ static void CursorCb_Register(u8);
 static void CursorCb_Trade1(u8);
 static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
+static void CursorCb_Pokedex(u8);
+static void CB2_ShowPokedexEntry(void);
 static void CursorCb_FieldMove(u8);
 static bool8 SetUpFieldMove_Surf(void);
 static bool8 SetUpFieldMove_Fly(void);
@@ -2743,6 +2748,10 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MAIL);
         else
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_ITEM);
+        // Add Pokédex entry for non-egg Pokémon, only if Pokédex is obtained
+        if (!GetMonData(&mons[slotId], MON_DATA_IS_EGG)
+            && FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
+            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_POKEDEX);
     }
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL1);
 }
@@ -2883,6 +2892,27 @@ static void CursorCb_Summary(u8 taskId)
     PlaySE(SE_SELECT);
     sPartyMenuInternal->exitCallback = CB2_ShowPokemonSummaryScreen;
     Task_ClosePartyMenu(taskId);
+}
+
+static void CursorCb_Pokedex(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    sPartyMenuInternal->exitCallback = CB2_ShowPokedexEntry;
+    Task_ClosePartyMenu(taskId);
+}
+
+static void CB2_ReturnToPartyMenuFromPokedex(void)
+{
+    gPaletteFade.bufferTransferDisabled = TRUE;
+    InitPartyMenu(gPartyMenu.menuType, KEEP_PARTY_LAYOUT, gPartyMenu.action, TRUE, PARTY_MSG_DO_WHAT_WITH_MON, Task_TryCreateSelectionWindow, gPartyMenu.exitCallback);
+}
+
+static void CB2_ShowPokedexEntry(void)
+{
+    u16 species = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES);
+    
+    // Open the Pokédex info screen for this specific Pokémon
+    OpenPokedexInfoScreenFromParty(species, CB2_ReturnToPartyMenuFromPokedex);
 }
 
 static void CB2_ShowPokemonSummaryScreen(void)
