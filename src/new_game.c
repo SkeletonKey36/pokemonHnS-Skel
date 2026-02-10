@@ -111,6 +111,7 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsFastBattle = 0; //HnS
     gSaveBlock2Ptr->optionsBikeMusic = 0;
     gSaveBlock2Ptr->optionsEvenFasterJoy = 1;
+    gSaveBlock2Ptr->optionsNicknamePrompt = 0; //HnS - skel
     gSaveBlock2Ptr->optionsSurfMusic = 0;
     gSaveBlock2Ptr->optionsWildBattleMusic = 3;
     gSaveBlock2Ptr->optionsTrainerBattleMusic = 3; //JOHTO ONLY BB

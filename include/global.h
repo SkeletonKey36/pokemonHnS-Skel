@@ -569,6 +569,7 @@ struct SaveBlock2
               u16 optionsAutorunSurf:1;
               u16 optionsAutorunDive:1;
               u16 optionsNewBattleUI:1;
+              u16 optionsNicknamePrompt:1; // Added by Skel 2/9/26
               u8 rivalName[PLAYER_NAME_LENGTH + 1];
               u16 optionsGenOneRecharge:1;
 }; // sizeof=0xF2C
