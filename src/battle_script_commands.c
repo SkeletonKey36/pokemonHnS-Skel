@@ -11153,6 +11153,17 @@ static void Cmd_trygivecaughtmonnick(void)
             gBattleCommunication[MULTIUSE_STATE]++;
             BeginFastPaletteFade(3);
         }
+        /* TODO: This isn't exactly where it should be:
+        - New pokemon, empty party -> Goes to new catch UI w pokedex entry, Still shows "What would you like to nickname the new pokemon?" text for a moment before fading out.
+        - New pokemon, full party -> Goes to new catch UI w pokedex entry, still shows {above} text, the yes/no window appeared with no text, then it said the text for transferring to the PC.
+        - Old pokemon, empty party -> Still shows {above} text for a moment before fading out.
+        - Old pokemon, full party -> Still shows {above} text, the yes/no window appeared with no text, then it said the text for transferring to the PC.
+        */
+        else if (gSaveBlock2Ptr->optionsNicknamePrompt == 1) // Check if user wants nickname prompt (0 = yes, 1 = no)
+        {
+            // Skip nickname prompt - go directly to case 4
+            gBattleCommunication[MULTIUSE_STATE] = 4;
+        }
         else
         {
             BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
