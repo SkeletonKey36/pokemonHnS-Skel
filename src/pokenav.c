@@ -205,6 +205,7 @@ const struct PokenavCallbacks PokenavMenuCallbacks[15] =
 
 EWRAM_DATA u8 gNextLoopedTaskId = 0;
 EWRAM_DATA struct PokenavResources *gPokenavResources = NULL;
+// static u8 sAnimationDelayCounter = 0;
 
 // code
 u32 CreateLoopedTask(LoopedTask loopedTask, u32 priority)
@@ -417,6 +418,14 @@ static bool32 AnyMonHasRibbon(void)
 static void CB2_Pokenav(void)
 {
     RunTasks();
+    
+    // Slow down sprite animation - only animate every 2 frames
+    // Change the "2" to a higher number to slow down more (3, 4, etc.)
+    // if (++sAnimationDelayCounter >= 2)
+    // {
+    //     sAnimationDelayCounter = 0;
+    //     AnimateSprites();
+    // }
     AnimateSprites();
     BuildOamBuffer();
     UpdatePaletteFade();
