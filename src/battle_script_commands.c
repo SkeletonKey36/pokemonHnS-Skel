@@ -2654,6 +2654,14 @@ static void Cmd_printstring(void)
     if (gBattleControllerExecFlags == 0)
     {
         u16 var = T2_READ_16(gBattlescriptCurrInstr + 1);
+        
+        // Skip the nickname prompt message if the setting is disabled
+        if (var == STRINGID_GIVENICKNAMECAPTURED && gSaveBlock2Ptr->optionsNicknamePrompt == 1)
+        {
+            gBattlescriptCurrInstr += 3;
+            return;
+        }
+        
         PrepareStringBattle(var, gBattlerAttacker);
         gBattlescriptCurrInstr += 3;
         gBattleCommunication[MSG_DISPLAY] = 1;
@@ -11146,19 +11154,12 @@ static void Cmd_trygivecaughtmonnick(void)
     switch (gBattleCommunication[MULTIUSE_STATE])
     {
     case 0:
-        HandleBattleWindow(YESNOBOX_X_Y, 0);
-
         if (IsNuzlockeNicknamingActive()) //tx_randomizer_and_challenges
         {
+            HandleBattleWindow(YESNOBOX_X_Y, 0);
             gBattleCommunication[MULTIUSE_STATE]++;
             BeginFastPaletteFade(3);
         }
-        /* TODO: This isn't done:
-        - New pokemon, empty party -> Goes to new catch UI w pokedex entry, Still shows "What would you like to nickname the new pokemon?" text for a moment before fading out.
-        - New pokemon, full party -> Goes to new catch UI w pokedex entry, still shows {above} text, the yes/no window appeared with no text, then it said the text for transferring to the PC.
-        - Old pokemon, empty party -> Still shows {above} text for a moment before fading out.
-        - Old pokemon, full party -> Still shows {above} text, the yes/no window appeared with no text, then it said the text for transferring to the PC.
-        */
         else if (gSaveBlock2Ptr->optionsNicknamePrompt == 1) // Check if user wants nickname prompt (0 = yes, 1 = no)
         {
             // Skip nickname prompt - go directly to case 4
@@ -11166,6 +11167,7 @@ static void Cmd_trygivecaughtmonnick(void)
         }
         else
         {
+            HandleBattleWindow(YESNOBOX_X_Y, 0);
             BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
             gBattleCommunication[MULTIUSE_STATE]++;
             gBattleCommunication[CURSOR_POSITION] = 0;
