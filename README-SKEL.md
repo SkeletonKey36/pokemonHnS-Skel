@@ -46,6 +46,7 @@
  
 - Option Menu Setting for Disabling Nickname Prompt
   - In the branch I also included a new string after the player catches Pokêmon that spits out "{POKEMON} added to {PLAYER}'s party." - similar to how the "sent to PC" message is displayed.
+  - I also added Nuzlocke Forced Naming logic to Anorith when received from the fossil guy. The other 4 fossils had it, so it just got missed.
 
 ## Programs used:
 - VS Code
