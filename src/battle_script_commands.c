@@ -37,6 +37,7 @@
 #include "field_specials.h"
 #include "pokemon_summary_screen.h"
 #include "pokenav.h"
+#include "option_plus_menu.h"
 #include "menu_specialized.h"
 #include "data.h"
 #include "constants/abilities.h"
@@ -2656,7 +2657,7 @@ static void Cmd_printstring(void)
         u16 var = T2_READ_16(gBattlescriptCurrInstr + 1);
         
         // Skip the nickname prompt message if the setting is disabled
-        if (var == STRINGID_GIVENICKNAMECAPTURED && gSaveBlock2Ptr->optionsNicknamePrompt == 1)
+        if (var == STRINGID_GIVENICKNAMECAPTURED && CheckNicknamePromptSetting()) // CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
         {
             gBattlescriptCurrInstr += 3;
             return;
@@ -11165,7 +11166,7 @@ static void Cmd_trygivecaughtmonnick(void)
             gBattleCommunication[MULTIUSE_STATE]++;
             BeginFastPaletteFade(3);
         }
-        else if (gSaveBlock2Ptr->optionsNicknamePrompt == 1) // Check if user wants nickname prompt (0 = yes, 1 = no)
+        else if (!CheckNicknamePromptSetting()) // Check if user wants nickname prompt (0 = yes, 1 = no)
         {
             // Skip nickname prompt - go directly to case 4
             gBattleCommunication[MULTIUSE_STATE] = 4;
