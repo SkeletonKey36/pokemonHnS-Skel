@@ -2159,3 +2159,9 @@ static void DrawBgWindowFrames(void)
 
     CopyBgTilemapBufferToVram(1);
 }
+
+// CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
+bool8 CheckNicknamePromptSetting(void) 
+{
+    return (gSaveBlock2Ptr->optionsNicknamePrompt == 0); // 0 = Show nickname prompt, 1 = Don't show nickname prompt
+}
