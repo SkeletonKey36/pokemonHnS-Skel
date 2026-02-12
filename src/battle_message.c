@@ -477,6 +477,7 @@ static const u8 sText_ShootSoClose[] = _("Shoot!\nIt was so close, too!");
 static const u8 sText_GotchaPkmnCaughtPlayer[] = _("Gotcha!\n{B_OPPONENT_MON1_NAME} was caught!{WAIT_SE}\p");
 static const u8 sText_GotchaPkmnCaughtWally[] = _("Gotcha!\n{B_OPPONENT_MON1_NAME} was caught!{WAIT_SE}{PAUSE 127}");
 static const u8 sText_GiveNicknameCaptured[] = _("Give a nickname to the\ncaptured {B_OPPONENT_MON1_NAME}?");
+static const u8 sText_PkmnAddedToParty[] = _("{B_OPPONENT_MON1_NAME} was added to\n{B_PLAYER_NAME}'s party.");
 static const u8 sText_PkmnSentToPC[] = _("{B_OPPONENT_MON1_NAME} was sent to\n{B_PC_CREATOR_NAME} PC.");
 static const u8 sText_Someones[] = _("someone's");
 static const u8 sText_Bills[] = _("BILL'S");
@@ -783,6 +784,7 @@ const u8 * const gBattleStringsTable[BATTLESTRINGS_COUNT - BATTLESTRINGS_TABLE_S
     [STRINGID_GOTCHAPKMNCAUGHTPLAYER - BATTLESTRINGS_TABLE_START] = sText_GotchaPkmnCaughtPlayer,
     [STRINGID_GOTCHAPKMNCAUGHTWALLY - BATTLESTRINGS_TABLE_START] = sText_GotchaPkmnCaughtWally,
     [STRINGID_GIVENICKNAMECAPTURED - BATTLESTRINGS_TABLE_START] = sText_GiveNicknameCaptured,
+    [STRINGID_PKMNADDEDTOPARTY - BATTLESTRINGS_TABLE_START] = sText_PkmnAddedToParty,
     [STRINGID_PKMNSENTTOPC - BATTLESTRINGS_TABLE_START] = sText_PkmnSentToPC,
     [STRINGID_PKMNDATAADDEDTODEX - BATTLESTRINGS_TABLE_START] = sText_PkmnDataAddedToDex,
     [STRINGID_ITISRAINING - BATTLESTRINGS_TABLE_START] = sText_ItIsRaining,
@@ -1263,10 +1265,11 @@ const u16 gFlashFireStringIds[] =
 
 const u16 gCaughtMonStringIds[] =
 {
+    [B_MSG_ADDED_TO_PARTY]    = STRINGID_PKMNADDEDTOPARTY,
     [B_MSG_SENT_SOMEONES_PC]  = STRINGID_PKMNTRANSFERREDSOMEONESPC,
-    [B_MSG_SENT_BillS_PC]  = STRINGID_PKMNTRANSFERREDBillSPC,
+    [B_MSG_SENT_BillS_PC]     = STRINGID_PKMNTRANSFERREDBillSPC,
     [B_MSG_SOMEONES_BOX_FULL] = STRINGID_PKMNBOXSOMEONESPCFULL,
-    [B_MSG_BillS_BOX_FULL] = STRINGID_PKMNBOXBillSPCFULL,
+    [B_MSG_BillS_BOX_FULL]    = STRINGID_PKMNBOXBillSPCFULL,
 };
 
 const u16 gTrappingMoves[NUM_TRAPPING_MOVES + 1] =
