@@ -86,7 +86,7 @@ CeladonMansion2F_Text_Phant:
 
 CeladonMansion2F_Text_Exclsior:
 	.string "I implemented the unique surfing\n"
-	.string "surfing sprites for each POKéMON!\p"
+	.string "sprites for each POKéMON!\p"
 	.string "Since the project is OPEN SOURCE,\n"
 	.string "you can add your own features too!$"
 
