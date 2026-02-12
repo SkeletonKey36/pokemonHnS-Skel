@@ -273,6 +273,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveLileepParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedLileepFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveLileepParty_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_FinishReceivingLileep
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingLileep
 	call Common_EventScript_GetGiftMonPartySlot
@@ -290,6 +293,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveLileepPC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedLileepFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveLileepPC_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_TransferLileepToPC
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferLileepToPC
 	call Common_EventScript_NameReceivedBoxMon
@@ -300,7 +306,7 @@ RuinsOfAlph_Lab_EventScript_ReceiveLileepPC_Nuzlocke::
 	call Common_EventScript_NameReceivedBoxMon
 	goto RuinsOfAlph_Lab_EventScript_TransferLileepToPC
 	end
-	
+
 RuinsOfAlph_Lab_EventScript_TransferLileepToPC::
 	call Common_EventScript_TransferredToPC
 	goto RuinsOfAlph_Lab_EventScript_FinishReceivingLileep
@@ -333,6 +339,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAnorithFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_FinishReceivingAnorith
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingAnorith
 	call Common_EventScript_GetGiftMonPartySlot
@@ -350,6 +359,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveAnorithPC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAnorithFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAnorithPC_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_TransferAnorithToPC
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferAnorithToPC
 	call Common_EventScript_NameReceivedBoxMon
@@ -393,6 +405,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveOmanyteParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedOmanyteFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveOmanyteParty_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_FinishReceivingOmanyte
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingOmanyte
 	call Common_EventScript_GetGiftMonPartySlot
@@ -410,6 +425,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveOmanytePC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedOmanyteFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveOmanytePC_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_TransferOmanyteToPC
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferOmanyteToPC
 	call Common_EventScript_NameReceivedBoxMon
@@ -462,6 +480,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveKabutoParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedKabutoFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveKabutoParty_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_FinishReceivingKabuto
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingKabuto
 	call Common_EventScript_GetGiftMonPartySlot
@@ -479,6 +500,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveKabutoPC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedKabutoFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveKabutoPC_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_TransferKabutoToPC
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferKabutoToPC
 	call Common_EventScript_NameReceivedBoxMon
@@ -522,6 +546,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveAeroParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAeroFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAeroParty_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_FinishReceivingAero
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingAero
 	call Common_EventScript_GetGiftMonPartySlot
@@ -539,6 +566,9 @@ RuinsOfAlph_Lab_EventScript_ReceiveAeroPC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAeroFanfare
 	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
 	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAeroPC_Nuzlocke
+	@ Check if nickname prompt is disabled
+	specialvar VAR_RESULT, CheckNicknamePromptSetting
+	goto_if_eq VAR_RESULT, FALSE, RuinsOfAlph_Lab_EventScript_TransferAeroToPC
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferAeroToPC
 	call Common_EventScript_NameReceivedBoxMon
