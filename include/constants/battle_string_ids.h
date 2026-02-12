@@ -388,9 +388,11 @@
 #define STRINGID_PKMNGAINEDEXPALL           387
 #define STRINGID_PKMNDROPPEDITEM            388
 #define STRINGID_BAGISFULL                  389
+//additional string for "adding pokemon to player party" message
+#define STRINGID_PKMNADDEDTOPARTY           390
 
 
-#define BATTLESTRINGS_COUNT                 390
+#define BATTLESTRINGS_COUNT                 391
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
@@ -540,10 +542,11 @@
 #define B_MSG_WEAKEN_FIRE     1
 
 // gCaughtMonStringIds
-#define B_MSG_SENT_SOMEONES_PC  0
-#define B_MSG_SENT_BillS_PC  1
-#define B_MSG_SOMEONES_BOX_FULL 2
-#define B_MSG_BillS_BOX_FULL 3
+#define B_MSG_ADDED_TO_PARTY     0
+#define B_MSG_SENT_SOMEONES_PC   1
+#define B_MSG_SENT_BillS_PC      2
+#define B_MSG_SOMEONES_BOX_FULL  3
+#define B_MSG_BillS_BOX_FULL     4
 
 // gInobedientStringIds
 #define B_MSG_LOAFING            0
