@@ -24,10 +24,10 @@
 
 - BST Viewer in Summary Page
   - View BST breakdown by pressing START on the Stats Summary screen
-  - Planned: In battle viewer
+  - New window for BST value added under EXP
 
 - BST Distribution Randomizer Setting
-  - future: BST Viewer merged into this feature
+  - Note: Recommend `BST Viewer` feature as well
 
 - Pokédex shortcuts
   - Party Menu's selection submenu
@@ -39,7 +39,17 @@
 
 - Field Moves submenu in party menu's selection menu (removes the limit on 4 usable field moves on a Pokémon)
   - **I also changed the logic on how the Challenge/Randomizer HM Override setting determines when to show FLY or FLASH in a Pokémon's FIELD MOVES. It now checks if the player has the HM in their bag for all slots in the party (the leading pokemon will still show FLY/FLASH regardless and non-leading slots will have a check for if they can learn it, due to how the original HM Override works)**
+ 
+- PokeGear UI Update
+  - Changed the PokeGear's Main Menu UI to be more aligned with a PokeGear (HGSS, gen4) rather than a PokeNav (RSE, gen3)
+  - A blue color is currently implemented, but the files for a yellow version are also present (just rename the file(s) for the desired color to be the proper name used by the game - be sure to store the previous if you want to keep both options in the files).
+ 
+- Option Menu Setting for Disabling Nickname Prompt
+  - In the branch I also included a new string after the player catches Pokêmon that spits out "{POKEMON} added to {PLAYER}'s party." - similar to how the "sent to PC" message is displayed.
 
-
+## Programs used:
+- VS Code
+- Tilemap Studio (For assigning tilesets to a tilemap)
+- Libresprite (For editing sprites & tilesets)
 
 Thanks for reading & enjoy, Skel
