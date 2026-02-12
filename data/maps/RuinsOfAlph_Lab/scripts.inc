@@ -331,6 +331,8 @@ RuinsOfAlph_Lab_EventScript_ReceiveAnorith::
 
 RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAnorithFanfare
+	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
+	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty_Nuzlocke
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_FinishReceivingAnorith
 	call Common_EventScript_GetGiftMonPartySlot
@@ -338,10 +340,23 @@ RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty::
 	goto RuinsOfAlph_Lab_EventScript_FinishReceivingAnorith
 	end
 
+RuinsOfAlph_Lab_EventScript_ReceiveAnorithParty_Nuzlocke::
+	call Common_EventScript_GetGiftMonPartySlot
+	call Common_EventScript_NameReceivedPartyMon
+	goto RuinsOfAlph_Lab_EventScript_FinishReceivingAnorith
+	end
+
 RuinsOfAlph_Lab_EventScript_ReceiveAnorithPC::
 	call RuinsOfAlph_Lab_EventScript_ReceivedAnorithFanfare
+	specialvar VAR_RESULT, IsNuzlockeNicknamingActive
+	goto_if_eq VAR_RESULT, TRUE, RuinsOfAlph_Lab_EventScript_ReceiveAnorithPC_Nuzlocke
 	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, RuinsOfAlph_Lab_EventScript_TransferAnorithToPC
+	call Common_EventScript_NameReceivedBoxMon
+	goto RuinsOfAlph_Lab_EventScript_TransferAnorithToPC
+	end
+
+RuinsOfAlph_Lab_EventScript_ReceiveAnorithPC_Nuzlocke::
 	call Common_EventScript_NameReceivedBoxMon
 	goto RuinsOfAlph_Lab_EventScript_TransferAnorithToPC
 	end
