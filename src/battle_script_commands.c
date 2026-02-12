@@ -11153,7 +11153,7 @@ static void Cmd_trygivecaughtmonnick(void)
             gBattleCommunication[MULTIUSE_STATE]++;
             BeginFastPaletteFade(3);
         }
-        /* TODO: This isn't exactly where it should be:
+        /* TODO: This isn't done:
         - New pokemon, empty party -> Goes to new catch UI w pokedex entry, Still shows "What would you like to nickname the new pokemon?" text for a moment before fading out.
         - New pokemon, full party -> Goes to new catch UI w pokedex entry, still shows {above} text, the yes/no window appeared with no text, then it said the text for transferring to the PC.
         - Old pokemon, empty party -> Still shows {above} text for a moment before fading out.
