@@ -37,6 +37,7 @@
 #include "field_specials.h"
 #include "pokemon_summary_screen.h"
 #include "pokenav.h"
+#include "option_plus_menu.h"
 #include "menu_specialized.h"
 #include "data.h"
 #include "constants/abilities.h"
@@ -2654,6 +2655,14 @@ static void Cmd_printstring(void)
     if (gBattleControllerExecFlags == 0)
     {
         u16 var = T2_READ_16(gBattlescriptCurrInstr + 1);
+        
+        // Skip the nickname prompt message if the setting is disabled
+        if (var == STRINGID_GIVENICKNAMECAPTURED && !CheckNicknamePromptSetting()) // CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
+        {
+            gBattlescriptCurrInstr += 3;
+            return;
+        }
+        
         PrepareStringBattle(var, gBattlerAttacker);
         gBattlescriptCurrInstr += 3;
         gBattleCommunication[MSG_DISPLAY] = 1;
@@ -10982,6 +10991,11 @@ static void Cmd_givecaughtmon(void)
         if (FlagGet(FLAG_SYS_PC_BILL))
             gBattleCommunication[MULTISTRING_CHOOSER]++;
     }
+    else
+    {
+        // Mon was added to party
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ADDED_TO_PARTY;
+    }
 
     gBattleResults.caughtMonSpecies = GetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_SPECIES, NULL);
     GetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_NICKNAME, gBattleResults.caughtMonNick);
@@ -11146,15 +11160,20 @@ static void Cmd_trygivecaughtmonnick(void)
     switch (gBattleCommunication[MULTIUSE_STATE])
     {
     case 0:
-        HandleBattleWindow(YESNOBOX_X_Y, 0);
-
         if (IsNuzlockeNicknamingActive()) //tx_randomizer_and_challenges
         {
+            HandleBattleWindow(YESNOBOX_X_Y, 0);
             gBattleCommunication[MULTIUSE_STATE]++;
             BeginFastPaletteFade(3);
         }
+        else if (!CheckNicknamePromptSetting()) // Check if user wants nickname prompt (0 = yes, 1 = no)
+        {
+            // Skip nickname prompt - go directly to case 4
+            gBattleCommunication[MULTIUSE_STATE] = 4;
+        }
         else
         {
+            HandleBattleWindow(YESNOBOX_X_Y, 0);
             BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
             gBattleCommunication[MULTIUSE_STATE]++;
             gBattleCommunication[CURSOR_POSITION] = 0;
@@ -11216,18 +11235,30 @@ static void Cmd_trygivecaughtmonnick(void)
         if (gMain.callback2 == BattleMainCB2 && !gPaletteFade.active)
         {
             SetMonData(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]], MON_DATA_NICKNAME, gBattleStruct->caughtMonNick);
-            gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
+            // Advance to show the "added to party" or "sent to PC" message
+            gBattlescriptCurrInstr += 5;
         }
         break;
     case 4:
+        // When skipping nickname prompt, check if mon should go to party or PC
+        // Party is full OR type challenge prevents adding this mon → continue to show message
         if (CalculatePlayerPartyCount() == GetMaxPartySize()) //tx_randomizer_and_challenges
-            gBattlescriptCurrInstr += 5;
+        {
+            // Party full - will be sent to PC
+            gBattlescriptCurrInstr += 5; // Continue to givecaughtmon and printfromtable
+        }
         else if (typeChallenge != TX_CHALLENGE_TYPE_OFF && //tx_randomizer_and_challenges
                             GetTypeBySpecies(GetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerAttacker ^ BIT_SIDE]], MON_DATA_SPECIES), 1) != typeChallenge &&
                             GetTypeBySpecies(GetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerAttacker ^ BIT_SIDE]], MON_DATA_SPECIES), 2) != typeChallenge)
-            gBattlescriptCurrInstr += 5;
+        {
+            // Type challenge active and mon doesn't match - will be sent to PC
+            gBattlescriptCurrInstr += 5; // Continue to givecaughtmon and printfromtable
+        }
         else
-            gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
+        {
+            // Mon can be added to party - show the "added to party" message
+            gBattlescriptCurrInstr += 5; // Continue to givecaughtmon and printfromtable
+        }
         break;
     }
 }

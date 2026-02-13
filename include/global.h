@@ -571,6 +571,7 @@ struct SaveBlock2
               u16 optionsNewBattleUI:1;
               u8 rivalName[PLAYER_NAME_LENGTH + 1];
               u16 optionsGenOneRecharge:1;
+              u16 optionsNicknamePrompt:1; // Added by Skel 2/9/26
 }; // sizeof=0xF2C
 
 extern struct SaveBlock2 *gSaveBlock2Ptr;
