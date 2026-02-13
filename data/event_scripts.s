@@ -856,11 +856,11 @@ gText_SandstormIsVicious::
 	.string "It's impossible to keep going.$"
 
 gText_SelectWithoutRegisteredItem::
-	.string "An item in the BAG can be\n"
+	.string "Up to four items in the BAG can be\n"
 	.string "registered to SELECT for easy use.$"
 
 gText_SelectWithoutRegisteredLongItem::
-	.string "A second item in the BAG can be\n"
+	.string "An additional item in the BAG can be\n"
 	.string "registered to holding SELECT.$"
 
 gText_PokemonTrainerSchoolEmail::

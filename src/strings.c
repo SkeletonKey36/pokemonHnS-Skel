@@ -239,6 +239,7 @@ const u8 gText_TooImportantToToss[] = _("That's much too\nimportant to toss\nout
 const u8 gText_TossHowManyVar1s[] = _("Toss out how many\n{STR_VAR_1}(s)?");
 const u8 gText_ThrewAwayVar2Var1s[] = _("Threw away {STR_VAR_2}\n{STR_VAR_1}(s).");
 const u8 gText_ConfirmTossItems[] = _("Is it okay to\nthrow away {STR_VAR_2}\n{STR_VAR_1}(s)?");
+const u8 gText_PressAnyDpadKey[] = _("Press any {DPAD_NONE} key\nto register item\nin that slot.");
 
 const u8 gText_OakTalk_Clefairy[] = _(
     "MARY: Tonight on POKéMON TALK,\n"

@@ -738,6 +738,7 @@ extern const u8 gText_WithdrawHowManyItems[];
 extern const u8 gText_WithdrawXItems[];
 extern const u8 gText_TossHowManyVar1s[];
 extern const u8 gText_ThrewAwayVar2Var1s[];
+extern const u8 gText_PressAnyDpadKey[];
 extern const u8 gText_NoRoomInBag[];
 extern const u8 gText_TooImportantToToss[];
 extern const u8 gText_ConfirmTossItems[];
