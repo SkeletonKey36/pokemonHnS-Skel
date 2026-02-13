@@ -1088,6 +1088,7 @@ static const u8 *const sOptionMenuItemDescriptionsDisabledRandomizer[MENUITEM_RA
     [MENUITEM_RANDOM_EVOLUTIONS_METHODS]        = sText_Empty,
     [MENUITEM_RANDOM_TYPE_EFFEC]                = sText_Description_Disabled_Random_Type_Effectiveness,
     [MENUITEM_RANDOM_ITEMS]                     = sText_Empty,
+    [MENUITEM_RANDOM_STAT_DISTRIBUTION]         = sText_Empty,
     [MENUITEM_RANDOM_CHAOS]                     = sText_Description_Disabled_Random_Chaos_Mode,
     [MENUITEM_RANDOM_NEXT]                      = sText_Empty,
 };
