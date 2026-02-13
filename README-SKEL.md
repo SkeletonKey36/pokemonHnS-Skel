@@ -20,13 +20,13 @@
 
 - Bug fixes from pokemonHnS branches cause I don't want to play with bugs if I don't have to. (collection of cherry-picked commits)
 
-- Infinite Repel Nuzlocke Setting
+- Infinite Repel Nuzlocke Setting (AFFECTS SAVE DATA)
 
 - BST Viewer in Summary Page
   - View BST breakdown by pressing START on the Stats Summary screen
   - New window for BST value added under EXP
 
-- BST Distribution Randomizer Setting
+- BST Distribution Randomizer Setting (AFFECTS SAVE DATA)
   - Note: Recommend `BST Viewer` feature as well
 
 - Pokédex shortcuts
@@ -44,9 +44,11 @@
   - Changed the PokeGear's Main Menu UI to be more aligned with a PokeGear (HGSS, gen4) rather than a PokeNav (RSE, gen3)
   - A blue color is currently implemented, but the files for a yellow version are also present (just rename the file(s) for the desired color to be the proper name used by the game - be sure to store the previous if you want to keep both options in the files).
  
-- Option Menu Setting for Disabling Nickname Prompt
+- Option Menu Setting for Disabling Nickname Prompt (AFFECTS SAVE DATA)
   - In the branch I also included a new string after the player catches Pokêmon that spits out "{POKEMON} added to {PLAYER}'s party." - similar to how the "sent to PC" message is displayed.
   - I also added Nuzlocke Forced Naming logic to Anorith when received from the fossil guy. The other 4 fossils had it, so it just got missed.
+ 
+- Show move power for Return/Frustration in Summary screen
 
 ## Programs used:
 - VS Code
