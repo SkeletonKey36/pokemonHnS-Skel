@@ -246,7 +246,7 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     // ????????
     [ITEM_INFINITE_REPEL] = {gItemIcon_Repel, gItemIconPalette_MaxRepel},
     [ITEM_INFINITE_RARE_CANDIES] = {gItemIcon_RareCandy, gItemIconPalette_RareCandy},
-    [ITEM_0F0] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
+    [ITEM_DEXNAV] = {gItemIcon_Scanner, gItemIconPalette_Scanner},
     [ITEM_0F1] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_0F2] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_0F3] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
