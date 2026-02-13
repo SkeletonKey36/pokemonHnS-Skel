@@ -197,6 +197,7 @@ const u8 gMenuText_Show[] = _("SHOW");
 const u8 gText_EmptyString2[] = _("");
 const u8 gText_Cancel7[] = _("CANCEL"); // Unused
 const u8 gText_Item[] = _("ITEM");
+const u8 gText_FieldMoves[] = _("FIELD MOVES");
 const u8 gText_Mail[] = _("MAIL");
 const u8 gText_Take[] = _("TAKE");
 const u8 gText_Store[] = _("STORE");
