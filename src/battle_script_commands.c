@@ -2657,7 +2657,7 @@ static void Cmd_printstring(void)
         u16 var = T2_READ_16(gBattlescriptCurrInstr + 1);
         
         // Skip the nickname prompt message if the setting is disabled
-        if (var == STRINGID_GIVENICKNAMECAPTURED && CheckNicknamePromptSetting()) // CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
+        if (var == STRINGID_GIVENICKNAMECAPTURED && !CheckNicknamePromptSetting()) // CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
         {
             gBattlescriptCurrInstr += 3;
             return;
