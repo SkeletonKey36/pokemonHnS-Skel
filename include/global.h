@@ -1182,6 +1182,7 @@ struct SaveBlock1
         u8 NuzlockeEncounterFlags[12]; //
         u8 tx_Nuzlocke_RareCandy:1; //new for HnS 1.2
         u8 tx_Nuzlocke_InfiniteRepel:1; //new for HnS 1.2
+        u8 tx_Nuzlocke_HealingHeart:1; //new for HnS 1.2
 };
 
 extern struct SaveBlock1* gSaveBlock1Ptr;

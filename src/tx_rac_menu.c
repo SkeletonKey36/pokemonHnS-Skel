@@ -100,6 +100,7 @@ enum
     MENUITEM_NUZLOCKE_DELETION,
     MENUITEM_NUZLOCKE_RARE_CANDY,
     MENUITEM_NUZLOCKE_INFINITE_REPEL,
+    MENUITEM_NUZLOCKE_HEALING_HEART,
     MENUITEM_NUZLOCKE_NEXT,
     MENUITEM_NUZLOCKE_COUNT,
 };
@@ -283,6 +284,7 @@ static void DrawChoices_Nuzlocke_Nicknaming(int selection, int y);
 static void DrawChoices_Nuzlocke_Deletion(int selection, int y);
 static void DrawChoices_Nuzlocke_RareCandy(int selection, int y);
 static void DrawChoices_Nuzlocke_InfiniteRepel(int selection, int y);
+static void DrawChoices_Nuzlocke_HealingHeart(int selection, int y);
 
 static void DrawChoices_Challenges_PartyLimit(int selection, int y);
 static void DrawChoices_Challenges_LevelCap(int selection, int y);
@@ -433,8 +435,9 @@ struct // MENU_NUZLOCKE
     [MENUITEM_NUZLOCKE_SHINY_CLAUSE]    = {DrawChoices_Nuzlocke_ShinyClause,    ProcessInput_Options_Two},
     [MENUITEM_NUZLOCKE_NICKNAMING]      = {DrawChoices_Nuzlocke_Nicknaming,     ProcessInput_Options_Two},
     [MENUITEM_NUZLOCKE_DELETION]        = {DrawChoices_Nuzlocke_Deletion,       ProcessInput_Options_Two},
-    [MENUITEM_NUZLOCKE_RARE_CANDY]      = {DrawChoices_Nuzlocke_RareCandy,       ProcessInput_Options_Two},
-    [MENUITEM_NUZLOCKE_INFINITE_REPEL]  = {DrawChoices_Nuzlocke_InfiniteRepel,   ProcessInput_Options_Two},
+    [MENUITEM_NUZLOCKE_RARE_CANDY]      = {DrawChoices_Nuzlocke_RareCandy,      ProcessInput_Options_Two},
+    [MENUITEM_NUZLOCKE_HEALING_HEART]   = {DrawChoices_Nuzlocke_HealingHeart,   ProcessInput_Options_Two},
+    [MENUITEM_NUZLOCKE_INFINITE_REPEL]  = {DrawChoices_Nuzlocke_InfiniteRepel,  ProcessInput_Options_Two},
     [MENUITEM_NUZLOCKE_NEXT]            = {NULL, NULL},
 };
 
@@ -580,6 +583,7 @@ static const u8 sText_Nicknaming[]      = _("NICKNAMES");
 static const u8 sText_Deletion[]        = _("FAINTING");
 static const u8 sText_RareCandy[]       = _("INF. RARE CANDY");
 static const u8 sText_InfiniteRepel[]  = _("INF. REPEL");
+static const u8 sText_HealingHeart[]    = _("HEALING HEART");
 
 static const u8 *const sOptionMenuItemsNamesNuzlocke[MENUITEM_NUZLOCKE_COUNT] =
 {
@@ -590,6 +594,7 @@ static const u8 *const sOptionMenuItemsNamesNuzlocke[MENUITEM_NUZLOCKE_COUNT] =
     [MENUITEM_NUZLOCKE_DELETION]        = sText_Deletion,
     [MENUITEM_NUZLOCKE_RARE_CANDY]      = sText_RareCandy,
     [MENUITEM_NUZLOCKE_INFINITE_REPEL]  = sText_InfiniteRepel,
+    [MENUITEM_NUZLOCKE_HEALING_HEART]   = sText_HealingHeart,
     [MENUITEM_NUZLOCKE_NEXT]            = sText_Next,
 };
 
@@ -761,6 +766,11 @@ static bool8 CheckConditions(int selection)
             else
                 return sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_NUZLOCKE];
         case MENUITEM_NUZLOCKE_INFINITE_REPEL:
+            if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) == 0)
+                return sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_NUZLOCKE];
+            else
+                return sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_NUZLOCKE];
+        case MENUITEM_NUZLOCKE_HEALING_HEART:
             if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) == 0)
                 return sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_NUZLOCKE];
             else
@@ -939,6 +949,8 @@ static const u8 sText_Description_Nuzlocke_RareCandy_On[]       = _("Infinite Ra
 static const u8 sText_Description_Nuzlocke_RareCandy_Off[]       = _("Player will not have access to\n Infinite Rare Candy.");
 static const u8 sText_Description_Nuzlocke_InfiniteRepel_On[]       = _("Infinite Repel will be in the\n player's PC at game start.");
 static const u8 sText_Description_Nuzlocke_InfiniteRepel_Off[]       = _("Player will not have access to\n Infinite Repel.");
+static const u8 sText_Description_Nuzlocke_HealingHeart_On[]       = _("Healing Heart will be in the\n player's PC at game start.");
+static const u8 sText_Description_Nuzlocke_HealingHeart_Off[]       = _("Player will not have access to\n Healing Heart.");
 static const u8 sText_Description_Nuzlocke_Next[]               = _("Continue to difficulty options.");
 static const u8 *const sOptionMenuItemDescriptionsNuzlocke[MENUITEM_NUZLOCKE_COUNT][4] =
 {
@@ -949,6 +961,7 @@ static const u8 *const sOptionMenuItemDescriptionsNuzlocke[MENUITEM_NUZLOCKE_COU
     [MENUITEM_NUZLOCKE_DELETION]            = {sText_Description_Nuzlocke_Deletion_Cemetery,    sText_Description_Nuzlocke_Deletion_Deletion,       sText_Empty,                        sText_Empty},
     [MENUITEM_NUZLOCKE_RARE_CANDY]          = {sText_Description_Nuzlocke_RareCandy_On,            sText_Description_Nuzlocke_RareCandy_Off,               sText_Empty,                        sText_Empty},
     [MENUITEM_NUZLOCKE_INFINITE_REPEL]      = {sText_Description_Nuzlocke_InfiniteRepel_On,        sText_Description_Nuzlocke_InfiniteRepel_Off,         sText_Empty,                        sText_Empty},
+    [MENUITEM_NUZLOCKE_HEALING_HEART]       = {sText_Description_Nuzlocke_HealingHeart_On,        sText_Description_Nuzlocke_HealingHeart_Off,         sText_Empty,                        sText_Empty},
     [MENUITEM_NUZLOCKE_NEXT]                = {sText_Description_Nuzlocke_Next,                 sText_Empty,                                        sText_Empty,                        sText_Empty},
 };
 
@@ -1106,6 +1119,7 @@ static const u8 *const sOptionMenuItemDescriptionsDisabledNuzlocke[MENUITEM_NUZL
     [MENUITEM_NUZLOCKE_DELETION]            = sText_Description_Disabled_Nuzlocke_Nuzlocke,
     [MENUITEM_NUZLOCKE_RARE_CANDY]          = sText_Description_Disabled_Nuzlocke_Nuzlocke,
     [MENUITEM_NUZLOCKE_INFINITE_REPEL]      = sText_Description_Disabled_Nuzlocke_Nuzlocke,
+    [MENUITEM_NUZLOCKE_HEALING_HEART]       = sText_Description_Disabled_Nuzlocke_Nuzlocke,
     [MENUITEM_NUZLOCKE_NEXT]                = sText_Empty,
 };
 
@@ -1508,6 +1522,7 @@ void CB2_InitTxRandomizerChallengesMenu(void)
         gSaveBlock1Ptr->tx_Nuzlocke_Deletion                = TX_NUZLOCKE_DELETION;
         gSaveBlock1Ptr->tx_Nuzlocke_RareCandy               = TX_NUZLOCKE_RARE_CANDY;
         gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel           = TX_NUZLOCKE_INFINITE_REPEL;
+        gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart            = TX_NUZLOCKE_HEALING_HEART;
     
         gSaveBlock1Ptr->tx_Challenges_PartyLimit            = TX_DIFFICULTY_PARTY_LIMIT;
         gSaveBlock1Ptr->tx_Challenges_LevelCap              = TX_DIFFICULTY_LEVEL_CAP;
@@ -1590,6 +1605,7 @@ void CB2_InitTxRandomizerChallengesMenu(void)
         sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_DELETION]          = gSaveBlock1Ptr->tx_Nuzlocke_Deletion;
         sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_RARE_CANDY]        = gSaveBlock1Ptr->tx_Nuzlocke_RareCandy;
         sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_INFINITE_REPEL]    = gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel;
+        sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_HEALING_HEART]    = gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart;
         
         // MENU_DIFFICULTY
         sOptions->sel_difficulty[MENUITEM_DIFFICULTY_PARTY_LIMIT]    = gSaveBlock1Ptr->tx_Challenges_PartyLimit;
@@ -1977,6 +1993,7 @@ void SaveData_TxRandomizerAndChallenges(void)
     {
         gSaveBlock1Ptr->tx_Nuzlocke_RareCandy        = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_RARE_CANDY];
         gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel    = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_INFINITE_REPEL];
+        gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart    = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_HEALING_HEART];
     }
     if (gSaveBlock1Ptr->tx_Challenges_Nuzlocke)
     {
@@ -1986,6 +2003,7 @@ void SaveData_TxRandomizerAndChallenges(void)
         gSaveBlock1Ptr->tx_Nuzlocke_Deletion        = sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_DELETION];
         gSaveBlock1Ptr->tx_Nuzlocke_RareCandy        = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_RARE_CANDY];
         gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel    = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_INFINITE_REPEL];
+        gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart    = !sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_HEALING_HEART];
     }
     else
     {
@@ -2146,6 +2164,7 @@ static int ProcessInput_Nuzlocke_Mode(int selection)
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_DELETION]          = TX_NUZLOCKE_DELETION;
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_RARE_CANDY]        = !TX_NUZLOCKE_RARE_CANDY;
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_INFINITE_REPEL]    = !TX_NUZLOCKE_INFINITE_REPEL;
+            sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_HEALING_HEART]     = !TX_NUZLOCKE_HEALING_HEART;
             gSaveBlock1Ptr->tx_Nuzlocke_EasyMode = 0; //off
         }
         else if (newSelection == 1) // EASY
@@ -2156,6 +2175,7 @@ static int ProcessInput_Nuzlocke_Mode(int selection)
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_DELETION]          = TX_NUZLOCKE_DELETION;
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_RARE_CANDY]        = !TX_NUZLOCKE_RARE_CANDY;
             sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_INFINITE_REPEL]    = !TX_NUZLOCKE_INFINITE_REPEL;
+            sOptions->sel_nuzlocke[MENUITEM_NUZLOCKE_HEALING_HEART]     = !TX_NUZLOCKE_HEALING_HEART;
             gSaveBlock1Ptr->tx_Nuzlocke_EasyMode = 1; //on
         }
         else // NORMAL or HARD
@@ -2565,6 +2585,12 @@ static void DrawChoices_Nuzlocke_RareCandy(int selection, int y)
 static void DrawChoices_Nuzlocke_InfiniteRepel(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_NUZLOCKE_INFINITE_REPEL);
+    DrawChoices_Nuzlocke_OnOff(selection, y, active);
+}
+
+static void DrawChoices_Nuzlocke_HealingHeart(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_NUZLOCKE_HEALING_HEART);
     DrawChoices_Nuzlocke_OnOff(selection, y, active);
 }
 

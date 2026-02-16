@@ -375,6 +375,20 @@ void NewGameInitPCItems(void)
 
     if (gSaveBlock1Ptr->tx_Nuzlocke_InfiniteRepel)
         AddPCItem(ITEM_INFINITE_REPEL, 1);
+
+    if (gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart)
+        AddPCItem(ITEM_HEALING_HEART, 1);
+    
+    // Always add default items
+    AddPCItem(ITEM_POTION, 1);
+
+    /* Commented out in favor of dynamic addition based on tx_randomizer_and_challenges.h settings
+    // Add infinite rare candies if enabled
+    if (gSaveBlock1Ptr->tx_Nuzlocke_RareCandy)
+        AddPCItem(ITEM_INFINITE_RARE_CANDIES, 1);
+
+    if (gSaveBlock1Ptr->tx_Nuzlocke_HealingHeart)
+        AddPCItem(ITEM_HEALING_HEART, 1);
     
     // Always add default items
     AddPCItem(ITEM_POTION, 1);
