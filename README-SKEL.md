@@ -50,6 +50,11 @@
  
 - Show move power for Return/Frustration in Summary screen
 
+- A key item wheel (Touches saveblock, but uses some unused sections so that compatability is kept I believe)
+  - Brings the Select-Tap option to have 4 options instead of 1.
+  - Kept the Select-Hold functionality present in HnS
+  - [Original implementation - PokeCommunity](https://www.pokecommunity.com/threads/oras-style-key-item-wheel.498877/)
+
 ## Programs used:
 - VS Code
 - Tilemap Studio (For assigning tilesets to a tilemap)
