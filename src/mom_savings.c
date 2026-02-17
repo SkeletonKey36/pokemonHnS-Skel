@@ -24,6 +24,9 @@
 extern const u8 EventScript_MomGiftCall_Item[];
 extern const u8 EventScript_MomGiftCall_Berry[];
 
+// Player wallet maximum (must match MAX_MONEY in money.c)
+#define MAX_PLAYER_MONEY 9999999
+
 // Sequential gift table (purchased in order, one-time only)
 // These items are purchased when the player's savings reach specific thresholds
 static const struct MomGiftSequential sMomGifts_Sequential[] = {
@@ -289,7 +292,7 @@ bool8 Mom_TryTriggerGiftCall(void)
 
 // ===== Money Input UI =====
 
-#define MOM_MAX_INPUT        9999
+#define MOM_MAX_INPUT        999999
 
 // Window IDs for mom savings UI
 enum {
@@ -330,13 +333,15 @@ static const struct WindowTemplate sMomInputWindowTemplates[] = {
     DUMMY_WIN_TEMPLATE
 };
 
-// Task data aliases
-#define tAmount         data[0]
-#define tMaxAmount      data[1]
-#define tIsDeposit      data[2]
-#define tWindowMoney    data[3]
-#define tWindowInput    data[4]
-#define tWindowMessage  data[5]
+// Static variables for large money amounts (can't fit in s16 task data)
+static u32 sMomInputAmount = 0;
+static u32 sMomInputMaxAmount = 0;
+
+// Task data aliases (tAmount and tMaxAmount replaced by static variables above)
+#define tIsDeposit      data[0]
+#define tWindowMoney    data[1]
+#define tWindowInput    data[2]
+#define tWindowMessage  data[3]
 
 static void Task_MomInput_ShowMessage(u8 taskId);
 static void Task_MomInput_InitAmountDialogue(u8 taskId);
@@ -355,7 +360,7 @@ static void MomInput_PrintAmount(u8 taskId)
     s16 *data = gTasks[taskId].data;
 
     FillWindowPixelBuffer(tWindowInput, PIXEL_FILL(1));
-    PrintMoneyAmount(tWindowInput, 0, 1, tAmount, 0);
+    PrintMoneyAmount(tWindowInput, 0, 1, sMomInputAmount, 0);
 }
 
 static void Task_MomInput_ShowMessage(u8 taskId)
@@ -381,25 +386,25 @@ static void Task_MomInput_HandleInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
 
-    if (AdjustQuantityAccordingToDPadInput_100Version(&tAmount, tMaxAmount) == TRUE)
+    if (AdjustQuantityAccordingToDPadInput_MomVersion(&sMomInputAmount, sMomInputMaxAmount) == TRUE)
     {
         MomInput_PrintAmount(taskId);
     }
     else if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
-        gSpecialVar_0x8000 = tAmount;
+        gSpecialVar_0x8000 = sMomInputAmount;
 
         // Execute deposit or withdraw
         if (tIsDeposit)
         {
-            RemoveMoney(&gSaveBlock1Ptr->money, tAmount);
-            Mom_TryDepositMoney(tAmount);
+            RemoveMoney(&gSaveBlock1Ptr->money, sMomInputAmount);
+            Mom_TryDepositMoney(sMomInputAmount);
         }
         else
         {
-            Mom_TryWithdrawMoney(tAmount);
-            AddMoney(&gSaveBlock1Ptr->money, tAmount);
+            Mom_TryWithdrawMoney(sMomInputAmount);
+            AddMoney(&gSaveBlock1Ptr->money, sMomInputAmount);
         }
 
         MomInput_CleanupWindows(taskId);
@@ -459,7 +464,7 @@ static void MomInput_Open(bool8 isDeposit)
     PutWindowTilemap(tWindowMessage);
 
     tIsDeposit = isDeposit;
-    tAmount = 1;
+    sMomInputAmount = 1;
 
     // Show money box with border and sprite label
     // For deposits: show player's wallet
@@ -474,12 +479,20 @@ static void MomInput_Open(bool8 isDeposit)
     }
     AddMoneyLabelObject(19, 11);  // Sprite label at (8*0)+19, (8*0)+11
 
-    // Cap deposit at min(9999, player's wallet)
-    // Cap withdraw at min(9999, mom's balance)
+    // Cap deposit at min(999999, player's wallet, mom's remaining capacity)
+    // Cap withdraw at min(9999999, mom's balance, player's remaining wallet capacity)
     if (isDeposit)
-        tMaxAmount = min(MOM_MAX_INPUT, GetMoney(&gSaveBlock1Ptr->money));
+    {
+        u32 momsRemainingCapacity = MOM_MAX_MONEY - Mom_GetBalance();
+        u32 playersAvailableMoney = GetMoney(&gSaveBlock1Ptr->money);
+        sMomInputMaxAmount = min(MOM_MAX_INPUT, min(playersAvailableMoney, momsRemainingCapacity));
+    }
     else
-        tMaxAmount = min(MOM_MAX_INPUT, Mom_GetBalance());
+    {
+        u32 playersWalletCapacity = MAX_PLAYER_MONEY - GetMoney(&gSaveBlock1Ptr->money);
+        u32 momsAvailableMoney = Mom_GetBalance();
+        sMomInputMaxAmount = min(MOM_MAX_INPUT, min(momsAvailableMoney, playersWalletCapacity));
+    }
 
     ScriptContext_Stop();
 }
@@ -542,8 +555,6 @@ void Special_MomOpenWithdrawInput(void)
     MomInput_Open(FALSE);
 }
 
-#undef tAmount
-#undef tMaxAmount
 #undef tIsDeposit
 #undef tWindowMoney
 #undef tWindowInput
