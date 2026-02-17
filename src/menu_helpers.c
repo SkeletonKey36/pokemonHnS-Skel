@@ -250,9 +250,9 @@ bool8 AdjustQuantityAccordingToDPadInput(s16 *quantity, u16 max)
 }
 
 // Returns TRUE if the quantity was changed, FALSE if it remained the same
-bool8 AdjustQuantityAccordingToDPadInput_100Version(s16 *quantity, u16 max)
+bool8 AdjustQuantityAccordingToDPadInput_MomVersion(u32 *quantity, u32 max)
 {
-    s16 valBefore = *quantity;
+    u32 valBefore = *quantity;
 
     if (JOY_REPEAT(DPAD_ANY) == DPAD_UP)
     {
@@ -272,9 +272,9 @@ bool8 AdjustQuantityAccordingToDPadInput_100Version(s16 *quantity, u16 max)
     }
     else if (JOY_REPEAT(DPAD_ANY) == DPAD_DOWN)
     {
+        if (*quantity <= 1)
+            *quantity = max + 1;
         (*quantity)--;
-        if (*quantity <= 0)
-            *quantity = max;
 
         if (*quantity == valBefore)
         {
@@ -304,9 +304,10 @@ bool8 AdjustQuantityAccordingToDPadInput_100Version(s16 *quantity, u16 max)
     }
     else if (JOY_REPEAT(DPAD_ANY) == DPAD_LEFT)
     {
-        *quantity -= 100;
-        if (*quantity <= 0)
+        if (*quantity <= 100)
             *quantity = 1;
+        else
+            *quantity -= 100;
 
         if (*quantity == valBefore)
         {
