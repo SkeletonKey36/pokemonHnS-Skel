@@ -41,7 +41,9 @@ NewBarkTown_PlayersHouse_1F_EventScript_MomsFriend::
 	end
 
 NewBarkTown_PlayersHouse_1F_MomEventScript_GoodLuck::
-	msgbox NewBarkTown_PlayersHouse_1F_Text_MomLeaving, MSGBOX_DEFAULT
+	msgbox NewBarkTown_PlayersHouse_1F_Text_MomLeaving1, MSGBOX_DEFAULT
+	call NewBarkTown_PlayersHouse_1F_EventScript_SavingInit
+	msgbox NewBarkTown_PlayersHouse_1F_Text_MomLeaving2, MSGBOX_DEFAULT
 	setflag FLAG_MOM_VISITED
 	clearflag FLAG_HIDE_ROUTE_30_NPCS
 	setvar VAR_NEWBARK_TOWN_STATE, 5
@@ -56,7 +58,8 @@ NewBarkTown_PlayersHouse_1F_EventScript_Mom_Regular::
 	end
 
 NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu::
-	msgbox NewBarkTown_PlayersHouse_1F_Text_MomWhatCanIDo, MSGBOX_DEFAULT
+	special Special_MomEnsureInitialized
+	msgbox NewBarkTown_PlayersHouse_1F_Text_MomAnythingElse, MSGBOX_DEFAULT
 	multichoice 0, 0, MULTI_MOM_MENU, FALSE
 	switch VAR_RESULT
 	case 0, NewBarkTown_PlayersHouse_1F_EventScript_CheckSavings
@@ -69,32 +72,45 @@ NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu::
 
 NewBarkTown_PlayersHouse_1F_EventScript_CheckSavings::
 	special Special_MomGetBalance
-	buffernumberstring STR_VAR_1, VAR_0x8000
 	msgbox NewBarkTown_PlayersHouse_1F_Text_CurrentSavings, MSGBOX_DEFAULT
 	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
 	end
 
 NewBarkTown_PlayersHouse_1F_EventScript_Deposit::
-	msgbox NewBarkTown_PlayersHouse_1F_Text_HowMuchDeposit, MSGBOX_DEFAULT
-	@ TODO: Implement money input UI
-	@ For now, we'll use a simplevar input
-	@ setvar VAR_TEMP_1, 1000  @ Test value
-	@ Once you have money input working, uncomment the special call below
-	@ special Special_MomDeposit
-	msgbox NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet, MSGBOX_DEFAULT
-	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
-	end
+	closemessage
+    special Special_MomOpenDepositInput
+    waitstate
+	compare VAR_0x8000, 0
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	msgbox NewBarkTown_PlayersHouse_1F_Text_DepositSuccess, MSGBOX_DEFAULT
+    goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+    end
 
 NewBarkTown_PlayersHouse_1F_EventScript_Withdraw::
-	msgbox NewBarkTown_PlayersHouse_1F_Text_HowMuchWithdraw, MSGBOX_DEFAULT
-	@ TODO: Implement money input UI
-	@ For now, we'll use a simple var input
-	@ setvar VAR_TEMP_1, 1000  @ Test value
-	@ Once you have money input working, uncomment the special call below
-	@ special Special_MomWithdraw
-	msgbox NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet, MSGBOX_DEFAULT
-	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
-	end
+	closemessage
+    special Special_MomOpenWithdrawInput
+    waitstate
+	compare VAR_0x8000, 0
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	msgbox NewBarkTown_PlayersHouse_1F_Text_WithdrawSuccess, MSGBOX_DEFAULT
+    goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+    end
+
+NewBarkTown_PlayersHouse_1F_EventScript_SavingInit::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_EnableSaving, MSGBOX_YESNO
+	compare VAR_RESULT, YES
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_ConfirmEnableInit
+	return
+
+NewBarkTown_PlayersHouse_1F_EventScript_ConfirmEnableInit::
+	special Special_MomEnableSaving
+	msgbox NewBarkTown_PlayersHouse_1F_Text_SavingEnabled, MSGBOX_DEFAULT
+	return
+
+NewBarkTown_PlayersHouse_1F_EventScript_ConfirmDisableInit::
+	special Special_MomDisableSaving
+	msgbox NewBarkTown_PlayersHouse_1F_Text_SavingDisabled, MSGBOX_DEFAULT
+	return
 
 NewBarkTown_PlayersHouse_1F_EventScript_ToggleSaving::
 	special Special_MomIsSavingEnabled
@@ -272,52 +288,51 @@ NewBarkTown_PlayersHouse_1F_Text_MomsFriend:
 	.string "becoming PROF.ELM's assistant.\p"
 	.string "She really loves POKéMON!$"
 
-NewBarkTown_PlayersHouse_1F_Text_MomLeaving:
+NewBarkTown_PlayersHouse_1F_Text_MomLeaving1:
 	.string "MOM: Wow, that's a cute POKéMON.\n"
 	.string "Where did you get it?\p"
 	.string "…\p"
-	.string "So, you're leaving on an adventure...\n"
-	.string "That does sound challenging...\p"
+	.string "So, you're leaving on an adventure...\p"
+	.string "OK!\nI'll help too.\p"
+	.string "I know! I'll save money for you.\n"
+	.string "On a long journey, money's important.$"
+
+NewBarkTown_PlayersHouse_1F_Text_MomLeaving2:
 	.string "Just be careful.\p"
 	.string "POKéMON are your friends.\n"
 	.string "You need to work as a team.\p"
 	.string "Now, go on!\n"
 	.string "I'm behind you all the way!$"
-
-NewBarkTown_PlayersHouse_1F_Text_MomWhatCanIDo:
-	.string "MOM: Hi, sweetie!\n"
-	.string "What can I do for you?$"
+	
+NewBarkTown_PlayersHouse_1F_Text_MomAnythingElse:
+	.string "Is there anything else I can\n"
+	.string "help you with, sweetie?$"
 
 NewBarkTown_PlayersHouse_1F_Text_CurrentSavings:
-	.string "MOM: I'm holding ${STR_VAR_1}\n"
+	.string "I'm holding {STR_VAR_2}\n"
 	.string "for you right now.$"
 
-NewBarkTown_PlayersHouse_1F_Text_HowMuchDeposit:
-	.string "MOM: How much would you like to\n"
-	.string "save with me?$"
-
-NewBarkTown_PlayersHouse_1F_Text_HowMuchWithdraw:
-	.string "MOM: How much would you like to\n"
-	.string "take out?$"
-
 NewBarkTown_PlayersHouse_1F_Text_EnableSaving:
-	.string "MOM: Would you like me to save part\n"
-	.string "of your earnings for you?$"
+	.string "Do you want me to save some of the \n"
+	.string "money you earn?$"
 
 NewBarkTown_PlayersHouse_1F_Text_SavingEnabled:
-	.string "MOM: Okay! I'll save a portion of\n"
+	.string "Okay! I'll save 25% of\n"
 	.string "the money you earn from battles.$"
 
 NewBarkTown_PlayersHouse_1F_Text_DisableSaving:
-	.string "MOM: Would you like me to stop\n"
+	.string "Would you like me to stop\n"
 	.string "saving for you?$"
 
 NewBarkTown_PlayersHouse_1F_Text_SavingDisabled:
-	.string "MOM: Okay, I'll stop saving for now.$"
+	.string "Okay, I'll stop saving for now.$"
 
 NewBarkTown_PlayersHouse_1F_Text_Goodbye:
-	.string "MOM: Take care, sweetie!$"
+	.string "Take care, sweetie!$"
 
-NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet:
-	.string "MOM: I'm still setting this up...\n"
-	.string "Check back later!$"
+NewBarkTown_PlayersHouse_1F_Text_DepositSuccess:
+	.string "MOM: Sounds good! I'll put that in\n"
+	.string "savings for you.$"
+
+NewBarkTown_PlayersHouse_1F_Text_WithdrawSuccess:
+	.string "MOM: Here you go!$"

@@ -1,9 +1,28 @@
 #include "global.h"
 #include "mom_savings.h"
+#include "main.h"
 #include "item.h"
 #include "random.h"
 #include "constants/items.h"
 #include "event_data.h"
+#include "string_util.h"
+#include "strings.h"
+#include "script.h"
+#include "menu_helpers.h"
+#include "money.h"
+#include "menu.h"
+#include "task.h"
+#include "sound.h"
+#include "constants/songs.h"
+#include "text_window.h"
+#include "palette.h"
+#include "window.h"
+#include "bg.h"
+#include "fieldmap.h"
+#include "constants/map_types.h"
+
+extern const u8 EventScript_MomGiftCall_Item[];
+extern const u8 EventScript_MomGiftCall_Berry[];
 
 // Sequential gift table (purchased in order, one-time only)
 // These items are purchased when the player's savings reach specific thresholds
@@ -61,7 +80,20 @@ void InitMomSavings(void)
     mom->momsMoney = 0;
     mom->normalGiftFlags = 0;
     mom->isSavingMoney = FALSE;
-    mom->padding = 0;
+    mom->isInitialized = TRUE;
+}
+
+void Mom_EnsureInitialized(void)
+{
+    struct MomSavingsData *mom = &gSaveBlock1Ptr->momSavings;
+
+    if (mom->isInitialized == TRUE)
+        return;
+
+    mom->momsMoney = 0;
+    mom->normalGiftFlags = 0;
+    mom->isSavingMoney = FALSE;
+    mom->isInitialized = TRUE;
 }
 
 // Enable or disable mom's automatic saving feature
@@ -83,14 +115,10 @@ u32 Mom_GetBalance(void)
 }
 
 // Attempt to deposit money into mom's savings
-// Returns TRUE if successful, FALSE if saving is disabled
+// Returns TRUE if successful
 bool8 Mom_TryDepositMoney(u32 amount)
 {
     struct MomSavingsData *mom = &gSaveBlock1Ptr->momSavings;
-    
-    // Check if feature is enabled
-    if (!mom->isSavingMoney)
-        return FALSE;
     
     // Store old balance for tier comparison
     u32 oldBalance = mom->momsMoney;
@@ -231,6 +259,231 @@ static bool8 Mom_CheckRandomBerries(u32 newBalance, u32 oldBalance, u16 *purchas
     return TRUE;
 }
 
+static bool8 Mom_GiftIsBerry(void)
+{
+    u16 item = VarGet(VAR_MOM_GIFT_ITEM);
+    return (item >= ITEM_CHERI_BERRY && item <= ITEM_ENIGMA_BERRY);
+}
+
+bool8 Mom_TryTriggerGiftCall(void)
+{
+    u8 mapType = gMapHeader.mapType;
+    
+    // No gift waiting
+    if (!FlagGet(FLAG_MOM_HAS_GIFT))
+        return FALSE;
+    
+    // Only call when player is outdoors on a route, city, or town
+    // Don't interrupt when indoors or underground
+    if (mapType != MAP_TYPE_ROUTE && mapType != MAP_TYPE_OCEAN_ROUTE && mapType != MAP_TYPE_CITY && mapType != MAP_TYPE_TOWN)
+        return FALSE;
+    
+    // All conditions met - trigger the call!
+    if (Mom_GiftIsBerry())
+        ScriptContext_SetupScript(EventScript_MomGiftCall_Berry);
+    else
+        ScriptContext_SetupScript(EventScript_MomGiftCall_Item);
+
+    return TRUE;
+}
+
+// ===== Money Input UI =====
+
+#define MOM_MAX_INPUT        9999
+
+// Window IDs for mom savings UI
+enum {
+    WIN_MOM_MONEY,
+    WIN_MOM_INPUT,
+    WIN_MOM_MESSAGE,
+};
+
+// Window templates matching shop UI layout
+static const struct WindowTemplate sMomInputWindowTemplates[] = {
+    [WIN_MOM_MONEY] = {
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 1,
+        .width = 10,
+        .height = 2,
+        .paletteNum = 15,
+        .baseBlock = 0x001E,
+    },
+    [WIN_MOM_INPUT] = {
+        .bg = 0,
+        .tilemapLeft = 22,
+        .tilemapTop = 11,
+        .width = 6,
+        .height = 2,
+        .paletteNum = 15,
+        .baseBlock = 0x018E,
+    },
+    [WIN_MOM_MESSAGE] = {
+        .bg = 0,
+        .tilemapLeft = 2,
+        .tilemapTop = 15,
+        .width = 27,
+        .height = 4,
+        .paletteNum = 15,
+        .baseBlock = 0x01A2,
+    },
+    DUMMY_WIN_TEMPLATE
+};
+
+// Task data aliases
+#define tAmount         data[0]
+#define tMaxAmount      data[1]
+#define tIsDeposit      data[2]
+#define tWindowMoney    data[3]
+#define tWindowInput    data[4]
+#define tWindowMessage  data[5]
+
+static void Task_MomInput_ShowMessage(u8 taskId);
+static void Task_MomInput_InitAmountDialogue(u8 taskId);
+static void Task_MomInput_HandleInput(u8 taskId);
+static void MomInput_CleanupWindows(u8 taskId);
+
+static void MomInput_DisplayMessage(u8 taskId, const u8 *text, TaskFunc callback)
+{
+    s16 *data = gTasks[taskId].data;
+    DisplayMessageAndContinueTask(taskId, tWindowMessage, 10, 14, FONT_NORMAL, GetPlayerTextSpeedDelay(), text, callback);
+    ScheduleBgCopyTilemapToVram(0);
+}
+
+static void MomInput_PrintAmount(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    FillWindowPixelBuffer(tWindowInput, PIXEL_FILL(1));
+    PrintMoneyAmount(tWindowInput, 0, 1, tAmount, 0);
+}
+
+static void Task_MomInput_ShowMessage(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    const u8 *text = tIsDeposit ? gText_MomHowMuchDeposit : gText_MomHowMuchWithdraw;
+    MomInput_DisplayMessage(taskId, text, Task_MomInput_InitAmountDialogue);
+}
+
+static void Task_MomInput_InitAmountDialogue(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    // Create input window with frame
+    DrawStdFrameWithCustomTileAndPalette(tWindowInput, FALSE, 1, 13);
+    MomInput_PrintAmount(taskId);
+    ScheduleBgCopyTilemapToVram(0);
+
+    gTasks[taskId].func = Task_MomInput_HandleInput;
+}
+
+static void Task_MomInput_HandleInput(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    if (AdjustQuantityAccordingToDPadInput_100Version(&tAmount, tMaxAmount) == TRUE)
+    {
+        MomInput_PrintAmount(taskId);
+    }
+    else if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        gSpecialVar_0x8000 = tAmount;
+
+        // Execute deposit or withdraw
+        if (tIsDeposit)
+        {
+            RemoveMoney(&gSaveBlock1Ptr->money, tAmount);
+            Mom_TryDepositMoney(tAmount);
+        }
+        else
+        {
+            Mom_TryWithdrawMoney(tAmount);
+            AddMoney(&gSaveBlock1Ptr->money, tAmount);
+        }
+
+        MomInput_CleanupWindows(taskId);
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        gSpecialVar_0x8000 = 0;
+
+        MomInput_CleanupWindows(taskId);
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+    }
+}
+
+static void MomInput_CleanupWindows(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    // Remove money sprite label
+    RemoveMoneyLabelObject();
+
+    // Clear and remove money window
+    ClearStdWindowAndFrameToTransparent(tWindowMoney, FALSE);
+    ClearWindowTilemap(tWindowMoney);
+    RemoveWindow(tWindowMoney);
+
+    // Clear and remove input window
+    ClearStdWindowAndFrameToTransparent(tWindowInput, FALSE);
+    ClearWindowTilemap(tWindowInput);
+    RemoveWindow(tWindowInput);
+
+    // Clear and remove message window
+    ClearDialogWindowAndFrameToTransparent(tWindowMessage, FALSE);
+    ClearWindowTilemap(tWindowMessage);
+    RemoveWindow(tWindowMessage);
+
+    ScheduleBgCopyTilemapToVram(0);
+}
+
+static void MomInput_Open(bool8 isDeposit)
+{
+    u8 taskId = CreateTask(Task_MomInput_ShowMessage, 8);
+    s16 *data = gTasks[taskId].data;
+
+    // Create windows individually using AddWindow to avoid conflicts with script system
+    tWindowMoney = AddWindow(&sMomInputWindowTemplates[WIN_MOM_MONEY]);
+    tWindowInput = AddWindow(&sMomInputWindowTemplates[WIN_MOM_INPUT]);
+    tWindowMessage = AddWindow(&sMomInputWindowTemplates[WIN_MOM_MESSAGE]);
+
+    DeactivateAllTextPrinters();
+    LoadUserWindowBorderGfx(tWindowMoney, 1, BG_PLTT_ID(13));
+    LoadMessageBoxGfx(tWindowMoney, 0xA, BG_PLTT_ID(14));
+    PutWindowTilemap(tWindowMoney);
+    PutWindowTilemap(tWindowMessage);
+
+    tIsDeposit = isDeposit;
+    tAmount = 1;
+
+    // Show money box with border and sprite label
+    // For deposits: show player's wallet
+    // For withdrawals: show mom's balance
+    if (isDeposit)
+    {
+        PrintMoneyAmountInMoneyBoxWithBorder(tWindowMoney, 1, 13, GetMoney(&gSaveBlock1Ptr->money));
+    }
+    else
+    {
+        PrintMoneyAmountInMoneyBoxWithBorder(tWindowMoney, 1, 13, Mom_GetBalance());
+    }
+    AddMoneyLabelObject(19, 11);  // Sprite label at (8*0)+19, (8*0)+11
+
+    // Cap deposit at min(9999, player's wallet)
+    // Cap withdraw at min(9999, mom's balance)
+    if (isDeposit)
+        tMaxAmount = min(MOM_MAX_INPUT, GetMoney(&gSaveBlock1Ptr->money));
+    else
+        tMaxAmount = min(MOM_MAX_INPUT, Mom_GetBalance());
+
+    ScriptContext_Stop();
+}
+
 /* Special script functions related to mom's savings (called from event scripts) */
 
 static void Mom_AddItemToPC(u16 itemId, u16 quantity)
@@ -250,7 +503,9 @@ void Special_MomDisableSaving(void)
 
 void Special_MomGetBalance(void)
 {
-    gSpecialVar_0x8000 = Mom_GetBalance();
+    u32 balance = Mom_GetBalance();
+    ConvertIntToDecimalStringN(gStringVar1, balance, STR_CONV_MODE_LEFT_ALIGN, 6);
+    StringExpandPlaceholders(gStringVar2, gText_PokedollarVar1);
 }
 
 void Special_MomDeposit(void)
@@ -271,3 +526,25 @@ void Special_MomIsSavingEnabled(void)
 {
     gSpecialVar_Result = Mom_IsSavingEnabled();
 }
+
+void Special_MomEnsureInitialized(void)
+{
+    Mom_EnsureInitialized();
+}
+
+void Special_MomOpenDepositInput(void)
+{
+    MomInput_Open(TRUE);
+}
+
+void Special_MomOpenWithdrawInput(void)
+{
+    MomInput_Open(FALSE);
+}
+
+#undef tAmount
+#undef tMaxAmount
+#undef tIsDeposit
+#undef tWindowMoney
+#undef tWindowInput
+#undef tWindowMessage
