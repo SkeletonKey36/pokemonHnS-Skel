@@ -15,7 +15,7 @@ struct MomSavingsData
     u32 momsMoney;           // Mom's current savings balance
     u16 normalGiftFlags;     // Bitflags for which sequential items purchased (up to 16)
     u8 isSavingMoney;        // Boolean: is the feature active?
-    u8 padding;              // Alignment padding
+    u8 isInitialized;        // Boolean: is the savings feature initialized?
 };
 
 // Item table structure for sequential gifts
@@ -33,6 +33,10 @@ u32 Mom_GetBalance(void);
 bool8 Mom_TryDepositMoney(u32 amount);
 bool8 Mom_TryWithdrawMoney(u32 amount);
 bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance);
+void Mom_EnsureInitialized(void);
 void InitMomSavings(void);
+bool8 Mom_TryTriggerGiftCall(void);
+void Special_MomOpenDepositInput(void);
+void Special_MomOpenWithdrawInput(void);
 
 #endif // GUARD_MOM_SAVINGS_H

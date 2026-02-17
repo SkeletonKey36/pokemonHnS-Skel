@@ -25,6 +25,8 @@ extern const u8 gText_Lv50[];
 extern const u8 gText_OpenLevel[];
 
 extern const u8 gText_Mom[];
+extern const u8 gText_MomHowMuchDeposit[];
+extern const u8 gText_MomHowMuchWithdraw[];
 extern const u8 gText_Dad[];
 
 extern const u8 gText_GetsAPokeBlockQuestion[];

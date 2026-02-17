@@ -594,3 +594,6 @@ gSpecials::
 	def_special Special_MomDeposit				@ mom_savings
 	def_special Special_MomWithdraw				@ mom_savings
 	def_special Special_MomIsSavingEnabled		@ mom_savings
+	def_special Special_MomEnsureInitialized	@ mom_savings
+	def_special Special_MomOpenDepositInput		@ mom_savings
+	def_special Special_MomOpenWithdrawInput	@ mom_savings
