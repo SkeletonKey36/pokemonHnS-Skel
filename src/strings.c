@@ -2219,3 +2219,8 @@ const u8 gText_FORMS_Buttons_Submenu_PE[]           = _("{DPAD_NONE}FORMs {A_BUT
 const u8 gText_FORMS_Buttons_Submenu_Decapped_PE[]  = _("{START_BUTTON}Evos");
 const u8 gText_FORMS_NONE[]                         = _("{STR_VAR_1} has no alternate forms.");
 const u8 gText_Var1DotVar2_Metric[]                 = _("{STR_VAR_1}.{STR_VAR_2}cm");
+
+const u8 gText_CheckSavings[] = _("CHECK SAVINGS");
+const u8 gText_Deposit[] = _("DEPOSIT");
+const u8 gText_Withdraw[] = _("WITHDRAW");
+const u8 gText_SavingOption[] = _("SAVING OPTION");

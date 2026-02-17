@@ -588,3 +588,9 @@ gSpecials::
 	def_special NameRival
 	def_special IsRandomMovesActivated 			@ tx_randomizer_and_challenges
 	def_special ToggleShinyColors
+	def_special Special_MomEnableSaving			@ mom_savings
+	def_special Special_MomDisableSaving		@ mom_savings
+	def_special Special_MomGetBalance			@ mom_savings
+	def_special Special_MomDeposit				@ mom_savings
+	def_special Special_MomWithdraw				@ mom_savings
+	def_special Special_MomIsSavingEnabled		@ mom_savings

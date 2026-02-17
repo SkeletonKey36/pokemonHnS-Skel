@@ -3284,4 +3284,10 @@ extern const u8 gText_UnitSystemMetric[];   //tx_optionsPlus
 extern const u8 gText_UnitSystemImperial[]; //tx_optionsPlus
 extern const u8 gText_Var1DotVar2_Metric[];
 
+// Mom's Savings
+extern const u8 gText_CheckSavings[];
+extern const u8 gText_Deposit[];
+extern const u8 gText_Withdraw[];
+extern const u8 gText_SavingOption[];
+
 #endif // GUARD_STRINGS_H

@@ -51,8 +51,83 @@ NewBarkTown_PlayersHouse_1F_MomEventScript_GoodLuck::
 
 NewBarkTown_PlayersHouse_1F_EventScript_Mom_Regular::
 	call PlayersHouse_1F_EventScript_MomHealsParty
+	call NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
 	release
 	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_MomWhatCanIDo, MSGBOX_DEFAULT
+	multichoice 0, 0, MULTI_MOM_MENU, FALSE
+	switch VAR_RESULT
+	case 0, NewBarkTown_PlayersHouse_1F_EventScript_CheckSavings
+	case 1, NewBarkTown_PlayersHouse_1F_EventScript_Deposit
+	case 2, NewBarkTown_PlayersHouse_1F_EventScript_Withdraw
+	case 3, NewBarkTown_PlayersHouse_1F_EventScript_ToggleSaving
+	case 4, NewBarkTown_PlayersHouse_1F_EventScript_ExitSavings
+	case MULTI_B_PRESSED, NewBarkTown_PlayersHouse_1F_EventScript_ExitSavings
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_CheckSavings::
+	special Special_MomGetBalance
+	buffernumberstring STR_VAR_1, VAR_0x8000
+	msgbox NewBarkTown_PlayersHouse_1F_Text_CurrentSavings, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_Deposit::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_HowMuchDeposit, MSGBOX_DEFAULT
+	@ TODO: Implement money input UI
+	@ For now, we'll use a simplevar input
+	@ setvar VAR_TEMP_1, 1000  @ Test value
+	@ Once you have money input working, uncomment the special call below
+	@ special Special_MomDeposit
+	msgbox NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_Withdraw::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_HowMuchWithdraw, MSGBOX_DEFAULT
+	@ TODO: Implement money input UI
+	@ For now, we'll use a simple var input
+	@ setvar VAR_TEMP_1, 1000  @ Test value
+	@ Once you have money input working, uncomment the special call below
+	@ special Special_MomWithdraw
+	msgbox NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_ToggleSaving::
+	special Special_MomIsSavingEnabled
+	compare VAR_RESULT, TRUE
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_DisableSaving
+	msgbox NewBarkTown_PlayersHouse_1F_Text_EnableSaving, MSGBOX_YESNO
+	compare VAR_RESULT, YES
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_ConfirmEnable
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_ConfirmEnable::
+	special Special_MomEnableSaving
+	msgbox NewBarkTown_PlayersHouse_1F_Text_SavingEnabled, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_DisableSaving::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_DisableSaving, MSGBOX_YESNO
+	compare VAR_RESULT, YES
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_ConfirmDisable
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_ConfirmDisable::
+	special Special_MomDisableSaving
+	msgbox NewBarkTown_PlayersHouse_1F_Text_SavingDisabled, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
+NewBarkTown_PlayersHouse_1F_EventScript_ExitSavings::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_Goodbye, MSGBOX_DEFAULT
+	return
 
 NewBarkTown_PlayersHouse_1F_EventScript_MomsIntroTrigger1::
 	lock
@@ -208,3 +283,41 @@ NewBarkTown_PlayersHouse_1F_Text_MomLeaving:
 	.string "You need to work as a team.\p"
 	.string "Now, go on!\n"
 	.string "I'm behind you all the way!$"
+
+NewBarkTown_PlayersHouse_1F_Text_MomWhatCanIDo:
+	.string "MOM: Hi, sweetie!\n"
+	.string "What can I do for you?$"
+
+NewBarkTown_PlayersHouse_1F_Text_CurrentSavings:
+	.string "MOM: I'm holding ${STR_VAR_1}\n"
+	.string "for you right now.$"
+
+NewBarkTown_PlayersHouse_1F_Text_HowMuchDeposit:
+	.string "MOM: How much would you like to\n"
+	.string "save with me?$"
+
+NewBarkTown_PlayersHouse_1F_Text_HowMuchWithdraw:
+	.string "MOM: How much would you like to\n"
+	.string "take out?$"
+
+NewBarkTown_PlayersHouse_1F_Text_EnableSaving:
+	.string "MOM: Would you like me to save part\n"
+	.string "of your earnings for you?$"
+
+NewBarkTown_PlayersHouse_1F_Text_SavingEnabled:
+	.string "MOM: Okay! I'll save a portion of\n"
+	.string "the money you earn from battles.$"
+
+NewBarkTown_PlayersHouse_1F_Text_DisableSaving:
+	.string "MOM: Would you like me to stop\n"
+	.string "saving for you?$"
+
+NewBarkTown_PlayersHouse_1F_Text_SavingDisabled:
+	.string "MOM: Okay, I'll stop saving for now.$"
+
+NewBarkTown_PlayersHouse_1F_Text_Goodbye:
+	.string "MOM: Take care, sweetie!$"
+
+NewBarkTown_PlayersHouse_1F_Text_NotImplementedYet:
+	.string "MOM: I'm still setting this up...\n"
+	.string "Check back later!$"

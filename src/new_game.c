@@ -46,6 +46,7 @@
 #include "union_room_chat.h"
 #include "constants/items.h"
 #include "tx_randomizer_and_challenges.h"
+#include "mom_savings.h"
 
 extern const u8 EventScript_ResetAllMapFlags[];
 
@@ -243,6 +244,7 @@ void NewGameInitData(void)
     ResetTrainerHillResults();
     ResetContestLinkResults();
     RandomizeTypeEffectivenessListEWRAM(Random32());
+    InitMomSavings();
     if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (gSaveBlock1Ptr->tx_Challenges_Nuzlocke))
         gSaveBlock1Ptr->tx_Nuzlocke_EasyMode = 0;
 
