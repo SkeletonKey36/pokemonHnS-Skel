@@ -1610,17 +1610,25 @@ static const struct SpriteFrameImage sPicTable_BigSnorlaxDoll[] = {
     obj_frame_tiles(gObjectEventPic_BigSnorlaxDoll),
 };
 
+static const struct SpriteFrameImage sPicTable_BigSnorlaxStatic[] = {
+    obj_frame_tiles(gObjectEventPic_BigSnorlaxStatic),
+};
+
 static const struct SpriteFrameImage sPicTable_BigRhydonDoll[] = {
     obj_frame_tiles(gObjectEventPic_BigRhydonDoll),
 };
 
 static const struct SpriteFrameImage sPicTable_BigLaprasDoll[] = {
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 0),
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 1),
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 2),
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 3),
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 4),
-    overworld_frame(gObjectEventPic_BigLaprasDoll, 4, 4, 5),
+    obj_frame_tiles(gObjectEventPic_BigLaprasDoll),
+};
+
+static const struct SpriteFrameImage sPicTable_BigLaprasStatic[] = {
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 0),
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 1),
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 2),
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 3),
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 4),
+    overworld_frame(gObjectEventPic_BigLaprasStatic, 4, 4, 5),
 };
 
 static const struct SpriteFrameImage sPicTable_BigVenusaurDoll[] = {

@@ -64,6 +64,10 @@ const u16 gObjectEventPal_Npc1[] = INCBIN_U16("graphics/object_events/palettes/n
 const u16 gObjectEventPal_Npc2[] = INCBIN_U16("graphics/object_events/palettes/npc_pink.gbapal");
 const u16 gObjectEventPal_Npc3[] = INCBIN_U16("graphics/object_events/palettes/npc_blue.gbapal");
 const u16 gObjectEventPal_Npc4[] = INCBIN_U16("graphics/object_events/palettes/npc_green.gbapal");
+const u16 gObjectEventPal_Npc1_Old[] = INCBIN_U16("graphics/object_events/palettes/npc_1.gbapal");
+const u16 gObjectEventPal_Npc2_Old[] = INCBIN_U16("graphics/object_events/palettes/npc_2.gbapal");
+const u16 gObjectEventPal_Npc3_Old[] = INCBIN_U16("graphics/object_events/palettes/npc_3.gbapal");
+const u16 gObjectEventPal_Npc4_Old[] = INCBIN_U16("graphics/object_events/palettes/npc_4.gbapal");
 const u16 gObjectEventPal_Rocket1[] = INCBIN_U16("graphics/object_events/palettes/rocket_1.gbapal");
 const u16 gObjectEventPal_Rocket2[] = INCBIN_U16("graphics/object_events/palettes/rocket_2.gbapal");
 const u16 gObjectEventPal_Rocket3[] = INCBIN_U16("graphics/object_events/palettes/rocket_3.gbapal");
@@ -583,8 +587,10 @@ const u32 gObjectEventPic_Togepi[] = INCBIN_COMP("graphics/object_events/pics/po
 const u32 gObjectEventPic_Togetic[] = INCBIN_COMP("graphics/object_events/pics/pokemon/togetic.4bpp");
 
 const u32 gObjectEventPic_ShinyGyarados[] = INCBIN_U32("graphics/object_events/pics/pokemon/shiny_gyarados.4bpp");
-const u32 gObjectEventPic_BigLaprasDoll[] = INCBIN_U32("graphics/object_events/pics/dolls/big_lapras_doll.4bpp"); //Special for HnS
-const u32 gObjectEventPic_BigSnorlaxDoll[] = INCBIN_U32("graphics/object_events/pics/dolls/big_snorlax_doll.4bpp"); //Special for HnS
+const u32 gObjectEventPic_BigLaprasDoll[] = INCBIN_U32("graphics/object_events/pics/dolls/big_lapras_doll.4bpp");
+const u32 gObjectEventPic_BigSnorlaxDoll[] = INCBIN_U32("graphics/object_events/pics/dolls/big_snorlax_doll.4bpp");
+const u32 gObjectEventPic_BigLaprasStatic[] = INCBIN_U32("graphics/object_events/pics/dolls/big_lapras_static.4bpp"); //Special for HnS
+const u32 gObjectEventPic_BigSnorlaxStatic[] = INCBIN_U32("graphics/object_events/pics/dolls/big_snorlax_static.4bpp"); //Special for HnS
 
 const u32 gObjectEventPic_Natu[] = INCBIN_COMP("graphics/object_events/pics/pokemon/natu.4bpp");
 const u32 gObjectEventPic_Xatu[] = INCBIN_COMP("graphics/object_events/pics/pokemon/xatu.4bpp");

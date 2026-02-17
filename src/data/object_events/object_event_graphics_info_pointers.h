@@ -176,8 +176,10 @@ extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GrassCushio
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_FireCushion;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_WaterCushion;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigSnorlaxDoll;
+extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigSnorlaxStatic;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigRhydonDoll;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigLaprasDoll;
+extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigLaprasStatic;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigVenusaurDoll;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigCharizardDoll;
 extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BigBlastoiseDoll;
@@ -434,7 +436,8 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_LOTAD_DOLL] =               &gObjectEventGraphicsInfo_LotadDoll,
     [OBJ_EVENT_GFX_SEEDOT_DOLL] =              &gObjectEventGraphicsInfo_SeedotDoll,
     [OBJ_EVENT_GFX_PIKA_CUSHION] =             &gObjectEventGraphicsInfo_PikaCushion,
-    [OBJ_EVENT_GFX_ROUND_CUSHION] =            &gObjectEventGraphicsInfo_RoundCushion,
+    // [OBJ_EVENT_GFX_ROUND_CUSHION] =            &gObjectEventGraphicsInfo_RoundCushion,
+    [OBJ_EVENT_GFX_SNORLAX_STATIC] =           &gObjectEventGraphicsInfo_BigSnorlaxStatic,
     [OBJ_EVENT_GFX_KISS_CUSHION] =             &gObjectEventGraphicsInfo_KissCushion,
     [OBJ_EVENT_GFX_ZIGZAG_CUSHION] =           &gObjectEventGraphicsInfo_ZigzagCushion,
     [OBJ_EVENT_GFX_SPIN_CUSHION] =             &gObjectEventGraphicsInfo_SpinCushion,
@@ -442,10 +445,11 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_BALL_CUSHION] =             &gObjectEventGraphicsInfo_BallCushion,
     [OBJ_EVENT_GFX_GRASS_CUSHION] =            &gObjectEventGraphicsInfo_GrassCushion,
     [OBJ_EVENT_GFX_FIRE_CUSHION] =             &gObjectEventGraphicsInfo_FireCushion,
-    [OBJ_EVENT_GFX_WATER_CUSHION] =            &gObjectEventGraphicsInfo_WaterCushion,
-    [OBJ_EVENT_GFX_BIG_SNORLAX] =         &gObjectEventGraphicsInfo_BigSnorlaxDoll,
+    // [OBJ_EVENT_GFX_WATER_CUSHION] =            &gObjectEventGraphicsInfo_WaterCushion,
+    [OBJ_EVENT_GFX_LAPRAS_STATIC] =            &gObjectEventGraphicsInfo_BigLaprasStatic,
+    [OBJ_EVENT_GFX_BIG_SNORLAX_DOLL] =         &gObjectEventGraphicsInfo_BigSnorlaxDoll,
     [OBJ_EVENT_GFX_BIG_RHYDON_DOLL] =          &gObjectEventGraphicsInfo_BigRhydonDoll,
-    [OBJ_EVENT_GFX_LAPRAS] =          &gObjectEventGraphicsInfo_BigLaprasDoll,
+    [OBJ_EVENT_GFX_BIG_LAPRAS_DOLL] =          &gObjectEventGraphicsInfo_BigLaprasDoll,
     [OBJ_EVENT_GFX_BIG_VENUSAUR_DOLL] =        &gObjectEventGraphicsInfo_BigVenusaurDoll,
     [OBJ_EVENT_GFX_BIG_CHARIZARD_DOLL] =       &gObjectEventGraphicsInfo_BigCharizardDoll,
     [OBJ_EVENT_GFX_BIG_BLASTOISE_DOLL] =       &gObjectEventGraphicsInfo_BigBlastoiseDoll,

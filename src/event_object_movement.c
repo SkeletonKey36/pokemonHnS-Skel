@@ -566,6 +566,12 @@ const u8 gInitialMovementTypeFacingDirections[NUM_MOVEMENT_TYPES] = {
 // Gen VIII
 #define OBJ_EVENT_PAL_TAG_BALL_STRANGE            0x116A
 #endif
+
+#define OBJ_EVENT_PAL_TAG_NPC_1_OLD               0x116B
+#define OBJ_EVENT_PAL_TAG_NPC_2_OLD               0x116C
+#define OBJ_EVENT_PAL_TAG_NPC_3_OLD               0x116D
+#define OBJ_EVENT_PAL_TAG_NPC_4_OLD               0x116E
+
 // Used as a placeholder follower graphic
 #define OBJ_EVENT_PAL_TAG_SUBSTITUTE              0x7611
 #define OBJ_EVENT_PAL_TAG_LIGHT                   0x8001
@@ -720,6 +726,10 @@ static const struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPaletteLight2, OBJ_EVENT_PAL_TAG_LIGHT_2},
     {gObjectEventPaletteEmotes, OBJ_EVENT_PAL_TAG_EMOTES},
     {gObjectEventPaletteNeonLight, OBJ_EVENT_PAL_TAG_NEON_LIGHT},
+    {gObjectEventPal_Npc1_Old,                  OBJ_EVENT_PAL_TAG_NPC_1_OLD}, //NPC_WHITE old (used for dolls)
+    {gObjectEventPal_Npc2_Old,                  OBJ_EVENT_PAL_TAG_NPC_2_OLD}, //NPC_PINK old (used for dolls)
+    {gObjectEventPal_Npc3_Old,                  OBJ_EVENT_PAL_TAG_NPC_3_OLD}, //NPC_BLUE old (used for dolls)
+    {gObjectEventPal_Npc4_Old,                  OBJ_EVENT_PAL_TAG_NPC_4_OLD}, //NPC_GREEN old (used for dolls)
     {NULL,                  OBJ_EVENT_PAL_TAG_NONE},
 };
 
@@ -3749,12 +3759,12 @@ void TryOverrideObjectEventTemplateCoords(u8 localId, u8 mapNum, u8 mapGroup)
         OverrideTemplateCoordsForObjectEvent(&gObjectEvents[objectEventId]);
 }
 
-void OverrideSecretBaseDecorationSpriteScript(u8 localId, u8 mapNum, u8 mapGroup, u8 decorationCategory)
+void OverrideSecretBaseDecorationSpriteScript(u8 localId, u8 mapNum, u8 mapGroup, u8 decorationCategory_HnS)
 {
     u8 objectEventId;
     if (!TryGetObjectEventIdByLocalIdAndMap(localId, mapNum, mapGroup, &objectEventId))
     {
-        switch (decorationCategory)
+        switch (decorationCategory_HnS)
         {
         case DECORCAT_DOLL:
             OverrideObjectEventTemplateScript(&gObjectEvents[objectEventId], SecretBase_EventScript_DollInteract);
