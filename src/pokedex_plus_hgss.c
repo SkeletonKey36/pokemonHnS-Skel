@@ -5085,30 +5085,36 @@ static void SaveMonDataInStruct(void)
 
     sPokedexView->sPokemonStats.species             = species;
     sPokedexView->sPokemonStats.genderRatio         = gSpeciesInfo[species].genderRatio;
-    if ((gSpeciesInfo[species].baseHP_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseHP_old              = gSpeciesInfo[species].baseHP_old;
+    
+    if (gSaveBlock1Ptr->tx_Random_StatDistribution)
+    {
+        // Display randomized stats
+        sPokedexView->sPokemonStats.baseHP          = GetBaseStatBySpecies(species, 0);
+        sPokedexView->sPokemonStats.baseAttack      = GetBaseStatBySpecies(species, 1);
+        sPokedexView->sPokemonStats.baseDefense     = GetBaseStatBySpecies(species, 2);
+        sPokedexView->sPokemonStats.baseSpeed       = GetBaseStatBySpecies(species, 3);
+        sPokedexView->sPokemonStats.baseSpAttack    = GetBaseStatBySpecies(species, 4);
+        sPokedexView->sPokemonStats.baseSpDefense   = GetBaseStatBySpecies(species, 5);
+    }
+    else if ((gSpeciesInfo[species].baseHP_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+    {
+        sPokedexView->sPokemonStats.baseHP_old          = gSpeciesInfo[species].baseHP_old;
+        sPokedexView->sPokemonStats.baseSpeed_old       = gSpeciesInfo[species].baseSpeed_old;
+        sPokedexView->sPokemonStats.baseAttack_old      = gSpeciesInfo[species].baseAttack_old;
+        sPokedexView->sPokemonStats.baseSpAttack_old    = gSpeciesInfo[species].baseSpAttack_old;
+        sPokedexView->sPokemonStats.baseDefense_old     = gSpeciesInfo[species].baseDefense_old;
+        sPokedexView->sPokemonStats.baseSpDefense_old   = gSpeciesInfo[species].baseSpDefense_old;
+    }
     else
-        sPokedexView->sPokemonStats.baseHP              = gSpeciesInfo[species].baseHP;
-    if ((gSpeciesInfo[species].baseSpeed_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseSpeed_old           = gSpeciesInfo[species].baseSpeed_old;
-    else
-        sPokedexView->sPokemonStats.baseSpeed           = gSpeciesInfo[species].baseSpeed;
-    if ((gSpeciesInfo[species].baseAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseAttack_old          = gSpeciesInfo[species].baseAttack_old;
-    else
-        sPokedexView->sPokemonStats.baseAttack          = gSpeciesInfo[species].baseAttack;
-    if ((gSpeciesInfo[species].baseSpAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseSpAttack_old        = gSpeciesInfo[species].baseSpAttack_old;
-    else
-        sPokedexView->sPokemonStats.baseSpAttack        = gSpeciesInfo[species].baseSpAttack;
-    if ((gSpeciesInfo[species].baseDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseDefense_old         = gSpeciesInfo[species].baseDefense_old;
-    else
-        sPokedexView->sPokemonStats.baseDefense         = gSpeciesInfo[species].baseDefense;
-    if ((gSpeciesInfo[species].baseSpDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        sPokedexView->sPokemonStats.baseSpDefense_old       = gSpeciesInfo[species].baseSpDefense_old;
-    else
-        sPokedexView->sPokemonStats.baseSpDefense       = gSpeciesInfo[species].baseSpDefense;
+    {
+        sPokedexView->sPokemonStats.baseHP          = gSpeciesInfo[species].baseHP;
+        sPokedexView->sPokemonStats.baseSpeed       = gSpeciesInfo[species].baseSpeed;
+        sPokedexView->sPokemonStats.baseAttack      = gSpeciesInfo[species].baseAttack;
+        sPokedexView->sPokemonStats.baseSpAttack    = gSpeciesInfo[species].baseSpAttack;
+        sPokedexView->sPokemonStats.baseDefense     = gSpeciesInfo[species].baseDefense;
+        sPokedexView->sPokemonStats.baseSpDefense   = gSpeciesInfo[species].baseSpDefense;
+    }
+    
     sPokedexView->sPokemonStats.differentEVs        = differentEVs;
     sPokedexView->sPokemonStats.evYield_HP          = EVs[0];
     sPokedexView->sPokemonStats.evYield_Speed       = EVs[1];

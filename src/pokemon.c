@@ -5803,6 +5803,24 @@ static u16 CalculateBoxMonChecksum(struct BoxPokemon *boxMon)
     SetMonData(mon, field, &n);                                 \
 }
 
+#define CALC_STAT_RANDOMIZED(statIndex, iv, ev, field)         \
+{                                                               \
+    u8 baseStat = GetBaseStatBySpecies(species, statIndex);    \
+    s32 n = (((2 * baseStat + iv + ev / 4) * level) / 100) + 5; \
+    u8 nature = GetNature(mon, TRUE);                          \
+    n = ModifyStatByNature(nature, n, statIndex);              \
+    SetMonData(mon, field, &n);                                \
+}
+
+#define CALC_STAT_RANDOMIZED50(statIndex, iv, ev, field)       \
+{                                                               \
+    u8 baseStat = GetBaseStatBySpecies(species, statIndex);    \
+    s32 n = (((2 * baseStat + iv + ev / 4) * 50) / 100) + 5;  \
+    u8 nature = GetNature(mon, TRUE);                          \
+    n = ModifyStatByNature(nature, n, statIndex);              \
+    SetMonData(mon, field, &n);                                \
+}
+
 void CalculateMonStats(struct Pokemon *mon)
 {
     s32 oldMaxHP = GetMonData(mon, MON_DATA_MAX_HP, NULL);
@@ -5841,8 +5859,20 @@ void CalculateMonStats(struct Pokemon *mon)
     }
     else
     {
-        s32 n = 2 * gSpeciesInfo[species].baseHP + hpIV;
-        s32 n_old = 2 * gSpeciesInfo[species].baseHP_old + hpIV;
+        s32 n, n_old;
+        
+        // Use randomized stats if enabled
+        if (gSaveBlock1Ptr->tx_Random_StatDistribution)
+        {
+            n = 2 * GetBaseStatBySpecies(species, 0) + hpIV;
+            n_old = n;  // No old stats in randomized mode
+        }
+        else
+        {
+            n = 2 * gSpeciesInfo[species].baseHP + hpIV;
+            n_old = 2 * gSpeciesInfo[species].baseHP_old + hpIV;
+        }
+        
         switch(gSaveBlock1Ptr->tx_Challenges_BaseStatEqualizer)
         {
         case 0:
@@ -5887,7 +5917,16 @@ void CalculateMonStats(struct Pokemon *mon)
 
     SetMonData(mon, MON_DATA_MAX_HP, &newMaxHP);
 
-    if (gSaveBlock1Ptr->tx_Challenges_BaseStatEqualizer)
+    if (gSaveBlock1Ptr->tx_Random_StatDistribution)
+    {
+        // Use randomized stat distribution
+        CALC_STAT_RANDOMIZED(1, attackIV, attackEV, MON_DATA_ATK)
+        CALC_STAT_RANDOMIZED(2, defenseIV, defenseEV, MON_DATA_DEF)
+        CALC_STAT_RANDOMIZED(3, speedIV, speedEV, MON_DATA_SPEED)
+        CALC_STAT_RANDOMIZED(4, spAttackIV, spAttackEV, MON_DATA_SPATK)
+        CALC_STAT_RANDOMIZED(5, spDefenseIV, spDefenseEV, MON_DATA_SPDEF)
+    }
+    else if (gSaveBlock1Ptr->tx_Challenges_BaseStatEqualizer)
     {
         u8 option = gSaveBlock1Ptr->tx_Challenges_BaseStatEqualizer - 1;
         CALC_STAT_EQUALIZED(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK, option)
@@ -5898,49 +5937,61 @@ void CalculateMonStats(struct Pokemon *mon)
     }
     else if (FlagGet(FLAG_LIMIT_TO_50) == TRUE) //Try to limit mons to level 50 for frontier)
     {
-        if ((gSpeciesInfo[species].baseAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+        if (gSaveBlock1Ptr->tx_Random_StatDistribution)
         {
-            CALC_STAT50(baseAttack_old, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            // Use randomized stat distribution at level 50
+            CALC_STAT_RANDOMIZED50(1, attackIV, attackEV, MON_DATA_ATK)
+            CALC_STAT_RANDOMIZED50(2, defenseIV, defenseEV, MON_DATA_DEF)
+            CALC_STAT_RANDOMIZED50(3, speedIV, speedEV, MON_DATA_SPEED)
+            CALC_STAT_RANDOMIZED50(4, spAttackIV, spAttackEV, MON_DATA_SPATK)
+            CALC_STAT_RANDOMIZED50(5, spDefenseIV, spDefenseEV, MON_DATA_SPDEF)
         }
         else
         {
-            CALC_STAT50(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
-        }
+            if ((gSpeciesInfo[species].baseAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT50(baseAttack_old, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            }
+            else
+            {
+                CALC_STAT50(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            }
 
-        if ((gSpeciesInfo[species].baseDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT50(baseDefense_old, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
-        }
-        else
-        {
-            CALC_STAT50(baseDefense, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
-        }
+            if ((gSpeciesInfo[species].baseDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT50(baseDefense_old, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
+            }
+            else
+            {
+                CALC_STAT50(baseDefense, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
+            }
 
-        if ((gSpeciesInfo[species].baseSpeed_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT50(baseSpeed_old, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
-        }
-        else
-        {
-            CALC_STAT50(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
-        }
+            if ((gSpeciesInfo[species].baseSpeed_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT50(baseSpeed_old, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
+            }
+            else
+            {
+                CALC_STAT50(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
+            }
 
-        if ((gSpeciesInfo[species].baseSpAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT50(baseSpAttack_old, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
-        }
-        else
-        {
-            CALC_STAT50(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
-        }
+            if ((gSpeciesInfo[species].baseSpAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT50(baseSpAttack_old, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
+            }
+            else
+            {
+                CALC_STAT50(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
+            }
 
-        if ((gSpeciesInfo[species].baseSpDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT50(baseSpDefense_old, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
-        }
-        else
-        {
-            CALC_STAT50(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            if ((gSpeciesInfo[species].baseSpDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT50(baseSpDefense_old, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            }
+            else
+            {
+                CALC_STAT50(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            }
         } 
     }
     else if ((FlagGet(FLAG_LIMIT_TO_50) == TRUE) && (gSaveBlock1Ptr->tx_Challenges_BaseStatEqualizer)) //Try to limit mons to level 50 for frontier)
@@ -5954,49 +6005,61 @@ void CalculateMonStats(struct Pokemon *mon)
     }
     else
     {
-        if ((gSpeciesInfo[species].baseAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+        if (gSaveBlock1Ptr->tx_Random_StatDistribution)
         {
-            CALC_STAT(baseAttack_old, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            // Use randomized stat distribution
+            CALC_STAT_RANDOMIZED(1, attackIV, attackEV, MON_DATA_ATK)
+            CALC_STAT_RANDOMIZED(2, defenseIV, defenseEV, MON_DATA_DEF)
+            CALC_STAT_RANDOMIZED(3, speedIV, speedEV, MON_DATA_SPEED)
+            CALC_STAT_RANDOMIZED(4, spAttackIV, spAttackEV, MON_DATA_SPATK)
+            CALC_STAT_RANDOMIZED(5, spDefenseIV, spDefenseEV, MON_DATA_SPDEF)
         }
         else
         {
-            CALC_STAT(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
-        }
+            if ((gSpeciesInfo[species].baseAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT(baseAttack_old, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            }
+            else
+            {
+                CALC_STAT(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+            }
 
-        if ((gSpeciesInfo[species].baseDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT(baseDefense_old, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
-        }
-        else
-        {
-            CALC_STAT(baseDefense, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
-        }
+            if ((gSpeciesInfo[species].baseDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT(baseDefense_old, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
+            }
+            else
+            {
+                CALC_STAT(baseDefense, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
+            }
 
-        if ((gSpeciesInfo[species].baseSpeed_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT(baseSpeed_old, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
-        }
-        else
-        {
-            CALC_STAT(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
-        }
+            if ((gSpeciesInfo[species].baseSpeed_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT(baseSpeed_old, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
+            }
+            else
+            {
+                CALC_STAT(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
+            }
 
-        if ((gSpeciesInfo[species].baseSpAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT(baseSpAttack_old, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
-        }
-        else
-        {
-            CALC_STAT(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
-        }
+            if ((gSpeciesInfo[species].baseSpAttack_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT(baseSpAttack_old, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
+            }
+            else
+            {
+                CALC_STAT(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
+            }
 
-        if ((gSpeciesInfo[species].baseSpDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
-        {
-            CALC_STAT(baseSpDefense_old, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
-        }
-        else
-        {
-            CALC_STAT(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            if ((gSpeciesInfo[species].baseSpDefense_old != 0) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 0))
+            {
+                CALC_STAT(baseSpDefense_old, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            }
+            else
+            {
+                CALC_STAT(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+            }
         } 
     }
 
@@ -8220,6 +8283,9 @@ u8 GetMonsStateToDoubles_2(void)
 
 u8 GetAbilityBySpecies(u16 species, u8 abilityNum)
 {
+    // TODO: Consider adding Shedinja protection to preserve Wonder Guard during ability randomization
+    // if (species == SPECIES_SHEDINJA) return gSpeciesInfo[species].abilities[abilityNum];
+    
     if (gSaveBlock1Ptr->tx_Random_Abilities) //tx_randomizer_and_challenges
     {
         species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_ABILITY, 0);
@@ -11728,6 +11794,150 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
     #endif
 
     return type;
+}
+
+void GetRandomizedStatDistribution(u16 species, u8 *outStats)
+{
+    u16 bst = 0;
+    u16 remaining;
+    u8 i;
+    u16 pointsToAdd;
+    u8 numStats;
+    u32 seed;
+    
+    // Calculate original BST
+    bst += gSpeciesInfo[species].baseHP;
+    bst += gSpeciesInfo[species].baseAttack;
+    bst += gSpeciesInfo[species].baseDefense;
+    bst += gSpeciesInfo[species].baseSpeed;
+    bst += gSpeciesInfo[species].baseSpAttack;
+    bst += gSpeciesInfo[species].baseSpDefense;
+    
+    // Handle Shedinja special case
+    if (species == SPECIES_SHEDINJA)
+    {
+        outStats[0] = 1;  // HP must be 1
+        bst -= 1;
+        // Initialize other stats to 1
+        for (i = 1; i < 6; i++)
+            outStats[i] = 1;
+        remaining = bst - 5;
+        numStats = 5;
+    }
+    else
+    {
+        // Initialize all stats to minimum of 1
+        for (i = 0; i < 6; i++)
+            outStats[i] = 1;
+        remaining = bst - 6;
+        numStats = 6;
+    }
+    
+    // Use a better seed combining species, trainer ID, and a prime multiplier
+    seed = (species * 251) + (gSaveBlock2Ptr->playerTrainerId[0] * 197) + (gSaveBlock2Ptr->playerTrainerId[1] * 163);
+    
+    // Distribute remaining points in larger chunks for more variance
+    while (remaining > 0)
+    {
+        u8 statIndex;
+        
+        // Determine how many points to add this iteration (between 1 and min(20, remaining))
+        if (remaining > 20)
+            pointsToAdd = (RandomSeededModulo(seed, 20) + 1);
+        else
+            pointsToAdd = (RandomSeededModulo(seed, remaining) + 1);
+        
+        // Pick which stat to add to
+        if (species == SPECIES_SHEDINJA)
+        {
+            statIndex = (RandomSeededModulo(seed * 3, 5) + 1);  // Skip HP
+        }
+        else
+        {
+            statIndex = RandomSeededModulo(seed * 3, 6);
+        }
+        
+        // Add points, capping at 255
+        while (pointsToAdd > 0 && remaining > 0)
+        {
+            if (outStats[statIndex] < 255)
+            {
+                outStats[statIndex]++;
+                remaining--;
+                pointsToAdd--;
+            }
+            else
+            {
+                // This stat is maxed, pick a different one
+                break;
+            }
+        }
+        
+        // Change seed for next iteration to get different results
+        seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;  // Linear congruential generator
+    }
+    
+    #ifndef NDEBUG
+    if (gSaveBlock1Ptr->tx_Random_StatDistribution)
+    {
+        u16 checkBst = outStats[0] + outStats[1] + outStats[2] + outStats[3] + outStats[4] + outStats[5];
+        MgbaPrintf(MGBA_LOG_DEBUG, "TX RANDOM STATS: species=%d=%S; BST=%d; HP=%d ATK=%d DEF=%d SPD=%d SPATK=%d SPDEF=%d", 
+                   species, gSpeciesNames[species], checkBst, 
+                   outStats[0], outStats[1], outStats[2], outStats[3], outStats[4], outStats[5]);
+    }
+    #endif
+}
+
+u8 GetBaseStatBySpecies(u16 species, u8 statIndex)
+{
+    // statIndex: 0=HP, 1=Atk, 2=Def, 3=Spd, 4=SpAtk, 5=SpDef
+    u8 randomStats[6];
+    if (!gSaveBlock1Ptr->tx_Random_StatDistribution)
+    {
+        // Return original stats based on Modern Stats mode
+        bool8 useOldStats = FALSE;
+        
+        // Check if Modern Stats mode is OFF and species has old stats
+        if (gSaveBlock1Ptr->tx_Mode_New_Stats == 0)
+        {
+            switch(statIndex)
+            {
+                case 0: useOldStats = (gSpeciesInfo[species].baseHP_old != 0); break;
+                case 1: useOldStats = (gSpeciesInfo[species].baseAttack_old != 0); break;
+                case 2: useOldStats = (gSpeciesInfo[species].baseDefense_old != 0); break;
+                case 3: useOldStats = (gSpeciesInfo[species].baseSpeed_old != 0); break;
+                case 4: useOldStats = (gSpeciesInfo[species].baseSpAttack_old != 0); break;
+                case 5: useOldStats = (gSpeciesInfo[species].baseSpDefense_old != 0); break;
+            }
+        }
+        
+        if (useOldStats)
+        {
+            switch(statIndex) {
+                case 0: return gSpeciesInfo[species].baseHP_old;
+                case 1: return gSpeciesInfo[species].baseAttack_old;
+                case 2: return gSpeciesInfo[species].baseDefense_old;
+                case 3: return gSpeciesInfo[species].baseSpeed_old;
+                case 4: return gSpeciesInfo[species].baseSpAttack_old;
+                case 5: return gSpeciesInfo[species].baseSpDefense_old;
+            }
+        }
+        else
+        {
+            switch(statIndex) {
+                case 0: return gSpeciesInfo[species].baseHP;
+                case 1: return gSpeciesInfo[species].baseAttack;
+                case 2: return gSpeciesInfo[species].baseDefense;
+                case 3: return gSpeciesInfo[species].baseSpeed;
+                case 4: return gSpeciesInfo[species].baseSpAttack;
+                case 5: return gSpeciesInfo[species].baseSpDefense;
+            }
+        }
+    }
+    
+    // Get randomized stats
+    GetRandomizedStatDistribution(species, randomStats);
+    return randomStats[statIndex];
 }
 
 static u16 GetRandomSpecies(u16 species, u8 mapBased, u8 type, u16 additionalOffset) //INTERNAL use only!
