@@ -2853,15 +2853,16 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_InfiniteRareCandies,
     },
 
-    [ITEM_0F0] =
+    [ITEM_DEXNAV] =
     {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
+        .name = _("DEXNAV"),
+        .itemId = ITEM_DEXNAV,
         .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
+        .description = sDexNavDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_DexNav,
     },
 
     [ITEM_0F1] =
@@ -7729,15 +7730,16 @@ const struct Item gItems2[] =
     },
 
 
-    [ITEM_0F0] =
+    [ITEM_DEXNAV] =
     {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
+        .name = _("DEXNAV"),
+        .itemId = ITEM_DEXNAV,
         .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
+        .description = sDexNavDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_DexNav,
     },
 
     [ITEM_0F1] =

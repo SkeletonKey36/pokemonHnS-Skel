@@ -3275,6 +3275,19 @@ extern const u8 gText_infiniteRepelOn[];
 extern const u8 gText_infiniteRepelOff[];
 extern const u8 gText_infiniteCandies[];
 extern const u8 gText_HealingHeart[];
+// DexNav Related
+extern const u8 gText_NoWildPokemonHere[];
+extern const u8 gText_EncountersInArea[];
+extern const u8 gText_GrassEncounters[];
+extern const u8 gText_GrassEncountersDay[];
+extern const u8 gText_GrassEncountersNight[];
+extern const u8 gText_WaterEncounters[];
+extern const u8 gText_OldRodEncounters[];
+extern const u8 gText_GoodRodEncounters[];
+extern const u8 gText_SuperRodEncounters[];
+extern const u8 gText_RockSmashEncounters[];
+extern const u8 gText_CommaSpace2[];
+extern const u8 gText_ParagraphSpace[];
 
 //tx_randomizer_and_challenges
 extern const u8 gText_NuzlockeCantThrowPokeBallRoute[];
