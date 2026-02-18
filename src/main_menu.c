@@ -24,6 +24,7 @@
 #include "pokeball.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "pokemon_icon.h"
 #include "random.h"
 #include "rtc.h"
 #include "save.h"
@@ -175,6 +176,7 @@ static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 
 static u8 sBirchSpeechMainTaskId;
+static u8 sMainMenuMonIconSpriteIds[PARTY_SIZE];
 
 // Static ROM declarations
 
@@ -255,6 +257,8 @@ static void MainMenu_FormatSavegamePlayer(void);
 static void MainMenu_FormatSavegamePokedex(void);
 static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
+static void CreateMainMenuMonIcons(void);
+static void DestroyMainMenuMonIcons(void);
 static void NewGameBirchSpeech_CreateDialogueWindowBorder(u8, u8, u8, u8, u8, u8);
 
 // .rodata
@@ -270,17 +274,20 @@ static const u16 sBirchSpeechBgGradientPal[] = INCBIN_U16("graphics/birch_speech
 static const u16 sBirchSpeechPlatformBlackPal[] = {RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK};
 
 #define MENU_LEFT 2
+#define MENU_LEFT_COL2 18
 #define MENU_TOP_WIN0 1
 #define MENU_TOP_WIN1 5
 #define MENU_TOP_WIN2 1
-#define MENU_TOP_WIN3 9
+#define MENU_TOP_WIN3 13
 #define MENU_TOP_WIN4 13
-#define MENU_TOP_WIN5 17
-#define MENU_TOP_WIN6 21
+#define MENU_TOP_WIN5 15
+#define MENU_TOP_WIN6 17
 #define MENU_WIDTH 26
+#define MENU_WIDTH_NEWGAME 14
+#define MENU_WIDTH_OPTION 10
 #define MENU_HEIGHT_WIN0 2
 #define MENU_HEIGHT_WIN1 2
-#define MENU_HEIGHT_WIN2 6
+#define MENU_HEIGHT_WIN2 10
 #define MENU_HEIGHT_WIN3 2
 #define MENU_HEIGHT_WIN4 2
 #define MENU_HEIGHT_WIN5 2
@@ -294,6 +301,8 @@ static const u16 sBirchSpeechPlatformBlackPal[] = {RGB_BLACK, RGB_BLACK, RGB_BLA
 #define MENU_SHADOW_PADDING 1
 
 #define MENU_WIN_HCOORDS WIN_RANGE(((MENU_LEFT - 1) * 8) + MENU_SHADOW_PADDING, (MENU_LEFT + MENU_WIDTH + 1) * 8 - MENU_SHADOW_PADDING)
+#define MENU_WIN_HCOORDS_LEFT WIN_RANGE(((MENU_LEFT - 1) * 8) + MENU_SHADOW_PADDING, (MENU_LEFT + MENU_WIDTH_NEWGAME + 1) * 8 - MENU_SHADOW_PADDING)
+#define MENU_WIN_HCOORDS_RIGHT WIN_RANGE(((MENU_LEFT_COL2 - 1) * 8) + MENU_SHADOW_PADDING, (MENU_LEFT_COL2 + MENU_WIDTH_OPTION + 1) * 8 - MENU_SHADOW_PADDING)
 #define MENU_WIN_VCOORDS(n) WIN_RANGE(((MENU_TOP_WIN##n - 1) * 8) + MENU_SHADOW_PADDING, (MENU_TOP_WIN##n + MENU_HEIGHT_WIN##n + 1) * 8 - MENU_SHADOW_PADDING)
 #define MENU_SCROLL_SHIFT WIN_RANGE(32, 32)
 
@@ -336,20 +345,20 @@ static const struct WindowTemplate sWindowTemplates_MainMenu[] =
         .bg = 0,
         .tilemapLeft = MENU_LEFT,
         .tilemapTop = MENU_TOP_WIN3,
-        .width = MENU_WIDTH,
+        .width = MENU_WIDTH_NEWGAME,
         .height = MENU_HEIGHT_WIN3,
         .paletteNum = 15,
-        .baseBlock = 0x9D
+        .baseBlock = 0x106
     },
     // OPTION / MYSTERY GIFT
     {
         .bg = 0,
-        .tilemapLeft = MENU_LEFT,
+        .tilemapLeft = MENU_LEFT_COL2,
         .tilemapTop = MENU_TOP_WIN4,
-        .width = MENU_WIDTH,
+        .width = MENU_WIDTH_OPTION,
         .height = MENU_HEIGHT_WIN4,
         .paletteNum = 15,
-        .baseBlock = 0xD1
+        .baseBlock = 0x124
     },
     // OPTION / MYSTERY EVENTS
     {
@@ -359,7 +368,7 @@ static const struct WindowTemplate sWindowTemplates_MainMenu[] =
         .width = MENU_WIDTH,
         .height = MENU_HEIGHT_WIN5,
         .paletteNum = 15,
-        .baseBlock = 0x105
+        .baseBlock = 0x138
     },
     // OPTION
     {
@@ -369,7 +378,7 @@ static const struct WindowTemplate sWindowTemplates_MainMenu[] =
         .width = MENU_WIDTH,
         .height = MENU_HEIGHT_WIN6,
         .paletteNum = 15,
-        .baseBlock = 0x139
+        .baseBlock = 0x16C
     },
     // Error message window
     {
@@ -379,7 +388,7 @@ static const struct WindowTemplate sWindowTemplates_MainMenu[] =
         .width = MENU_WIDTH_ERROR,
         .height = MENU_HEIGHT_ERROR,
         .paletteNum = 15,
-        .baseBlock = 0x16D
+        .baseBlock = 0x1A0
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -846,6 +855,7 @@ static void Task_DisplayMainMenu(u8 taskId)
                 AddTextPrinterParameterized3(3, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuNewGame);
                 AddTextPrinterParameterized3(4, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuOption);
                 MainMenu_FormatSavegameText();
+                CreateMainMenuMonIcons();
                 PutWindowTilemap(2);
                 PutWindowTilemap(3);
                 PutWindowTilemap(4);
@@ -866,6 +876,7 @@ static void Task_DisplayMainMenu(u8 taskId)
                 AddTextPrinterParameterized3(4, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuMysteryGift);
                 AddTextPrinterParameterized3(5, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuOption);
                 MainMenu_FormatSavegameText();
+                CreateMainMenuMonIcons();
                 PutWindowTilemap(2);
                 PutWindowTilemap(3);
                 PutWindowTilemap(4);
@@ -891,6 +902,7 @@ static void Task_DisplayMainMenu(u8 taskId)
                 AddTextPrinterParameterized3(5, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuMysteryEvents);
                 AddTextPrinterParameterized3(6, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, gText_MainMenuOption);
                 MainMenu_FormatSavegameText();
+                CreateMainMenuMonIcons();
                 PutWindowTilemap(2);
                 PutWindowTilemap(3);
                 PutWindowTilemap(4);
@@ -1099,6 +1111,7 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
         }
         ChangeBgY(0, 0, BG_COORD_SET);
         ChangeBgY(1, 0, BG_COORD_SET);
+        DestroyMainMenuMonIcons();
         switch (action)
         {
             case ACTION_NEW_GAME:
@@ -1159,6 +1172,7 @@ static void Task_HandleMainMenuBPressed(u8 taskId)
         if (gTasks[taskId].tMenuType == HAS_MYSTERY_EVENTS)
             RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
         sCurrItemAndOptionMenuCheck = 0;
+        DestroyMainMenuMonIcons();
         FreeAllWindowBuffers();
         SetMainCallback2(CB2_InitTitleScreen);
         DestroyTask(taskId);
@@ -1215,8 +1229,6 @@ static void Task_DisplayMainMenuInvalidActionError(u8 taskId)
 
 static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 isScrolled)
 {
-    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
-
     switch (menuType)
     {
         case HAS_NO_SAVED_GAME:
@@ -1225,9 +1237,11 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
             {
                 case 0:
                 default:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(0));
                     break;
                 case 1:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(1));
                     break;
             }
@@ -1237,12 +1251,15 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
             {
                 case 0:
                 default:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(2));
                     break;
                 case 1:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_LEFT);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
                     break;
                 case 2:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_RIGHT);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
                     break;
             }
@@ -1252,15 +1269,19 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
             {
                 case 0:
                 default:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(2));
                     break;
                 case 1:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_LEFT);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
                     break;
                 case 2:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_RIGHT);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
                     break;
                 case 3:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(5));
                     break;
             }
@@ -1270,27 +1291,32 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
             {
                 case 0:
                 default:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(2));
                     break;
                 case 1:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_LEFT);
                     if (isScrolled)
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3) - MENU_SCROLL_SHIFT);
                     else
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
                     break;
                 case 2:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS_RIGHT);
                     if (isScrolled)
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4) - MENU_SCROLL_SHIFT);
                     else
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
                     break;
                 case 3:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     if (isScrolled)
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(5) - MENU_SCROLL_SHIFT);
                     else
                         SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(5));
                     break;
                 case 4:
+                    SetGpuReg(REG_OFFSET_WIN0H, MENU_WIN_HCOORDS);
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(6) - MENU_SCROLL_SHIFT);
                     break;
             }
@@ -2383,6 +2409,63 @@ static void MainMenu_FormatSavegameBadges(void)
     AddTextPrinterParameterized3(2, FONT_NORMAL,
                                  GetStringRightAlignXOffset(FONT_NORMAL, str, 0xD0),
                                  33, sTextColor_MenuInfo, TEXT_SKIP_DRAW, str);
+}
+
+static void CreateMainMenuMonIcons(void)
+{
+    u16 species;
+    u32 personality;
+    u8 i;
+    u8 x;
+    
+    // Initialize sprite IDs to invalid values
+    for (i = 0; i < PARTY_SIZE; i++)
+        sMainMenuMonIconSpriteIds[i] = 0xFF;
+    
+    LoadMonIconPalettes();
+    
+    // Starting x position (shifted right from center)
+    // Window 2 is at tilemapLeft = 2, width = 26
+    // In pixels: left edge = 2 * 8 = 16, width = 26 * 8 = 208
+    // Center: 16 + 208/2 = 120
+    // For 6 mons at 32px spacing, total width = 6 * 32 = 192
+    // Shifted right: 120 - 192/2 + 16 = 40
+    x = 38;
+    
+    // Party menu style: animated icons with natural movement
+    for (i = 0; i < gSaveBlock1Ptr->playerPartyCount; i++, x += 32)
+    {
+        species = GetMonData(&gSaveBlock1Ptr->playerParty[i], MON_DATA_SPECIES);
+        personality = GetMonData(&gSaveBlock1Ptr->playerParty[i], MON_DATA_PERSONALITY);
+        
+        // Create animated icon sprite (like party menu - no StartSpriteAnim for natural animation)
+        sMainMenuMonIconSpriteIds[i] = CreateMonIcon(species, SpriteCB_MonIcon, x, 73, 4, personality, TRUE);
+        if (sMainMenuMonIconSpriteIds[i] != 0xFF)
+        {
+            gSprites[sMainMenuMonIconSpriteIds[i]].oam.priority = 0;
+        }
+    }
+    
+    /* Trainer card style implementation (static icons) - kept for reference
+    // Alternative approach: Load icon tiles to BG and write to tilemap
+    // This would use LoadBgTiles() and WriteSequenceToBgTilemapBuffer()
+    // to render static (non-animated) icons directly to the background
+    */
+}
+
+static void DestroyMainMenuMonIcons(void)
+{
+    u8 i;
+    
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (sMainMenuMonIconSpriteIds[i] != 0xFF)
+        {
+            FreeAndDestroyMonIconSprite(&gSprites[sMainMenuMonIconSpriteIds[i]]);
+            sMainMenuMonIconSpriteIds[i] = 0xFF;
+        }
+    }
+    FreeMonIconPalettes();
 }
 
 
