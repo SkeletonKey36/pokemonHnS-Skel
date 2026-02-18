@@ -2424,12 +2424,6 @@ static void CreateMainMenuMonIcons(void)
     
     LoadMonIconPalettes();
     
-    // Starting x position (shifted right from center)
-    // Window 2 is at tilemapLeft = 2, width = 26
-    // In pixels: left edge = 2 * 8 = 16, width = 26 * 8 = 208
-    // Center: 16 + 208/2 = 120
-    // For 6 mons at 32px spacing, total width = 6 * 32 = 192
-    // Shifted right: 120 - 192/2 + 16 = 40
     x = 38;
     
     // Party menu style: animated icons with natural movement
@@ -2445,12 +2439,6 @@ static void CreateMainMenuMonIcons(void)
             gSprites[sMainMenuMonIconSpriteIds[i]].oam.priority = 0;
         }
     }
-    
-    /* Trainer card style implementation (static icons) - kept for reference
-    // Alternative approach: Load icon tiles to BG and write to tilemap
-    // This would use LoadBgTiles() and WriteSequenceToBgTilemapBuffer()
-    // to render static (non-animated) icons directly to the background
-    */
 }
 
 static void DestroyMainMenuMonIcons(void)
