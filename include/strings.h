@@ -1068,6 +1068,12 @@ extern const u8 gText_MoveRelearnerAccuracy[];
 extern const u8 gText_MoveRelearnerContestMovesTitle[];
 extern const u8 gText_MoveRelearnerAppeal[];
 extern const u8 gText_MoveRelearnerJam[];
+extern const u8 gText_MoveRelearnerLevelUpMoves[];
+extern const u8 gText_MoveRelearnerEggMoves[];
+extern const u8 gText_MoveRelearnerTMHMMoves[];
+extern const u8 gText_MoveRelearnerTutorMoves[];
+extern const u8 gText_MoveRelearnerBattleInfo[];
+extern const u8 gText_MoveRelearnerContestInfo[];
 
 extern const u8 gText_Kira[];
 extern const u8 gText_Amy[];

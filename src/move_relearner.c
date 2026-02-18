@@ -262,11 +262,11 @@ static const struct SpritePalette sMoveRelearnerPalette =
 static const struct ScrollArrowsTemplate sDisplayModeArrowsTemplate =
 {
     .firstArrowType = SCROLL_ARROW_LEFT,
-    .firstX = 27,
-    .firstY = 16,
+    .firstX = 8,
+    .firstY = 32,
     .secondArrowType = SCROLL_ARROW_RIGHT,
-    .secondX = 117,
-    .secondY = 16,
+    .secondX = 136,
+    .secondY = 32,
     .fullyUpThreshold = -1,
     .fullyDownThreshold = -1,
     .tileTag = TAG_MODE_ARROWS,
@@ -379,6 +379,7 @@ static void VBlankCB_MoveRelearner(void)
 // Script arguments: The Pokémon to teach is in VAR_0x8004
 void TeachMoveRelearnerMove(void)
 {
+    gRelearnMode = RELEARN_MODE_SCRIPT; // NPC relearner should only show level-up moves
     LockPlayerFieldControls();
     CreateTask(Task_WaitForFadeOut, 10);
     // Fade to black
@@ -407,11 +408,14 @@ void CB2_InitLearnMove(void)
     SetVBlankCallback(VBlankCB_MoveRelearner);
 
     InitMoveRelearnerBackgroundLayers();
-    InitMoveRelearnerWindows(FALSE);
+    InitMoveRelearnerWindows(gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES);
 
     sMoveRelearnerMenuState.listOffset = 0;
     sMoveRelearnerMenuState.listRow = 0;
-    sMoveRelearnerMenuState.showContestInfo = FALSE;
+    sMoveRelearnerMenuState.showContestInfo = (gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES);
+    
+    // Always start with level-up moves
+    gMoveRelearnerState = MOVE_RELEARNER_LEVEL_UP_MOVES;
 
     CreateLearnableMovesList();
 
@@ -438,6 +442,9 @@ static void CB2_InitLearnMoveReturnFromSelectMove(void)
     sMoveRelearnerStruct->moveSlot = gSpecialVar_0x8005;
     sMoveRelearnerStruct->categoryIconSpriteId = 0xFF;
     SetVBlankCallback(VBlankCB_MoveRelearner);
+
+    // Always start with level-up moves
+    gMoveRelearnerState = MOVE_RELEARNER_LEVEL_UP_MOVES;
 
     InitMoveRelearnerBackgroundLayers();
     InitMoveRelearnerWindows(sMoveRelearnerMenuState.showContestInfo);
@@ -502,12 +509,17 @@ static void DoMoveRelearnerMain(void)
     case MENU_STATE_FADE_TO_BLACK:
         sMoveRelearnerStruct->state++;
         HideHeartSpritesAndShowTeachMoveText(FALSE);
+        if (gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES)
+            MoveRelearnerShowHideHearts(GetCurrentSelectedMove());
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
         break;
     case MENU_STATE_WAIT_FOR_FADE:
         if (!gPaletteFade.active)
         {
-            sMoveRelearnerStruct->state = MENU_STATE_IDLE_BATTLE_MODE;
+            if (gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES)
+                sMoveRelearnerStruct->state = MENU_STATE_IDLE_CONTEST_MODE;
+            else
+                sMoveRelearnerStruct->state = MENU_STATE_IDLE_BATTLE_MODE;
         }
         break;
     case MENU_STATE_UNREACHABLE:
@@ -701,8 +713,25 @@ static void DoMoveRelearnerMain(void)
     case MENU_STATE_RETURN_TO_FIELD:
         if (!gPaletteFade.active)
         {
-            FreeMoveRelearnerResources();
-            SetMainCallback2(CB2_ReturnToField);
+            // Check if we came from the summary screen
+            if (gRelearnMode == RELEARN_MODE_PSS_PAGE_BATTLE_MOVES || gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES)
+            {
+                // Return to the summary screen with the appropriate mode
+                u8 returnMode = (gRelearnMode == RELEARN_MODE_PSS_PAGE_BATTLE_MOVES) 
+                                ? SUMMARY_MODE_RELEARNER_BATTLE 
+                                : SUMMARY_MODE_RELEARNER_CONTEST;
+                
+                // Use the stored initial callback to maintain proper return path
+                ShowPokemonSummaryScreen(returnMode, gPlayerParty, sMoveRelearnerStruct->partyMon, gPlayerPartyCount - 1, gInitialSummaryScreenCallback);
+                FreeMoveRelearnerResources();
+                gRelearnMode = RELEARN_MODE_NONE;
+            }
+            else
+            {
+                FreeMoveRelearnerResources();
+                gRelearnMode = RELEARN_MODE_NONE;
+                SetMainCallback2(CB2_ReturnToField);
+            }
         }
         break;
     case MENU_STATE_FADE_FROM_SUMMARY_SCREEN:
@@ -808,6 +837,69 @@ static void HandleInput(bool8 showContest)
     switch (itemId)
     {
     case LIST_NOTHING_CHOSEN:
+        // Handle L/R buttons to switch between move lists ONLY when accessed from summary screen
+        // NPC relearner (RELEARN_MODE_SCRIPT) should not allow switching
+        if ((gMain.newKeys & L_BUTTON || gMain.newKeys & R_BUTTON)
+            && (gRelearnMode == RELEARN_MODE_PSS_PAGE_BATTLE_MOVES || gRelearnMode == RELEARN_MODE_PSS_PAGE_CONTEST_MOVES))
+        {
+            enum MoveRelearnerStates oldState = gMoveRelearnerState;
+            
+            // Cycle through move types
+            if (gMain.newKeys & R_BUTTON)
+            {
+                gMoveRelearnerState = (gMoveRelearnerState + 1) % MOVE_RELEARNER_COUNT;
+            }
+            else // L_BUTTON
+            {
+                gMoveRelearnerState = (gMoveRelearnerState == 0) ? (MOVE_RELEARNER_COUNT - 1) : (gMoveRelearnerState - 1);
+            }
+            
+            // If the new list is empty, keep cycling
+            u32 attempts = 0;
+            while (attempts < MOVE_RELEARNER_COUNT)
+            {
+                CreateLearnableMovesList();
+                if (sMoveRelearnerStruct->numMenuChoices > 0)
+                {
+                    
+                    // Reinitialize the menu and refresh the prompt text
+                    DestroyListMenuTask(sMoveRelearnerStruct->moveListMenuTask, NULL, NULL);
+                    sMoveRelearnerMenuState.listOffset = 0;
+                    sMoveRelearnerMenuState.listRow = 0;
+                    sMoveRelearnerStruct->moveListMenuTask = ListMenuInit(&gMultiuseListMenuTemplate, sMoveRelearnerMenuState.listOffset, sMoveRelearnerMenuState.listRow);
+                    
+                    // Update the teaching prompt with the new move type
+                    StringExpandPlaceholders(gStringVar4, gText_TeachWhichMoveToPkmn);
+                    FillWindowPixelBuffer(3, 0x11);
+                    AddTextPrinterParameterized(3, FONT_NORMAL, gStringVar4, 0, 1, 0, NULL);
+                    
+                    PlaySE(SE_SELECT);
+                    break;
+                }
+                
+                // This list was empty, try the next one
+                if (gMain.newKeys & R_BUTTON)
+                {
+                    gMoveRelearnerState = (gMoveRelearnerState + 1) % MOVE_RELEARNER_COUNT;
+                }
+                else
+                {
+                    gMoveRelearnerState = (gMoveRelearnerState == 0) ? (MOVE_RELEARNER_COUNT - 1) : (gMoveRelearnerState - 1);
+                }
+                attempts++;
+            }
+            
+            // If we couldn't find any valid list, restore the old state
+            if (attempts >= MOVE_RELEARNER_COUNT)
+            {
+                gMoveRelearnerState = oldState;
+                CreateLearnableMovesList();
+                DestroyListMenuTask(sMoveRelearnerStruct->moveListMenuTask, NULL, NULL);
+                sMoveRelearnerStruct->moveListMenuTask = ListMenuInit(&gMultiuseListMenuTemplate, sMoveRelearnerMenuState.listOffset, sMoveRelearnerMenuState.listRow);
+            }
+            break;
+        }
+        
         if (!(JOY_NEW(DPAD_LEFT | DPAD_RIGHT)) && !GetLRKeysPressed())
         {
             break;
@@ -882,14 +974,14 @@ static void CreateUISprites(void)
     // These are the appeal hearts.
     for (i = 0; i < 8; i++)
     {
-        sMoveRelearnerStruct->heartSpriteIds[i] = CreateSprite(&sConstestMoveHeartSprite, (i - (i / 4) * 4) * 8 + 104, (i / 4) * 8 + 36, 0);
+        sMoveRelearnerStruct->heartSpriteIds[i] = CreateSprite(&sConstestMoveHeartSprite, (i - (i / 4) * 4) * 8 + 106, (i / 4) * 8 + 44, 0);
     }
 
     // These are the jam harts.
     // The animation is used to toggle between full/empty heart sprites.
     for (i = 0; i < 8; i++)
     {
-        sMoveRelearnerStruct->heartSpriteIds[i + 8] = CreateSprite(&sConstestMoveHeartSprite, (i - (i / 4) * 4) * 8 + 104, (i / 4) * 8 + 52, 0);
+        sMoveRelearnerStruct->heartSpriteIds[i + 8] = CreateSprite(&sConstestMoveHeartSprite, (i - (i / 4) * 4) * 8 + 106, (i / 4) * 8 + 60, 0);
         StartSpriteAnim(&gSprites[sMoveRelearnerStruct->heartSpriteIds[i + 8]], 2);
     }
 
@@ -934,7 +1026,24 @@ static void CreateLearnableMovesList(void)
     s32 i;
     u8 nickname[POKEMON_NAME_LENGTH + 1];
 
-    sMoveRelearnerStruct->numMenuChoices = GetMoveRelearnerMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+    switch (gMoveRelearnerState)
+    {
+    case MOVE_RELEARNER_LEVEL_UP_MOVES:
+        sMoveRelearnerStruct->numMenuChoices = GetMoveRelearnerMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+        break;
+    case MOVE_RELEARNER_EGG_MOVES:
+        sMoveRelearnerStruct->numMenuChoices = GetRelearnerEggMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+        break;
+    case MOVE_RELEARNER_TM_MOVES:
+        sMoveRelearnerStruct->numMenuChoices = GetRelearnerTMMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+        break;
+    case MOVE_RELEARNER_TUTOR_MOVES:
+        sMoveRelearnerStruct->numMenuChoices = GetRelearnerTutorMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+        break;
+    default:
+        sMoveRelearnerStruct->numMenuChoices = 0;
+        break;
+    }
 
     for (i = 0; i < sMoveRelearnerStruct->numMenuChoices; i++)
     {
@@ -1018,7 +1127,7 @@ void MoveRelearnerShowHideCategoryIcon(s32 moveId)
     else
     {
         if (sMoveRelearnerStruct->categoryIconSpriteId == 0xFF)
-            sMoveRelearnerStruct->categoryIconSpriteId = CreateSprite(&sSpriteTemplate_SplitIcons, 66, 40, 0);
+            sMoveRelearnerStruct->categoryIconSpriteId = CreateSprite(&sSpriteTemplate_SplitIcons, 66, 48, 0);
 
         gSprites[sMoveRelearnerStruct->categoryIconSpriteId].invisible = FALSE;
         StartSpriteAnim(&gSprites[sMoveRelearnerStruct->categoryIconSpriteId], gBattleMoves[moveId].category);
