@@ -878,7 +878,7 @@ static const struct CompressedSpriteSheet sSpriteSheet_FriendshipIcon =
     .tag = TAG_FRIENDSHIP_ICON
 };
 
-static const struct CompressedSpriteSheet sSpriteSheet_SplitIcons =
+const struct CompressedSpriteSheet sSpriteSheet_SplitIcons =
 {
     .data = sSplitIcons_Gfx,
     .size = 16*16*3/2,
@@ -892,7 +892,7 @@ static const struct SpritePalette sSpritePal_FriendshipIcon =
 };
 
 
-static const struct SpritePalette sSpritePal_SplitIcons =
+const struct SpritePalette sSpritePal_SplitIcons =
 {
     .data = sSplitIcons_Pal,
     .tag = TAG_SPLIT_ICONS
@@ -923,7 +923,7 @@ static const union AnimCmd *const sSpriteAnimTable_SplitIcons[] =
     sSpriteAnim_SplitIcon2,
 };
 
-static const struct SpriteTemplate sSpriteTemplate_SplitIcons =
+const struct SpriteTemplate sSpriteTemplate_SplitIcons =
 {
     .tileTag = TAG_SPLIT_ICONS,
     .paletteTag = TAG_SPLIT_ICONS,

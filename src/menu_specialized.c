@@ -756,6 +756,7 @@ static void MoveRelearnerLoadBattleMoveDescription(u32 chosenMove)
     u8 buffer[32];
     const u8 *str;
 
+    MoveRelearnerShowHideCategoryIcon(chosenMove);
     FillWindowPixelBuffer(0, PIXEL_FILL(1));
     str = gText_MoveRelearnerBattleMoves;
     x = GetStringCenterAlignXOffset(FONT_NORMAL, str, 0x80);
@@ -816,6 +817,7 @@ static void MoveRelearnerMenuLoadContestMoveDescription(u32 chosenMove)
     const u8 *str;
     const struct ContestMove *move;
 
+    MoveRelearnerShowHideCategoryIcon(chosenMove);
     MoveRelearnerShowHideHearts(chosenMove);
     FillWindowPixelBuffer(1, PIXEL_FILL(1));
     str = gText_MoveRelearnerContestMovesTitle;
