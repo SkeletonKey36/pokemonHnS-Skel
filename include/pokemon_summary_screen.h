@@ -2,8 +2,10 @@
 #define GUARD_POKEMON_SUMMARY_SCREEN_H
 
 #include "main.h"
+#include "constants/move_relearner.h"
 
 extern u8 gLastViewedMonIndex;
+extern MainCallback gInitialSummaryScreenCallback;
 
 extern const u8 *const gMoveDescriptionPointers[];
 extern const u8 *const gNatureNamePointers[];
@@ -13,11 +15,21 @@ extern const struct CompressedSpriteSheet sSpriteSheet_MoveTypes;
 extern const struct CompressedSpriteSheet sSpriteSheet_SplitIcons;
 extern const struct SpritePalette sSpritePal_SplitIcons;
 
+enum IncrDecrUpdateValues
+{
+    TRY_SET_UPDATE,
+    TRY_INCREMENT,
+    TRY_DECREMENT,
+};
+
 void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, void (*callback)(void));
 void ShowSelectMovePokemonSummaryScreen(struct Pokemon *mons, u8 monIndex, u8 maxMonIndex, void (*callback)(void), u16 newMove);
 void ShowPokemonSummaryScreenHandleDeoxys(u8 mode, struct BoxPokemon *mons, u8 monIndex, u8 maxMonIndex, void (*callback)(void));
 u8 GetMoveSlotToReplace(void);
 void SummaryScreen_SetAnimDelayTaskId(u8 taskId);
+void TryUpdateRelearnType(enum IncrDecrUpdateValues delta);
+u32 GetCurrentRelearnMovesCount(void);
+u32 GetRelearnMovesCount(enum MoveRelearnerStates state);
 
 // The Pokémon Summary Screen can operate in different modes. Certain features,
 // such as move re-ordering, are available in the different modes.
@@ -27,6 +39,8 @@ enum PokemonSummaryScreenMode
     SUMMARY_MODE_LOCK_MOVES,
     SUMMARY_MODE_BOX,
     SUMMARY_MODE_SELECT_MOVE,
+    SUMMARY_MODE_RELEARNER_BATTLE,
+    SUMMARY_MODE_RELEARNER_CONTEST,
 };
 
 #endif // GUARD_POKEMON_SUMMARY_SCREEN_H
