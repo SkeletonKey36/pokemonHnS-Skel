@@ -25,6 +25,7 @@
 #include "pokemon_animation.h"
 #include "pokemon_summary_screen.h"
 #include "pokemon_storage_system.h"
+#include "daycare.h"
 #include "random.h"
 #include "recorded_battle.h"
 #include "rtc.h"
@@ -10422,6 +10423,205 @@ u8 GetNumberOfRelearnableMoves(struct Pokemon *mon)
     }
 
     return numMoves;
+}
+
+// Extended Move Relearner Functions
+u8 GetRelearnerEggMoves(struct Pokemon *mon, u16 *moves)
+{
+    u16 learnedMoves[MAX_MON_MOVES] = {0};
+    u8 numMoves = 0;
+    u16 species = GetMonData(mon, MON_DATA_SPECIES, 0);
+    u16 eggMoves[EGG_MOVES_ARRAY_COUNT] = {0};
+    u8 numEggMoves;
+
+    // Get base species (no egg moves for evolved forms)
+    while (GetPreEvolution(species) != SPECIES_NONE)
+        species = GetPreEvolution(species);
+
+    numEggMoves = GetEggMovesSpecies(species, eggMoves);
+    if (numEggMoves == 0)
+        return 0;
+
+    for (u8 i = 0; i < MAX_MON_MOVES; i++)
+        learnedMoves[i] = GetMonData(mon, MON_DATA_MOVE1 + i, 0);
+
+    for (u16 i = 0; i < numEggMoves; i++)
+    {
+        u16 j;
+        for (j = 0; j < MAX_MON_MOVES; j++)
+        {
+            if (learnedMoves[j] == eggMoves[i])
+                break;
+        }
+        if (j < MAX_MON_MOVES)
+            continue;
+
+        for (j = 0; j < numMoves; j++)
+        {
+            if (moves[j] == eggMoves[i])
+                break;
+        }
+        if (j < numMoves)
+            continue;
+
+        moves[numMoves++] = eggMoves[i];
+    }
+
+    return numMoves;
+}
+
+// Forward declaration for TM/HM move lookup
+extern u16 GetTMHMMoves(u16 position);
+
+u8 GetRelearnerTMMoves(struct Pokemon *mon, u16 *moves)
+{
+    u16 learnedMoves[MAX_MON_MOVES] = {0};
+    u8 numMoves = 0;
+    u16 totalTMHM = NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES;
+
+    // Get the moves the mon already knows
+    for (u8 i = 0; i < MAX_MON_MOVES; i++)
+        learnedMoves[i] = GetMonData(mon, MON_DATA_MOVE1 + i, 0);
+
+    // Check all TMs and HMs
+    for (u16 i = 0; i < totalTMHM; i++)
+    {
+        u16 itemId = ITEM_TM01 + i;
+        u16 move = GetTMHMMoves(i);
+        
+        // Check if player has this TM/HM in their bag
+        if (!CheckBagHasItem(itemId, 1))
+            continue;
+            
+        // Check if move is valid
+        if (move == MOVE_NONE)
+            continue;
+            
+        // Check if mon can learn this TM/HM
+        if (!CanMonLearnTMHM(mon, i))
+            continue;
+
+        // Check if mon already knows this move
+        u16 j;
+        for (j = 0; j < MAX_MON_MOVES; j++)
+        {
+            if (learnedMoves[j] == move)
+                break;
+        }
+        if (j < MAX_MON_MOVES)
+            continue;
+
+        // Check if we already added this move to the list
+        for (j = 0; j < numMoves; j++)
+        {
+            if (moves[j] == move)
+                break;
+        }
+        if (j < numMoves)
+            continue;
+
+        // Add move to the relearnable list
+        moves[numMoves++] = move;
+        
+        // Safety check to prevent overflow
+        if (numMoves >= MAX_RELEARNER_MOVES)
+            break;
+    }
+
+    return numMoves;
+}
+
+// Forward declaration for tutor move lookup
+extern const u16 gTutorMoves[];
+extern bool8 CanLearnTutorMove(u16 species, u8 tutor);
+
+u8 GetRelearnerTutorMoves(struct Pokemon *mon, u16 *moves)
+{
+    u16 learnedMoves[MAX_MON_MOVES] = {0};
+    u8 numMoves = 0;
+    u16 species = GetMonData(mon, MON_DATA_SPECIES, 0);
+
+    // Get the moves the mon already knows
+    for (u8 i = 0; i < MAX_MON_MOVES; i++)
+        learnedMoves[i] = GetMonData(mon, MON_DATA_MOVE1 + i, 0);
+
+    // Check all tutor moves
+    for (u16 i = 0; i < TUTOR_MOVE_COUNT; i++)
+    {
+        u16 move = gTutorMoves[i];
+        
+        // Check if move is valid
+        if (move == MOVE_NONE)
+            continue;
+            
+        // Check if mon can learn this tutor move
+        if (!CanLearnTutorMove(species, i))
+            continue;
+
+        // Check if mon already knows this move
+        u16 j;
+        for (j = 0; j < MAX_MON_MOVES; j++)
+        {
+            if (learnedMoves[j] == move)
+                break;
+        }
+        if (j < MAX_MON_MOVES)
+            continue;
+
+        // Check if we already added this move to the list
+        for (j = 0; j < numMoves; j++)
+        {
+            if (moves[j] == move)
+                break;
+        }
+        if (j < numMoves)
+            continue;
+
+        // Add move to the relearnable list
+        moves[numMoves++] = move;
+        
+        // Safety check to prevent overflow
+        if (numMoves >= MAX_RELEARNER_MOVES)
+            break;
+    }
+
+    return numMoves;
+}
+
+u8 GetNumberOfEggMoves(struct Pokemon *mon)
+{
+    u16 moves[EGG_MOVES_ARRAY_COUNT] = {0};
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+
+    if (species == SPECIES_EGG)
+        return 0;
+
+    return GetRelearnerEggMoves(mon, moves);
+}
+
+u8 GetNumberOfTMMoves(struct Pokemon *mon)
+{
+    u16 moves[MAX_RELEARNER_MOVES] = {0};
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+
+    if (species == SPECIES_EGG)
+        return 0;
+
+    if (!IsBagPocketNonEmpty(POCKET_TM_HM))
+        return 0;
+
+    return GetRelearnerTMMoves(mon, moves);
+}
+
+u8 GetNumberOfTutorMoves(struct Pokemon *mon)
+{
+    u16 moves[MAX_RELEARNER_MOVES] = {0};
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+
+    if (species == SPECIES_EGG)
+        return 0;
+
+    return GetRelearnerTutorMoves(mon, moves);
 }
 
 u16 SpeciesToPokedexNum(u16 species)
