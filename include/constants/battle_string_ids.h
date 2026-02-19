@@ -390,9 +390,10 @@
 #define STRINGID_BAGISFULL                  389
 //additional string for "adding pokemon to player party" message
 #define STRINGID_PKMNADDEDTOPARTY           390
+#define STRINGID_PLAYERGOTMONEYMOM          391
 
 
-#define BATTLESTRINGS_COUNT                 391
+#define BATTLESTRINGS_COUNT                 392
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
