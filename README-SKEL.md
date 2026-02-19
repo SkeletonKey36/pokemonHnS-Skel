@@ -41,7 +41,7 @@
   - **I also changed the logic on how the Challenge/Randomizer HM Override setting determines when to show FLY or FLASH in a Pokémon's FIELD MOVES. It now checks if the player has the HM in their bag for all slots in the party (the leading pokemon will still show FLY/FLASH regardless and non-leading slots will have a check for if they can learn it, due to how the original HM Override works)**
  
 - PokeGear UI Update
-  - Changed the PokeGear's Main Menu UI to be more aligned with a PokeGear (HGSS, gen4) rather than a PokeNav (RSE, gen3)
+  - Changed the PokeGear's Main Menu UI to be more aligned with a PokeGear (HGSS, gen4) rather than a PokeNav (RSE, gen3).
   - A blue color is currently implemented, but the files for a yellow version are also present (just rename the file(s) for the desired color to be the proper name used by the game - be sure to store the previous if you want to keep both options in the files).
  
 - Option Menu Setting for Disabling Nickname Prompt (AFFECTS SAVE DATA)
@@ -52,12 +52,27 @@
 
 - A key item wheel (Touches saveblock, but uses some unused sections so that compatability is kept I believe)
   - Brings the Select-Tap option to have 4 options instead of 1.
-  - Kept the Select-Hold functionality present in HnS
+  - Kept the Select-Hold functionality present in HnS.
   - [Original implementation - PokeCommunity](https://www.pokecommunity.com/threads/oras-style-key-item-wheel.498877/)
+
+- Mom's Savings
+  - Implemented Mom's savings feature that wasn't originally in pokemonHnS. I tried to follow GSC & HGSS for how it worked in both games. The one-time rewards are a mishmash of both Gen2's and Gen4's (with a masterball on the end of the list) it will be changed to pokédolls once pokemonHnS has enabled them again (to reflect how she gave you dolls in Gen 2). After the sequential gifts she will give the player berries that can be used at Kurt's to create Pokéballs.
+  - Auto savings prompt during intro.
+  - 25% of battle winnings are sent to Mom if auto savings is enabled.
+  - Multichoice menu when talking with Mom to check balance, deposit, withdraw, and toggle auto savings.
+ 
+- Pokémon Party on Load Save Window
+  - Added animated icons on the Load Save screen when the user starts the game (uses the party menu's implementation of the icons as a reference)
+ 
+- Move Relearner Shortcut from Summary Screen
+  - Added a shortcut to the Summary screen's Battle/Contest moves screen that opens up an extended Move Relearner menu that includes moves from the following lists: learnset, egg moves, tutor moves, & the compatible TM/HMs in the player's bag.
+  - I didn't touch the actual move relearner NPC's functionality - he still takes a heart scale and only teaches learnset moves. 
 
 ## Programs used:
 - VS Code
 - Tilemap Studio (For assigning tilesets to a tilemap)
 - Libresprite (For editing sprites & tilesets)
+
+If you find any issues with my feature branches, please let me know and I can get the bug/issue resolved!
 
 Thanks for reading & enjoy, Skel
