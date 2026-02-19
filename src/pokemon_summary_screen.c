@@ -4205,54 +4205,66 @@ static void PrintMoveNameAndPP(u8 moveIndex)
 
 static void PrintMovePowerAndAccuracy(u16 moveIndex)
 {
-   	struct Pokemon *mon = &sMonSummaryScreen->currentMon;
-    	u16 species = GetMonData(mon, MON_DATA_SPECIES);
-     	const u8 *text;
-     	if (moveIndex != 0)
-     	{
-         	FillWindowPixelRect(PSS_LABEL_WINDOW_MOVES_POWER_ACC, PIXEL_FILL(0), 53, 0, 19, 32);
-		
-		if (moveIndex == MOVE_HIDDEN_POWER)
-		{
-		 	/*u8 powerBits = ((GetMonData(mon, MON_DATA_HP_IV) & 2) >> 1)
-             	 	 | ((GetMonData(mon, MON_DATA_ATK_IV) & 2) << 0)
-             	 	 | ((GetMonData(mon, MON_DATA_DEF_IV) & 2) << 1)
-              	 	 | ((GetMonData(mon, MON_DATA_SPEED_IV) & 2) << 2)
-              	 	 | ((GetMonData(mon, MON_DATA_SPATK_IV)& 2) << 3)
-             	 	 | ((GetMonData(mon, MON_DATA_SPDEF_IV) & 2) << 4);*/
-			  
-			u8 powerForHiddenPower = 60;
-			  
-			ConvertIntToDecimalStringN(gStringVar1, powerForHiddenPower, STR_CONV_MODE_RIGHT_ALIGN, 3);
-			text = gStringVar1;
-		}
-		else
-		{
-			if (gBattleMoves[moveIndex].power < 2)
-			{
-				text = gText_ThreeDashes;
-			}
-			else
-			{
-				ConvertIntToDecimalStringN(gStringVar1, gBattleMoves[moveIndex].power, STR_CONV_MODE_RIGHT_ALIGN, 3);
-				text = gStringVar1;
-			}
-		}
-       
-         	PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, 1, 0, 0);
-
-         	if (gBattleMoves[moveIndex].accuracy == 0)
-         	{
-            	  	text = gText_ThreeDashes;
-         	}
-        	else
-         	{
-             	 	ConvertIntToDecimalStringN(gStringVar1, gBattleMoves[moveIndex].accuracy, STR_CONV_MODE_RIGHT_ALIGN, 3);
-             	 	text = gStringVar1;
-         	}
-
-         	PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, 17, 0, 0);
-     	}
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    const u8 *text;
+    u8 monFriendship = GetMonData(&gPlayerParty[sMonSummaryScreen->curMonIndex], MON_DATA_FRIENDSHIP);
+    
+    if (moveIndex != 0)
+    {
+        FillWindowPixelRect(PSS_LABEL_WINDOW_MOVES_POWER_ACC, PIXEL_FILL(0), 53, 0, 19, 32);
+        
+        if (moveIndex == MOVE_HIDDEN_POWER)
+        {
+            /*u8 powerBits = ((GetMonData(mon, MON_DATA_HP_IV) & 2) >> 1)
+                | ((GetMonData(mon, MON_DATA_ATK_IV) & 2) << 0)
+                | ((GetMonData(mon, MON_DATA_DEF_IV) & 2) << 1)
+                | ((GetMonData(mon, MON_DATA_SPEED_IV) & 2) << 2)
+                | ((GetMonData(mon, MON_DATA_SPATK_IV)& 2) << 3)
+                | ((GetMonData(mon, MON_DATA_SPDEF_IV) & 2) << 4);*/
+            
+            u8 powerForHiddenPower = 60;
+            
+            ConvertIntToDecimalStringN(gStringVar1, powerForHiddenPower, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            text = gStringVar1;
+        }
+        else
+        {
+            if (moveIndex == MOVE_RETURN)
+            {
+                ConvertIntToDecimalStringN(gStringVar1, (10 * monFriendship / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
+                text = gStringVar1;
+            }
+            else if (moveIndex == MOVE_FRUSTRATION)
+            {
+                ConvertIntToDecimalStringN(gStringVar1, (10 * (MAX_FRIENDSHIP - monFriendship) / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
+                text = gStringVar1;
+            }
+            else if (gBattleMoves[moveIndex].power < 2)
+            {
+                text = gText_ThreeDashes;
+            }
+            else
+            {
+                ConvertIntToDecimalStringN(gStringVar1, gBattleMoves[moveIndex].power, STR_CONV_MODE_RIGHT_ALIGN, 3);
+                text = gStringVar1;
+            }
+        }
+        
+        PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, 1, 0, 0);
+        
+        if (gBattleMoves[moveIndex].accuracy == 0)
+        {
+            text = gText_ThreeDashes;
+        }
+        else
+        {
+            ConvertIntToDecimalStringN(gStringVar1, gBattleMoves[moveIndex].accuracy, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            text = gStringVar1;
+        }
+        
+        PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, 17, 0, 0);
+    }
 }
 
 static void PrintContestMoves(void)
