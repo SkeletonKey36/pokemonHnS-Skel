@@ -2,5 +2,6 @@
 #define GUARD_OPTION_PLUS_MENU_H
 
 void CB2_InitOptionPlusMenu(void);
+bool8 CheckNicknamePromptSetting(void);
 
 #endif // GUARD_OPTION_PLUS_MENU_H

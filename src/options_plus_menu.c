@@ -20,6 +20,7 @@
 #include "constants/songs.h"
 #include "event_data.h"
 #include "sound.h"
+#include "tx_randomizer_and_challenges.h"
 
 enum
 {
@@ -37,6 +38,7 @@ enum
     //MENUITEM_MAIN_DIFFICULTY,
     MENUITEM_MAIN_BATTLESTYLE,
     MENUITEM_MAIN_BUTTONMODE,
+    MENUITEM_MAIN_NICKNAME_PROMPT,
     MENUITEM_MAIN_FOLLOWER,
     MENUITEM_MAIN_LARGE_FOLLOWER,
     //MENUITEM_MAIN_MATCHCALL,
@@ -210,6 +212,7 @@ static void DrawChoices_FastIntro(int selection, int y);
 static void DrawChoices_FastBattles(int selection, int y);
 static void DrawChoices_BikeMusic(int selection, int y);
 static void DrawChoices_EvenFasterJoy(int selection, int y);
+static void DrawChoices_NicknamePrompt(int selection, int y);
 static void DrawChoices_SurfMusic(int selection, int y);
 static void DrawChoices_Wild_Battle_Music(int selection, int y);
 static void DrawChoices_Trainer_Battle_Music(int selection, int y);
@@ -271,6 +274,7 @@ struct // MENU_MAIN
     //[MENUITEM_MAIN_MATCHCALL]               = {DrawChoices_MatchCall,        ProcessInput_Options_Two},
     [MENUITEM_CUSTOM_FISHING]               = {DrawChoices_Fishing,          ProcessInput_Options_Two},
     [MENUITEM_MAIN_EVEN_FASTER_JOY]         = {DrawChoices_EvenFasterJoy,    ProcessInput_Options_Two},
+    [MENUITEM_MAIN_NICKNAME_PROMPT]         = {DrawChoices_NicknamePrompt,   ProcessInput_Options_Two},
     //[MENUITEM_MAIN_SKIP_INTRO]              = {DrawChoices_Skip_Intro,       ProcessInput_Options_Two}, 
     [MENUITEM_MAIN_UNIT_TYPE]               = {DrawChoices_Unit_Type,        ProcessInput_Options_Two},  
     [MENUITEM_MAIN_FRAMETYPE]               = {DrawChoices_FrameType,        ProcessInput_FrameType},
@@ -318,6 +322,7 @@ static const u8 sText_OptionFastIntro[]           = _("FAST INTRO");
 static const u8 sText_OptionLargeFollower[]       = _("BIG FOLLOWERS");
 static const u8 sText_OptionFastBattles[]         = _("FAST BATTLES");
 static const u8 sText_OptionEvenFasterJoy[]       = _("FASTER JOY");
+static const u8 sText_OptionNicknamePrompt[]     = _("NICKNAME PROMPT");
 static const u8 sText_OptionSkipIntro[]           = _("SKIP INTRO");
 static const u8 sText_OptionLR_Run[]              = _("RUN PROMPT");
 static const u8 sText_OptionBallPrompt[]          = _("BALL PROMPT");
@@ -343,6 +348,7 @@ static const u8 *const sOptionMenuItemsNamesMain[MENUITEM_MAIN_COUNT] =
     //[MENUITEM_MAIN_MATCHCALL]           = gText_OptionMatchCalls,
     [MENUITEM_CUSTOM_FISHING]           = sText_OptionFishing,
     [MENUITEM_MAIN_EVEN_FASTER_JOY]     = sText_OptionEvenFasterJoy,
+    [MENUITEM_MAIN_NICKNAME_PROMPT]     = sText_OptionNicknamePrompt,
     //[MENUITEM_MAIN_SKIP_INTRO]          = sText_OptionSkipIntro,
     [MENUITEM_MAIN_UNIT_TYPE]           = sText_OptionUnitType,
     [MENUITEM_MAIN_FRAMETYPE]           = gText_Frame,
@@ -414,6 +420,7 @@ static bool8 CheckConditions(int selection)
         //case MENUITEM_MAIN_MATCHCALL:         return TRUE;
         case MENUITEM_CUSTOM_FISHING:         return TRUE;
         case MENUITEM_MAIN_EVEN_FASTER_JOY:   return TRUE;
+        case MENUITEM_MAIN_NICKNAME_PROMPT:   return !IsNuzlockeNicknamingActive();
         //case MENUITEM_MAIN_SKIP_INTRO:        return TRUE;
         case MENUITEM_MAIN_UNIT_TYPE:         return TRUE;
         }
@@ -476,6 +483,8 @@ static const u8 sText_Desc_FishingOn[]             = _("Automatically reel while
 static const u8 sText_Desc_FishingOff[]            = _("Manually reel while fishing.\nFish like you always fished!");
 static const u8 sText_Desc_EvenFasterJoyOn[]       = _("NURSE JOY heals you faster.");
 static const u8 sText_Desc_EvenFasterJoyOff[]      = _("NURSE JOY heals you with the\nusual animation.");
+static const u8 sText_Desc_NicknamePromptOn[]      = _("Show the nickname prompt when\ncatching/receiving a POKéMON.");
+static const u8 sText_Desc_NicknamePromptOff[]     = _("Don't show the nickname prompt when\ncatching/receiving a POKéMON.");
 static const u8 sText_Desc_SkipIntroOn[]           = _("Skips the Copyright screen and\nintro. Applies to soft-resets.");
 static const u8 sText_Desc_SkipIntroOff[]          = _("Shows the Copyright screen and\nthe game's introduction.");
 static const u8 sText_Desc_OverworldCallsOn[]      = _("TRAINERs will be able to call you,\noffering rematches and info.");
@@ -498,6 +507,7 @@ static const u8 *const sOptionMenuItemDescriptionsMain[MENUITEM_MAIN_COUNT][3] =
     //[MENUITEM_MAIN_MATCHCALL]   = {sText_Desc_OverworldCallsOn,     sText_Desc_OverworldCallsOff},
     [MENUITEM_CUSTOM_FISHING]     = {sText_Desc_FishingOn,            sText_Desc_FishingOff},
     [MENUITEM_MAIN_EVEN_FASTER_JOY]     = {sText_Desc_EvenFasterJoyOn,            sText_Desc_EvenFasterJoyOff},
+    [MENUITEM_MAIN_NICKNAME_PROMPT]     = {sText_Desc_NicknamePromptOn,            sText_Desc_NicknamePromptOff},
     //[MENUITEM_MAIN_SKIP_INTRO]     = {sText_Desc_SkipIntroOn,            sText_Desc_SkipIntroOff},
     [MENUITEM_MAIN_UNIT_TYPE]     = {sText_Desc_Units_Metric,            sText_Desc_Units_Imperial},
 };
@@ -574,6 +584,7 @@ static const u8 *const sOptionMenuItemDescriptionsSound[MENUITEM_SOUND_COUNT][6]
 // Disabled Descriptions
 static const u8 sText_Desc_Disabled_Textspeed[]     = _("Only active if xyz.");
 static const u8 sText_Desc_Disabled_BattleHPBar[]   = _("Only active if xyz.");
+static const u8 sText_Desc_Disabled_NicknamePrompt[] = _("NUZLOCKE forced nicknames enabled.");
 static const u8 *const sOptionMenuItemDescriptionsDisabledMain[MENUITEM_MAIN_COUNT] =
 {
     [MENUITEM_MAIN_TEXTSPEED]   = sText_Desc_Disabled_Textspeed,
@@ -590,6 +601,7 @@ static const u8 *const sOptionMenuItemDescriptionsDisabledMain[MENUITEM_MAIN_COU
     //[MENUITEM_MAIN_MATCHCALL]   = sText_Empty,
     [MENUITEM_CUSTOM_FISHING]     = sText_Empty,
     [MENUITEM_MAIN_EVEN_FASTER_JOY]     = sText_Empty,
+    [MENUITEM_MAIN_NICKNAME_PROMPT]     = sText_Desc_Disabled_NicknamePrompt,
     //[MENUITEM_MAIN_SKIP_INTRO]     = sText_Empty,
 };
 
@@ -870,6 +882,7 @@ void CB2_InitOptionPlusMenu(void)
         //sOptions->sel[MENUITEM_MAIN_MATCHCALL]           = gSaveBlock2Ptr->optionsDisableMatchCall;
         sOptions->sel[MENUITEM_CUSTOM_FISHING]           = gSaveBlock2Ptr->optionsFishing;
         sOptions->sel[MENUITEM_MAIN_EVEN_FASTER_JOY]     = gSaveBlock2Ptr->optionsEvenFasterJoy;
+        sOptions->sel[MENUITEM_MAIN_NICKNAME_PROMPT]     = gSaveBlock2Ptr->optionsNicknamePrompt;
         //sOptions->sel[MENUITEM_MAIN_SKIP_INTRO]          = gSaveBlock2Ptr->optionsSkipIntro;
         sOptions->sel[MENUITEM_MAIN_UNIT_TYPE]           = gSaveBlock2Ptr->optionsUnitSystem;
 
@@ -1110,6 +1123,7 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock2Ptr->optionsWindowFrameType       = sOptions->sel[MENUITEM_MAIN_FRAMETYPE];
     gSaveBlock2Ptr->optionsFishing               = sOptions->sel[MENUITEM_CUSTOM_FISHING];
     gSaveBlock2Ptr->optionsEvenFasterJoy         = sOptions->sel[MENUITEM_MAIN_EVEN_FASTER_JOY];
+    gSaveBlock2Ptr->optionsNicknamePrompt        = sOptions->sel[MENUITEM_MAIN_NICKNAME_PROMPT];
     //gSaveBlock2Ptr->optionsSkipIntro             = sOptions->sel[MENUITEM_MAIN_SKIP_INTRO];
     gSaveBlock2Ptr->optionsUnitSystem            = sOptions->sel[MENUITEM_MAIN_UNIT_TYPE];
 
@@ -1853,6 +1867,25 @@ static void DrawChoices_EvenFasterJoy(int selection, int y)
     DrawOptionMenuChoice(gText_BattleSceneOff, GetStringRightAlignXOffset(1, gText_BattleSceneOff, 198), y, styles[1], active);
 }
 
+static void DrawChoices_NicknamePrompt(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_MAIN_NICKNAME_PROMPT);
+    u8 styles[2] = {0};
+    styles[selection] = 1;
+
+    if (selection == 0)
+    {
+        gSaveBlock2Ptr->optionsNicknamePrompt = 0; //Show nickname prompt
+    }
+    else
+    {
+        gSaveBlock2Ptr->optionsNicknamePrompt = 1; //Don't show nickname prompt
+    }
+
+    DrawOptionMenuChoice(gText_BattleSceneOn, 104, y, styles[0], active);
+    DrawOptionMenuChoice(gText_BattleSceneOff, GetStringRightAlignXOffset(1, gText_BattleSceneOff, 198), y, styles[1], active);
+}
+
 /*static void DrawChoices_SurfMusic(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_SOUND_SURF_MUSIC);
@@ -2125,4 +2158,10 @@ static void DrawBgWindowFrames(void)
     FillBgTilemapBufferRect(1, TILE_BOT_CORNER_R, 28, 19,  1,  1,  7);
 
     CopyBgTilemapBufferToVram(1);
+}
+
+// CheckNicknamePromptSetting() returns true if the nickname prompt is enabled, false if it is disabled
+bool8 CheckNicknamePromptSetting(void) 
+{
+    return (gSaveBlock2Ptr->optionsNicknamePrompt == 0); // 0 = Show nickname prompt, 1 = Don't show nickname prompt
 }
