@@ -1676,6 +1676,7 @@ static void Task_PCMainMenu(u8 taskId)
         if (!gPaletteFade.active)
         {
             CleanupOverworldWindowsAndTilemaps();
+            gFieldCallback = NULL; // Ensure we return to PC menu when exiting
             EnterPokeStorage(task->tInput);
             RemoveWindow(task->tWindowId);
             DestroyTask(taskId);
@@ -1733,7 +1734,10 @@ static void CreateMainMenu(u8 whichMenu, s16 *windowIdPtr)
 static void CB2_ExitPokeStorage(void)
 {
     sPreviousBoxOption = GetCurrentBoxOption();
-    gFieldCallback = FieldTask_ReturnToPcMenu;
+    // Only set the PC menu callback if a custom callback wasn't already set
+    // (e.g., when opened from party menu with START button)
+    if (gFieldCallback == NULL)
+        gFieldCallback = FieldTask_ReturnToPcMenu;
     SetMainCallback2(CB2_ReturnToField);
 }
 
