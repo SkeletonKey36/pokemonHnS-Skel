@@ -1112,6 +1112,9 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
         ChangeBgY(0, 0, BG_COORD_SET);
         ChangeBgY(1, 0, BG_COORD_SET);
         DestroyMainMenuMonIcons();
+        // Ensure sprite system is fully reset after destroying mon icons to prevent corruption
+        ResetSpriteData();
+        FreeAllSpritePalettes();
         switch (action)
         {
             case ACTION_NEW_GAME:
@@ -1384,6 +1387,8 @@ static void Task_NewGameBirchSpeech_Init(u8 taskId)
     SetGpuReg(REG_OFFSET_BLDALPHA, 0);
     SetGpuReg(REG_OFFSET_BLDY, 0);
 
+    // Clear VRAM to remove any residual graphics from main menu (e.g. mon icon tiles)
+    DmaFill16(3, 0, (void *)VRAM, VRAM_SIZE);
     LZ77UnCompVram(sBirchSpeechShadowGfx, (void *)VRAM);
     LZ77UnCompVram(sBirchSpeechBgMap, (void *)(BG_SCREEN_ADDR(7)));
     LoadPalette(sBirchSpeechBgPals, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
