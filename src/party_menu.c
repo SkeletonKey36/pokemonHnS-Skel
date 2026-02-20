@@ -313,7 +313,10 @@ static u16 PartyMenuButtonHandler(s8 *);
 static s8 *GetCurrentPartySlotPtr(void);
 static bool8 IsSelectedMonNotEgg(u8 *);
 static void PartyMenuRemoveWindow(u8 *);
+static bool8 IsInvalidPartyMenuActionType(u8);
 static void CB2_SetUpExitToBattleScreen(void);
+static void CB2_OpenPCStorageFromPartyMenu(void);
+static void FieldTask_ReturnToPartyMenuFromStorage(void);
 static void Task_ClosePartyMenuAfterText(u8);
 static void TryTutorSelectedMon(u8);
 static void TryGiveMailToSelectedMon(u8);
@@ -1290,6 +1293,14 @@ void Task_HandleChooseMonInput(u8 taskId)
             {
                 PlaySE(SE_SELECT);
                 MoveCursorToConfirm();
+            }
+            else if (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD && !IsInvalidPartyMenuActionType(gPartyMenu.action))
+            {
+                // Open PC Storage System in MOVE mode
+                PlaySE(SE_SELECT);
+                sPartyMenuInternal->exitCallback = CB2_OpenPCStorageFromPartyMenu;
+                gPartyMenuUseExitCallback = FALSE;
+                Task_ClosePartyMenu(taskId);
             }
             break;
         }
@@ -6609,6 +6620,23 @@ static void UNUSED SwitchAliveMonIntoLeadSlot(void)
 static void CB2_SetUpExitToBattleScreen(void)
 {
     SetMainCallback2(CB2_SetUpReshowBattleScreenAfterMenu);
+}
+
+static void FieldTask_ReturnToPartyMenuFromStorage(void)
+{
+    // Called when exiting the PC Storage System to return to the party menu
+    // InitPartyMenu handles its own fade-in, so we don't call FadeInFromBlack here
+    gFieldCallback = NULL;
+    gPaletteFade.bufferTransferDisabled = TRUE;
+    InitPartyMenu(gPartyMenu.menuType, KEEP_PARTY_LAYOUT, gPartyMenu.action, TRUE, PARTY_MSG_DO_WHAT_WITH_MON, Task_HandleChooseMonInput, gPartyMenu.exitCallback);
+}
+
+static void CB2_OpenPCStorageFromPartyMenu(void)
+{
+    CleanupOverworldWindowsAndTilemaps();
+    // Set the field callback so that when exiting storage, we return to the party menu
+    gFieldCallback = FieldTask_ReturnToPartyMenuFromStorage;
+    EnterPokeStorage(0); // 0 = Move Pokémon mode
 }
 
 void ShowPartyMenuToShowcaseMultiBattleParty(void)
