@@ -581,6 +581,10 @@ EWRAM_DATA static bool8 sIsMonBeingMoved = 0;
 EWRAM_DATA static u8 sMovingMonOrigBoxId = 0;
 EWRAM_DATA static u8 sMovingMonOrigBoxPos = 0;
 EWRAM_DATA static bool8 sAutoActionOn = 0;
+EWRAM_DATA static bool8 sFromStartMenu = FALSE;
+
+// CB2 callbacks
+static void CB2_PokeStorage(void);
 
 // Main tasks
 static void Task_InitPokeStorage(u8);
@@ -1737,6 +1741,28 @@ static void CB2_ExitPokeStorage(void)
     SetMainCallback2(CB2_ReturnToField);
 }
 
+void EnterPokeStorageFromStartMenu(void)
+{
+    ResetTasks();
+    sCurrentBoxOption = OPTION_MOVE_MONS;
+    sFromStartMenu = TRUE;
+    sStorage = Alloc(sizeof(*sStorage));
+    if (sStorage == NULL)
+    {
+        SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+    }
+    else
+    {
+        sStorage->boxOption = OPTION_MOVE_MONS;
+        sStorage->isReopening = FALSE;
+        sMovingItemId = ITEM_NONE;
+        sStorage->state = 0;
+        sStorage->taskId = CreateTask(Task_InitPokeStorage, 3);
+        sLastUsedBox = StorageGetCurrentBox();
+        SetMainCallback2(CB2_PokeStorage);
+    }
+}
+
 static s16 UNUSED StorageSystemGetNextMonIndex(struct BoxPokemon *box, s8 startIdx, u8 stopIdx, u8 mode)
 {
     s16 i;
@@ -2041,6 +2067,7 @@ void EnterPokeStorage(u8 boxOption)
 {
     ResetTasks();
     sCurrentBoxOption = boxOption;
+    sFromStartMenu = FALSE;
     sStorage = Alloc(sizeof(*sStorage));
     if (sStorage == NULL)
     {
@@ -3834,7 +3861,15 @@ static void Task_ChangeScreen(u8 taskId)
     case SCREEN_CHANGE_EXIT_BOX:
     default:
         FreePokeStorageData();
-        SetMainCallback2(CB2_ExitPokeStorage);
+        if (sFromStartMenu == TRUE)
+        {
+            sFromStartMenu = FALSE;
+            SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+        }
+        else
+        {
+            SetMainCallback2(CB2_ExitPokeStorage);
+        }
         break;
     case SCREEN_CHANGE_SUMMARY_SCREEN:
         boxMons = sStorage->summaryMon.box;

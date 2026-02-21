@@ -30,6 +30,7 @@
 #include "party_menu.h"
 #include "pokedex.h"
 #include "pokenav.h"
+#include "pokemon_storage_system.h"
 #include "safari_zone.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -67,6 +68,7 @@ enum
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_DEBUG,
     MENU_ACTION_RETIRE_BUG_CONTEST,
+    MENU_ACTION_POKEPC,
 };
 
 // Save status
@@ -109,6 +111,7 @@ static bool8 StartMenuLinkModePlayerNameCallback(void);
 static bool8 StartMenuBattlePyramidRetireCallback(void);
 static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuDebugCallback(void);
+static bool8 StartMenuPokePCCallback(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -204,7 +207,8 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_RETIRE_FRONTIER] = {gText_MenuRetire,  {.u8_void = StartMenuBattlePyramidRetireCallback}},
     [MENU_ACTION_PYRAMID_BAG]     = {gText_MenuBag,     {.u8_void = StartMenuBattlePyramidBagCallback}},
     [MENU_ACTION_DEBUG]           = {gText_MenuDebug,   {.u8_void = StartMenuDebugCallback}},
-    [MENU_ACTION_RETIRE_BUG_CONTEST] = {gText_MenuRetire,   {.u8_void = StartMenuBugContestRetireCallback}}
+    [MENU_ACTION_RETIRE_BUG_CONTEST] = {gText_MenuRetire,   {.u8_void = StartMenuBugContestRetireCallback}},
+    [MENU_ACTION_POKEPC]          = {gText_MenuPokePC,  {.u8_void = StartMenuPokePCCallback}}
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -350,6 +354,11 @@ static void BuildNormalStartMenu(void)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
+    
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+    {
+        AddStartMenuAction(MENU_ACTION_POKEPC);
+    }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
     AddStartMenuAction(MENU_ACTION_SAVE);
@@ -373,6 +382,11 @@ static void BuildDebugStartMenu(void)
     if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
+    }
+    
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+    {
+        AddStartMenuAction(MENU_ACTION_POKEPC);
     }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
@@ -819,6 +833,21 @@ static bool8 StartMenuDebugCallback(void)
 #endif
 
     return TRUE;
+}
+
+static bool8 StartMenuPokePCCallback(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenuWindow();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        EnterPokeStorageFromStartMenu();
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool8 StartMenuSafariZoneRetireCallback(void)
