@@ -2281,6 +2281,7 @@ extern const u8 gPCText_Give[];
 extern const u8 gPCText_Switch[];
 extern const u8 gPCText_Bag[];
 extern const u8 gPCText_Info[];
+extern const u8 gPCText_Item[];
 extern const u8 gPCText_Scenery1[];
 extern const u8 gPCText_Scenery2[];
 extern const u8 gPCText_Scenery3[];

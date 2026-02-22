@@ -82,5 +82,6 @@ u32 GetStatusFromBoxStatus(struct Pokemon *mon);
 void PurgeMonOrBoxMon(u8 boxId, u8 position);
 u16 GetFirstBoxPokemon(void);
 void MoveFirstBoxPokemon(void);
+bool8 IsPokemonStorageAccessedFromStartMenu(void);
 
 #endif // GUARD_POKEMON_STORAGE_SYSTEM_H

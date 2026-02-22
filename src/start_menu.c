@@ -48,6 +48,7 @@
 #include "constants/battle_frontier.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/maps.h"
 #include "bug_contest.h"
 
 // Menu actions
@@ -283,12 +284,33 @@ static void ShowSaveInfoWindow(void);
 static void RemoveSaveInfoWindow(void);
 static void HideStartMenuWindow(void);
 static void HideStartMenuDebug(void);
+static bool8 IsPlayerInEliteFourOrChampionRoom(void);
 
 void SetDexPokemonPokenavFlags(void) // unused
 {
     FlagSet(FLAG_SYS_POKEDEX_GET);
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKENAV_GET);
+}
+
+static bool8 IsPlayerInEliteFourOrChampionRoom(void)
+{
+    u8 mapGroup = gSaveBlock1Ptr->location.mapGroup;
+    u8 mapNum = gSaveBlock1Ptr->location.mapNum;
+    
+    // Check if player is in any Elite Four member's room or Champion room
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_WILLS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_WILLS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_KOGAS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_KOGAS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_BRUNOS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_BRUNOS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_KARENS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_KARENS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_CHAMPIONS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_CHAMPIONS_ROOM))
+        return TRUE;
+    
+    return FALSE;
 }
 
 static void BuildStartMenuActions(void)
@@ -355,7 +377,7 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
     
-    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
     {
         AddStartMenuAction(MENU_ACTION_POKEPC);
     }
@@ -384,7 +406,7 @@ static void BuildDebugStartMenu(void)
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
     
-    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
     {
         AddStartMenuAction(MENU_ACTION_POKEPC);
     }
