@@ -1197,12 +1197,17 @@ static void Cmd_accuracycheck(void)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
         if (gBattleMons[gBattlerTarget].ability == ABILITY_ILLUMINATE)
             calc = (calc * 90) / 100; // 1.1 illuminate loss
+
         if (gSaveBlock2Ptr->optionStyle == 1)
+        {
             if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_TYPE_PHYSICAL(type))
                 calc = (calc * 80) / 100; // 1.2 hustle loss
-        if (gSaveBlock2Ptr->optionStyle == 0)
+        }
+        else if (gSaveBlock2Ptr->optionStyle == 0)
+        {
             if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_MOVE_PHYSICAL(move))
                 calc = (calc * 80) / 100; // 1.2 hustle loss
+        }
 
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
         {
@@ -2417,6 +2422,7 @@ static void Cmd_datahpupdate(void)
                 if (gSpecialStatuses[gActiveBattler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[gActiveBattler].shellBellDmg = gHpDealt;
                 if (gSaveBlock2Ptr->optionStyle == 0)
+                {
                     if (IS_MOVE_PHYSICAL(gCurrentMove) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2447,7 +2453,9 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
-                if (gSaveBlock2Ptr->optionStyle == 1)
+                }
+                else if (gSaveBlock2Ptr->optionStyle == 1)
+                {
                     if (IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2478,6 +2486,7 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
+                }
             }
             gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
 
