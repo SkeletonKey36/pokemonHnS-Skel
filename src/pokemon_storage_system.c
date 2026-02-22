@@ -4365,7 +4365,7 @@ static void SetUpHidePartyMenu(void)
     sStorage->partyMenuUnused1 = 0;
     sStorage->partyMenuY = 22;
     sStorage->partyMenuMoveTimer = 0;
-    if (sStorage->boxOption == OPTION_MOVE_ITEMS)
+    if (sStorage->boxOption == OPTION_MOVE_ITEMS || sStorage->boxOption == OPTION_MOVE_MONS)
         MoveHeldItemWithPartyMenu();
 }
 
