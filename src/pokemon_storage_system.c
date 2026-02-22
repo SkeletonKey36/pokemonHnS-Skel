@@ -656,6 +656,7 @@ static void SpriteCB_BoxMonIconScrollOut(struct Sprite *);
 static void GetIncomingBoxMonData(u8);
 static void CreatePartyMonsSprites(bool8);
 static void CompactPartySprites(void);
+static void HideAllPartyItemIcons(void);
 static u8 GetNumPartySpritesCompacting(void);
 static void MovePartySpriteToNextSlot(struct Sprite *, u16);
 static void SpriteCB_MovePartyMonToNextSlot(struct Sprite *);
@@ -3011,6 +3012,7 @@ static void Task_DepositMenu(u8 taskId)
     case 2:
         CompactPartySlots();
         CompactPartySprites();
+        HideAllPartyItemIcons();
         sStorage->state++;
         break;
     case 3:
@@ -3019,6 +3021,9 @@ static void Task_DepositMenu(u8 taskId)
             ResetSelectionAfterDeposit();
             StartDisplayMonMosaicEffect();
             UpdatePartySlotColors();
+            // After party compacts, load item icon for mon now at cursor position
+            if ((sStorage->boxOption == OPTION_MOVE_MONS || sStorage->boxOption == OPTION_MOVE_ITEMS) && sCursorArea == CURSOR_AREA_IN_PARTY)
+                TryLoadItemIconAtPos(CURSOR_AREA_IN_PARTY, sCursorPosition);
             SetPokeStorageTask(Task_PokeStorageMain);
         }
         break;
@@ -3103,6 +3108,7 @@ static void Task_ReleaseMon(u8 taskId)
             {
                 CompactPartySlots();
                 CompactPartySprites();
+                HideAllPartyItemIcons();
                 sStorage->state++;
             }
             else
@@ -3117,6 +3123,9 @@ static void Task_ReleaseMon(u8 taskId)
             RefreshDisplayMon();
             StartDisplayMonMosaicEffect();
             UpdatePartySlotColors();
+            // After party compacts, load item icon for mon now at cursor position
+            if ((sStorage->boxOption == OPTION_MOVE_MONS || sStorage->boxOption == OPTION_MOVE_ITEMS) && sCursorArea == CURSOR_AREA_IN_PARTY)
+                TryLoadItemIconAtPos(CURSOR_AREA_IN_PARTY, sCursorPosition);
             sStorage->state++;
         }
         break;
@@ -3578,12 +3587,20 @@ static void Task_HandleMovingMonFromParty(u8 taskId)
     case 0:
         CompactPartySlots();
         CompactPartySprites();
+        HideAllPartyItemIcons();
         sStorage->state++;
         break;
     case 1:
         if (GetNumPartySpritesCompacting() == 0)
         {
             UpdatePartySlotColors();
+            // After party compacts, load item icon for mon now at cursor position
+            // But only if one doesn't already exist there (similar to how pokemon sprites work)
+            if ((sStorage->boxOption == OPTION_MOVE_MONS || sStorage->boxOption == OPTION_MOVE_ITEMS) && sCursorArea == CURSOR_AREA_IN_PARTY)
+            {
+                if (!IsItemIconAtPosition(CURSOR_AREA_IN_PARTY, sCursorPosition))
+                    TryLoadItemIconAtPos(CURSOR_AREA_IN_PARTY, sCursorPosition);
+            }
             SetPokeStorageTask(Task_PokeStorageMain);
         }
         break;
@@ -5065,6 +5082,32 @@ static void CompactPartySprites(void)
                 sStorage->numPartyToCompact++;
             }
             targetSlot++;
+        }
+    }
+}
+
+// Hide all party item icons immediately (without animation)
+// This is called after party compacting starts so icons can be reloaded at correct positions after
+static void HideAllPartyItemIcons(void)
+{
+    u16 i;
+
+    if (sStorage->boxOption != OPTION_MOVE_ITEMS && sStorage->boxOption != OPTION_MOVE_MONS)
+        return;
+
+    // Immediately deactivate all party item icons, EXCEPT the one at the cursor position
+    // (similar to how CompactPartySprites doesn't move sprites already in the correct slot)
+    // Don't use TryHideItemIconAtPos because that starts an animation and keeps them "active"
+    for (i = 0; i < MAX_ITEM_ICONS; i++)
+    {
+        if (sStorage->itemIcons[i].active && sStorage->itemIcons[i].area == CURSOR_AREA_IN_PARTY)
+        {
+            // Skip the icon at the cursor position - it's already correctly positioned
+            if (sCursorArea == CURSOR_AREA_IN_PARTY && sStorage->itemIcons[i].pos == sCursorPosition)
+                continue;
+            
+            SetItemIconActive(i, FALSE);
+            sStorage->itemIcons[i].sprite->callback = SpriteCallbackDummy;
         }
     }
 }
@@ -6649,7 +6692,7 @@ static void MoveMon(void)
             {
                 sStorage->itemIcons[itemIconId].sprite->callback = SpriteCB_ItemIcon_FollowMon;
                 sStorage->itemIcons[itemIconId].sprite->oam.priority = 1;
-                sStorage->itemIcons[itemIconId].sprite->subpriority = 6; // In front of mon (which is 7)
+                sStorage->itemIcons[itemIconId].sprite->subpriority = 8; // Behind mon (which is 7) and cursor (which is 6)
                 sStorage->itemIcons[itemIconId].area = CURSOR_AREA_IN_HAND; // Mark as moving with mon
                 sStorage->itemIcons[itemIconId].pos = 0; // Use pos 0 for items in hand
             }
@@ -6668,7 +6711,7 @@ static void MoveMon(void)
                 {
                     sStorage->itemIcons[itemIconId].sprite->callback = SpriteCB_ItemIcon_FollowMon;
                     sStorage->itemIcons[itemIconId].sprite->oam.priority = 2;
-                    sStorage->itemIcons[itemIconId].sprite->subpriority = 6; // In front of mon (which is 7)
+                    sStorage->itemIcons[itemIconId].sprite->subpriority = 8; // Behind mon (which is 7) and cursor (which is 6)
                     sStorage->itemIcons[itemIconId].area = CURSOR_AREA_IN_HAND; // Mark as moving with mon
                     sStorage->itemIcons[itemIconId].pos = 0; // Use pos 0 for items in hand
                 }
