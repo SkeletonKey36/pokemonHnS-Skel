@@ -28,6 +28,7 @@
 #include "tx_randomizer_and_challenges.h"
 #include "script_pokemon_util.h"
 #include "starter_choose.h"
+#include "pokemon_storage_system.h"
 
 static void CB2_ReturnFromChooseHalfParty(void);
 static void CB2_ReturnFromChooseBattleFrontierParty(void);
@@ -60,6 +61,52 @@ void HealPlayerParty(void)
         arg[2] = 0;
         arg[3] = 0;
         SetMonData(&gPlayerParty[i], MON_DATA_STATUS, arg);
+    }
+}
+
+void HealBoxedPokemon(void)
+{
+    u8 boxId, boxPos, j;
+    u8 ppBonuses;
+    u8 value;
+    struct BoxPokemon *boxMon;
+    u16 species;
+    u8 inPC;
+
+    // Iterate through all boxes
+    for (boxId = 0; boxId < TOTAL_BOXES_COUNT; boxId++)
+    {
+        // Iterate through all positions in this box
+        for (boxPos = 0; boxPos < IN_BOX_COUNT; boxPos++)
+        {
+            // Get pointer to the boxed Pokemon (no copying, direct access)
+            boxMon = GetBoxedMonPtr(boxId, boxPos);
+            
+            // Check if there's a Pokemon in this slot
+            species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
+            if (species == SPECIES_NONE)
+                continue; // Empty slot, skip
+            
+            // Check if this Pokemon has preserved HP/status (MON_DATA_IN_PC flag)
+            inPC = GetBoxMonData(boxMon, MON_DATA_IN_PC);
+            if (inPC)
+            {
+                // Clear the IN_PC flag and the preserved HP/status data
+                // This tells the system this Pokemon doesn't have damage stored
+                value = 0;
+                SetBoxMonData(boxMon, MON_DATA_IN_PC, &value);
+                SetBoxMonData(boxMon, MON_DATA_BOX_HP, &value);
+                SetBoxMonData(boxMon, MON_DATA_BOX_AILMENT, &value);
+            }
+            
+            // Restore PP for all moves (always do this, not just when inPC is set)
+            ppBonuses = GetBoxMonData(boxMon, MON_DATA_PP_BONUSES);
+            for (j = 0; j < MAX_MON_MOVES; j++)
+            {
+                value = CalculatePPWithBonus(GetBoxMonData(boxMon, MON_DATA_MOVE1 + j), ppBonuses, j);
+                SetBoxMonData(boxMon, MON_DATA_PP1 + j, &value);
+            }
+        }
     }
 }
 
