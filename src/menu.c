@@ -492,7 +492,15 @@ u8 GetPlayerTextSpeedDelay(void)
 u8 AddStartMenuWindow(u8 numActions)
 {
     if (sStartMenuWindowId == WINDOW_NONE)
-        sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 0, 15, 0x139);
+        if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+        {
+            sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 0, 15, 0x139);
+        }
+        else
+        {
+            sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 2, 15, 0x139);
+        }
+        
     return sStartMenuWindowId;
 }
 
