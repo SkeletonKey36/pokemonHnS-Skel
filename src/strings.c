@@ -1100,6 +1100,7 @@ const u8 gPCText_Give[] = _("GIVE");
 const u8 gPCText_Switch[] = _("SWITCH");
 const u8 gPCText_Bag[] = _("BAG");
 const u8 gPCText_Info[] = _("INFO");
+const u8 gPCText_Item[] = _("ITEM");
 const u8 gPCText_Scenery1[] = _("SCENERY 1");
 const u8 gPCText_Scenery2[] = _("SCENERY 2");
 const u8 gPCText_Scenery3[] = _("SCENERY 3");
