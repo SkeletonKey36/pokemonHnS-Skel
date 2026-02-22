@@ -492,7 +492,7 @@ u8 GetPlayerTextSpeedDelay(void)
 u8 AddStartMenuWindow(u8 numActions)
 {
     if (sStartMenuWindowId == WINDOW_NONE)
-        sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 2, 15, 0x139);
+        sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 0, 15, 0x139);
     return sStartMenuWindowId;
 }
 
@@ -1980,6 +1980,17 @@ void AddTextPrinterParameterized5(u8 windowId, u8 fontId, const u8 *str, u8 left
     AddTextPrinter(&printer, speed, callback);
 }
 
+void PrintPlayerNameOnWindowShortFont(u8 windowId, const u8 *src, u16 x, u16 y)
+{
+    int count = 0;
+    while (gSaveBlock2Ptr->playerName[count] != EOS)
+        count++;
+
+    StringExpandPlaceholders(gStringVar4, src);
+
+    AddTextPrinterParameterized(windowId, FONT_SHORT, gStringVar4, x, y, TEXT_SKIP_DRAW, 0);
+}
+
 void PrintPlayerNameOnWindow(u8 windowId, const u8 *src, u16 x, u16 y)
 {
     int count = 0;
@@ -1988,7 +1999,7 @@ void PrintPlayerNameOnWindow(u8 windowId, const u8 *src, u16 x, u16 y)
 
     StringExpandPlaceholders(gStringVar4, src);
 
-    AddTextPrinterParameterized(windowId, 1, gStringVar4, x, y, TEXT_SKIP_DRAW, 0);
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar4, x, y, TEXT_SKIP_DRAW, 0);
 }
 
 static void UNUSED UnusedBlitBitmapRect(const struct Bitmap *src, struct Bitmap *dst, u16 srcX, u16 srcY, u16 dstX, u16 dstY, u16 width, u16 height)
