@@ -77,6 +77,9 @@ NewBarkTown_PlayersHouse_1F_EventScript_CheckSavings::
 	end
 
 NewBarkTown_PlayersHouse_1F_EventScript_Deposit::
+	checkmoney 1
+	compare VAR_RESULT, FALSE
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_DepositFailed
 	closemessage
     special Special_MomOpenDepositInput
     waitstate
@@ -86,7 +89,15 @@ NewBarkTown_PlayersHouse_1F_EventScript_Deposit::
     goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
     end
 
+NewBarkTown_PlayersHouse_1F_EventScript_DepositFailed::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_NoMoneyToDeposit, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
+
 NewBarkTown_PlayersHouse_1F_EventScript_Withdraw::
+	special Special_MomGetBalance
+	compare VAR_RESULT, 0
+	goto_if_eq NewBarkTown_PlayersHouse_1F_EventScript_WithdrawFailed
 	closemessage
     special Special_MomOpenWithdrawInput
     waitstate
@@ -95,6 +106,11 @@ NewBarkTown_PlayersHouse_1F_EventScript_Withdraw::
 	msgbox NewBarkTown_PlayersHouse_1F_Text_WithdrawSuccess, MSGBOX_DEFAULT
     goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
     end
+
+NewBarkTown_PlayersHouse_1F_EventScript_WithdrawFailed::
+	msgbox NewBarkTown_PlayersHouse_1F_Text_NoMoneyToWithdraw, MSGBOX_DEFAULT
+	goto NewBarkTown_PlayersHouse_1F_EventScript_MomSavingsMenu
+	end
 
 NewBarkTown_PlayersHouse_1F_EventScript_SavingInit::
 	msgbox NewBarkTown_PlayersHouse_1F_Text_EnableSaving, MSGBOX_YESNO
@@ -333,3 +349,11 @@ NewBarkTown_PlayersHouse_1F_Text_DepositSuccess:
 
 NewBarkTown_PlayersHouse_1F_Text_WithdrawSuccess:
 	.string "MOM: Here you go!$"
+
+NewBarkTown_PlayersHouse_1F_Text_NoMoneyToDeposit:
+	.string "MOM: You don't have any money to\n"
+	.string "deposit right now, sweetie.$"
+
+NewBarkTown_PlayersHouse_1F_Text_NoMoneyToWithdraw:
+	.string "MOM: I haven't saved any money\n"
+	.string "for you yet, honey.$"

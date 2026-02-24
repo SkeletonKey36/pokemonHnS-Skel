@@ -519,6 +519,7 @@ void Special_MomGetBalance(void)
     u32 balance = Mom_GetBalance();
     ConvertIntToDecimalStringN(gStringVar1, balance, STR_CONV_MODE_LEFT_ALIGN, 6);
     StringExpandPlaceholders(gStringVar2, gText_PokedollarVar1);
+    gSpecialVar_Result = balance;
 }
 
 void Special_MomDeposit(void)

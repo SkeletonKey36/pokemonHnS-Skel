@@ -29,3 +29,4 @@ Mom_Text_GiftCall_Berry:
 	.string "at the store for you!\p"
 	.string "I sent them to your PC.\n"
 	.string "Take care!$"
+	
