@@ -321,13 +321,13 @@ void MusicPlayerJumpTableCopy(void)
 
 void ClearChain(void *x)
 {
-    void (*func)(void *) = (void (*)(void *))gMPlayJumpTable[34];
+    void (*func)(void *) = (void (*)(void *))*(&gMPlayJumpTable[34]);
     func(x);
 }
 
 void Clear64byte(void *x)
 {
-    void (*func)(void *) = (void (*)(void *))gMPlayJumpTable[35];
+    void (*func)(void *) = (void (*)(void *))*(&gMPlayJumpTable[35]);
     func(x);
 }
 
@@ -1493,7 +1493,7 @@ void ply_memacc(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *trac
 cond_true:
     {
         // *& is required for matching
-        ((void (*)(struct MusicPlayerInfo *, struct MusicPlayerTrack *))gMPlayJumpTable[1])(mplayInfo, track);
+        ((void (*)(struct MusicPlayerInfo *, struct MusicPlayerTrack *))(*&gMPlayJumpTable[1]))(mplayInfo, track);
         return;
     }
 
