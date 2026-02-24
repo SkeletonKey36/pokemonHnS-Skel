@@ -116,7 +116,7 @@ AzaleaTown_KurtsHouse_EventScript_Kurt2::
 	kurtshop AzaleaTown_KurtsHouse_KurtBallList
 	@ Check if purchase was made (VAR_RESULT set by shop)
 	goto_if_eq VAR_RESULT, FALSE, AzaleaTown_KurtsHouse_EventScript_KurtCancel
-	@ Shop handled transaction, show crafting sequence
+	@ Shop handled transaction (berries removed, item stored in VAR_0x8004, quantity in VAR_0x8005)
 	
 	
 	playse SE_BANG
@@ -126,8 +126,35 @@ AzaleaTown_KurtsHouse_EventScript_Kurt2::
 	applymovement LOCALID_AZALEA_TOWN_KURT, AzaleaTownKurt_Movement_Making_Ball
 	waitmovement 0
 	turnobject LOCALID_AZALEA_TOWN_KURT, DIR_SOUTH
-	msgbox KurtsHouse_Text_KurtJustFinishedYourBall, MSGBOX_DEFAULT
-	msgbox KurtsHouse_Text_KurtTurnedOutGreat, MSGBOX_DEFAULT
+	@ Check quantity to determine singular or plural text
+	goto_if_eq VAR_0x8005, 1, AzaleaTown_KurtsHouse_EventScript_SingularBall
+	@ Plural case (1+ balls)
+	bufferitemname 0, VAR_0x8004
+	msgbox KurtsHouse_Text_KurtJustFinishedYourBallPlural, MSGBOX_DEFAULT
+	waitmessage
+	bufferitemname 0, VAR_0x8004
+	buffernumberstring 1, VAR_0x8005
+	playfanfare MUS_OBTAIN_ITEM
+	msgbox KurtsHouse_Text_ObtainedPlural, MSGBOX_DEFAULT
+	waitfanfare
+	additem VAR_0x8004, VAR_0x8005
+	msgbox KurtsHouse_Text_KurtTurnedOutGreatPlural, MSGBOX_DEFAULT
+	closemessage
+	turnobject LOCALID_AZALEA_TOWN_KURT, DIR_NORTH
+	release
+	end
+
+AzaleaTown_KurtsHouse_EventScript_SingularBall::
+	@ Singular case (1 ball)
+	bufferitemname 0, VAR_0x8004
+	msgbox KurtsHouse_Text_KurtJustFinishedYourBallSingular, MSGBOX_DEFAULT
+	waitmessage
+	bufferitemname 0, VAR_0x8004
+	playfanfare MUS_OBTAIN_ITEM
+	msgbox KurtsHouse_Text_ObtainedSingular, MSGBOX_DEFAULT
+	waitfanfare
+	additem VAR_0x8004, VAR_0x8005
+	msgbox KurtsHouse_Text_KurtTurnedOutGreatSingular, MSGBOX_DEFAULT
 	closemessage
 	turnobject LOCALID_AZALEA_TOWN_KURT, DIR_NORTH
 	release
@@ -296,13 +323,29 @@ KurtsHouse_Text_KurtAskYouHaveAnApricorn:
 KurtsHouse_Text_KurtThatsALetdown:
 	.string "KURT: I don't see {STR_VAR_1}s!$"
 
-KurtsHouse_Text_KurtJustFinishedYourBall:
-	.string "KURT: All done!\n"
-	.string "They turned out great!$"
+KurtsHouse_Text_KurtJustFinishedYourBallPlural:
+	.string "KURT: {PLAYER}!\n"
+	.string "Your {STR_VAR_1}S are done. Here!$"
 
-KurtsHouse_Text_KurtTurnedOutGreat:
-	.string "Here you go.\n"
+KurtsHouse_Text_KurtJustFinishedYourBallSingular:
+	.string "KURT: {PLAYER}!\n"
+	.string "Your {STR_VAR_1} is done. Here!$"
+
+KurtsHouse_Text_KurtTurnedOutGreatPlural:
+	.string "They turned out great.\n"
 	.string "Try catching some POKéMON with 'em!$"
+
+KurtsHouse_Text_KurtTurnedOutGreatSingular:
+	.string "It turned out great.\n"
+	.string "Try catching a POKéMON with it!$"
+
+KurtsHouse_Text_ObtainedPlural:
+	.string "{PLAYER} obtained\n"
+	.string "{STR_VAR_2} {STR_VAR_1}S!$"
+
+KurtsHouse_Text_ObtainedSingular:
+	.string "{PLAYER} obtained\n"
+	.string "the {STR_VAR_1}!$"
 
 KurtsHouse_Text_KurtWhatIsThat:
 	.string "Wh-what is that?\p"

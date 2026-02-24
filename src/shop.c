@@ -1849,8 +1849,21 @@ static void Task_BuyHowManyDialogueHandleInput(u8 taskId)
             CopyItemName(tItemId, gStringVar1);
             ConvertIntToDecimalStringN(gStringVar2, tItemCount, STR_CONV_MODE_LEFT_ALIGN, BAG_ITEM_CAPACITY_DIGITS);
             ConvertIntToDecimalStringN(gStringVar3, sShopData->totalCost, STR_CONV_MODE_LEFT_ALIGN, 6);
+
             if (sMartInfo.martType == MART_TYPE_KURT)
-                BuyMenuDisplayMessage(taskId, gText_KurtVar1AndYouWantedVar2, BuyMenuConfirmPurchase); // TODO:
+            {
+                u16 berryId = GetBerryFromBall(tItemId);
+                CopyItemName(berryId, gStringVar4);
+                // Remove " BERRY" suffix (last 6 characters)
+                gStringVar4[StringLength(gStringVar4) - 6] = EOS;
+                StringAppend(gStringVar3, gText_Space);
+                StringAppend(gStringVar3, gStringVar4);
+                
+                if (tItemCount == 1)
+                    BuyMenuDisplayMessage(taskId, gText_KurtVar1AndYouWantedVar2Singular, BuyMenuConfirmPurchase);
+                else
+                    BuyMenuDisplayMessage(taskId, gText_KurtVar1AndYouWantedVar2Plural, BuyMenuConfirmPurchase);
+            }
             else
                 BuyMenuDisplayMessage(taskId, gText_Var1AndYouWantedVar2, BuyMenuConfirmPurchase);
             
@@ -1881,10 +1894,13 @@ static void BuyMenuTryMakePurchase(u8 taskId)
 
     if (sMartInfo.martType == MART_TYPE_KURT)
     {
-        // For Kurt: try to add balls first
+        // For Kurt: check if there's space, but don't give items yet
         u16 totalBalls = tItemCount;
-        if (AddBagItem(tItemId, totalBalls) == TRUE)
+        if (CheckBagHasSpace(tItemId, totalBalls) == TRUE)
         {
+            // Store item info in special vars for script to use later
+            gSpecialVar_0x8004 = tItemId;
+            gSpecialVar_0x8005 = totalBalls;
             BuyMenuDisplayMessage(taskId, gText_KurtGettingStarted, BuyMenuSubtractMoney);
             RecordItemPurchase(taskId);
         }
@@ -1942,7 +1958,7 @@ static void BuyMenuSubtractMoney(u8 taskId)
         u16 berryItem = GetBerryFromBall(tItemId);
         u16 totalBerries = tItemCount;
         RemoveBagItem(berryItem, totalBerries);
-        PlaySE(SE_SHOP);
+        PlaySE(SE_BANG);
         // Set VAR_RESULT to indicate purchase was made
         gSpecialVar_Result = TRUE;
         // Wait for button press before exiting
