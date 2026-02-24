@@ -385,13 +385,15 @@ static void SetRentalsToOpponentParty(void)
 {
     u8 i;
 
-    if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_TENT) {
+    if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_TENT)
+    {
         if (gSaveBlock2Ptr->optionStyle == 1) //off
             gFacilityTrainerMons = gBattleFrontierMons;
         else if (gSaveBlock2Ptr->optionStyle == 0) //on
             gFacilityTrainerMons = gBattleFrontierMonsSplit;
     }
-    else {
+    else
+    {
         if (gSaveBlock2Ptr->optionStyle == 1) //off
             gFacilityTrainerMons = gSlateportBattleTentMons;
         else if (gSaveBlock2Ptr->optionStyle == 0) //on
@@ -433,6 +435,7 @@ static void SetPlayerAndOpponentParties(void)
             gFacilityTrainerMons = gBattleFrontierMons;
         else if (gSaveBlock2Ptr->optionStyle == 0) //on
             gFacilityTrainerMons = gBattleFrontierMonsSplit;
+
         if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_50)
             monLevel = FRONTIER_MAX_LEVEL_OPEN;
         else
@@ -555,6 +558,7 @@ static void GenerateInitialRentalMons(void)
         gFacilityTrainerMons = gBattleFrontierMons;
     else if (gSaveBlock2Ptr->optionStyle == 0) //on
         gFacilityTrainerMons = gBattleFrontierMonsSplit;
+
     if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_50)
     {
         factoryLvlMode = FRONTIER_LVL_OPEN;
@@ -684,6 +688,7 @@ static void GetOpponentBattleStyle(void)
         gFacilityTrainerMons = gBattleFrontierMons;
     else if (gSaveBlock2Ptr->optionStyle == 0) //on
         gFacilityTrainerMons = gBattleFrontierMonsSplit;
+    
     for (i = 0; i < FACTORY_NUM_STYLES; i++)
         stylePoints[i] = 0;
 
@@ -738,19 +743,21 @@ static void RestorePlayerPartyHeldItems(void)
 {
     u8 i;
 
-    if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_TENT) {
+    if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_TENT)
+    {
         if (gSaveBlock2Ptr->optionStyle == 1) //off
             gFacilityTrainerMons = gBattleFrontierMons;
         else if (gSaveBlock2Ptr->optionStyle == 0) //on
             gFacilityTrainerMons = gBattleFrontierMonsSplit;
     }
-    else {
+    else
+    {
         if (gSaveBlock2Ptr->optionStyle == 1) //off
             gFacilityTrainerMons = gSlateportBattleTentMons;
         else if (gSaveBlock2Ptr->optionStyle == 0) //on
             gFacilityTrainerMons = gSlateportBattleTentMonsSplit;
     }
-    
+
     for (i = 0; i < FRONTIER_PARTY_SIZE; i++)
     {
         SetMonData(&gPlayerParty[i],

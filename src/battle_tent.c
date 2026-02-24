@@ -298,16 +298,19 @@ static void GenerateInitialRentalMons(void)
 
     firstMonId = 0;
     gFacilityTrainers = gSlateportBattleTentTrainers;
+
     for (i = 0; i < PARTY_SIZE; i++)
     {
         species[i] = 0;
         monIds[i] = 0;
         heldItems[i] = 0;
     }
+
     if (gSaveBlock2Ptr->optionStyle == 1) //off
         gFacilityTrainerMons = gSlateportBattleTentMons;
     else if (gSaveBlock2Ptr->optionStyle == 0) //on
         gFacilityTrainerMons = gSlateportBattleTentMonsSplit;
+        
     currSpecies = SPECIES_NONE;
     i = 0;
     while (i != PARTY_SIZE)
