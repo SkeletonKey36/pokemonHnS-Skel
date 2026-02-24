@@ -1271,8 +1271,8 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)
             if (berryId != ITEM_NONE)
             {
                 CopyItemName(berryId, gStringVar4);
-                // Remove last 5 characters (" Berry")
-                gStringVar4[StringLength(gStringVar4) - 5] = EOS;
+                // Remove last 6 characters (" Berry")
+                gStringVar4[StringLength(gStringVar4) - 6] = EOS;
                 StringAppend(gStringVar4, gText_Space);
                 StringAppend(gStringVar4, gText_xOne);
                 x = GetStringRightAlignXOffset(FONT_NARROW, gStringVar4, 120);
