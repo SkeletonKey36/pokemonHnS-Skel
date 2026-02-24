@@ -321,7 +321,7 @@ KurtsHouse_Text_KurtAskYouHaveAnApricorn:
 	.string "Fine! I'll turn them into POKé BALLS.$"
 
 KurtsHouse_Text_KurtThatsALetdown:
-	.string "KURT: I don't see {STR_VAR_1}s!$"
+	.string "KURT: I don't see any {STR_VAR_1}s!$"
 
 KurtsHouse_Text_KurtJustFinishedYourBallPlural:
 	.string "KURT: {PLAYER}!\n"
