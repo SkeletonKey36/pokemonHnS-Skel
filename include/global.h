@@ -1191,6 +1191,7 @@ struct SaveBlock1
         u8 tx_Nuzlocke_InfiniteRepel:1; //new for HnS 1.2
         u8 tx_Nuzlocke_HealingHeart:1; //new for HnS 1.2
         u8 tx_Random_StatDistribution:1; //BST-preserving stat randomizer
+        u8 tx_Features_PCFromStart:1; // Added by Skel
 };
 
 extern struct SaveBlock1* gSaveBlock1Ptr;

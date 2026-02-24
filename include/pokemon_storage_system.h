@@ -60,6 +60,7 @@ bool32 CheckBoxMonSanityAt(u32 boxId, u32 boxPosition);
 u32 CountStorageNonEggMons(void);
 u32 CountAllStorageMons(void);
 bool32 AnyStorageMonWithMove(u16 moveId);
+void EnterPokeStorageFromStartMenu(void);
 
 void ResetWaldaWallpaper(void);
 void SetWaldaWallpaperLockedOrUnlocked(bool32 unlocked);
@@ -81,5 +82,6 @@ u32 GetStatusFromBoxStatus(struct Pokemon *mon);
 void PurgeMonOrBoxMon(u8 boxId, u8 position);
 u16 GetFirstBoxPokemon(void);
 void MoveFirstBoxPokemon(void);
+bool8 IsPokemonStorageAccessedFromStartMenu(void);
 
 #endif // GUARD_POKEMON_STORAGE_SYSTEM_H

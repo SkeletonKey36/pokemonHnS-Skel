@@ -37,6 +37,7 @@ EventScript_PkmnCenterNurse_HealPkmn::
 EventScript_PkmnCenterNurse_HealPkmnFast::
 	incrementgamestat GAME_STAT_USED_POKECENTER
 	special HealPlayerParty
+	special HealBoxedPokemon
 	playse SE_M_MORNING_SUN
 	goto EventScript_PkmnCenterNurse_ReturnPkmn
 	release
@@ -59,6 +60,7 @@ EventScript_PkmnCenterNurse_TakeAndHealPkmn::
 	applymovement VAR_0x800B, Common_Movement_FaceDown
 	waitmovement 0
 	special HealPlayerParty
+	special HealBoxedPokemon
 	return
 
 EventScript_PkmnCenterNurse_CheckTrainerHillAndUnionRoom::

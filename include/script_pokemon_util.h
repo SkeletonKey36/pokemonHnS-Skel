@@ -9,5 +9,6 @@ u32 GenerateShinyPersonalityForOtId(u32 otId);
 void ScriptSetMonMoveSlot(u8, u16, u8);
 void ReducePlayerPartyToSelectedMons(void);
 void HealPlayerParty(void);
+void HealBoxedPokemon(void);
 
 #endif // GUARD_SCRIPT_POKEMON_UTIL_H

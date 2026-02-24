@@ -30,6 +30,7 @@
 #include "party_menu.h"
 #include "pokedex.h"
 #include "pokenav.h"
+#include "pokemon_storage_system.h"
 #include "safari_zone.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -47,6 +48,7 @@
 #include "constants/battle_frontier.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/maps.h"
 #include "bug_contest.h"
 
 // Menu actions
@@ -67,6 +69,7 @@ enum
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_DEBUG,
     MENU_ACTION_RETIRE_BUG_CONTEST,
+    MENU_ACTION_POKEPC,
 };
 
 // Save status
@@ -109,6 +112,7 @@ static bool8 StartMenuLinkModePlayerNameCallback(void);
 static bool8 StartMenuBattlePyramidRetireCallback(void);
 static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuDebugCallback(void);
+static bool8 StartMenuPokePCCallback(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -204,7 +208,8 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_RETIRE_FRONTIER] = {gText_MenuRetire,  {.u8_void = StartMenuBattlePyramidRetireCallback}},
     [MENU_ACTION_PYRAMID_BAG]     = {gText_MenuBag,     {.u8_void = StartMenuBattlePyramidBagCallback}},
     [MENU_ACTION_DEBUG]           = {gText_MenuDebug,   {.u8_void = StartMenuDebugCallback}},
-    [MENU_ACTION_RETIRE_BUG_CONTEST] = {gText_MenuRetire,   {.u8_void = StartMenuBugContestRetireCallback}}
+    [MENU_ACTION_RETIRE_BUG_CONTEST] = {gText_MenuRetire,   {.u8_void = StartMenuBugContestRetireCallback}},
+    [MENU_ACTION_POKEPC]          = {gText_MenuPokePC,  {.u8_void = StartMenuPokePCCallback}}
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -279,12 +284,33 @@ static void ShowSaveInfoWindow(void);
 static void RemoveSaveInfoWindow(void);
 static void HideStartMenuWindow(void);
 static void HideStartMenuDebug(void);
+static bool8 IsPlayerInEliteFourOrChampionRoom(void);
 
 void SetDexPokemonPokenavFlags(void) // unused
 {
     FlagSet(FLAG_SYS_POKEDEX_GET);
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKENAV_GET);
+}
+
+static bool8 IsPlayerInEliteFourOrChampionRoom(void)
+{
+    u8 mapGroup = gSaveBlock1Ptr->location.mapGroup;
+    u8 mapNum = gSaveBlock1Ptr->location.mapNum;
+    
+    // Check if player is in any Elite Four member's room or Champion room
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_WILLS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_WILLS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_KOGAS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_KOGAS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_BRUNOS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_BRUNOS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_KARENS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_KARENS_ROOM))
+        return TRUE;
+    if (mapGroup == MAP_GROUP(POKEMON_LEAGUE_CHAMPIONS_ROOM) && mapNum == MAP_NUM(POKEMON_LEAGUE_CHAMPIONS_ROOM))
+        return TRUE;
+    
+    return FALSE;
 }
 
 static void BuildStartMenuActions(void)
@@ -350,9 +376,14 @@ static void BuildNormalStartMenu(void)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
+    
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
+    {
+        AddStartMenuAction(MENU_ACTION_POKEPC);
+    }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
-    AddStartMenuAction(MENU_ACTION_SAVE);
+    AddStartMenuAction(MENU_ACTION_SAVE);//TODO: change to select button press shortcut - creat text blurb window
     AddStartMenuAction(MENU_ACTION_OPTION);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
@@ -373,6 +404,11 @@ static void BuildDebugStartMenu(void)
     if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
+    }
+    
+    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
+    {
+        AddStartMenuAction(MENU_ACTION_POKEPC);
     }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
@@ -508,12 +544,28 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
     {
         if (sStartMenuItems[sCurrentStartMenuActions[index]].func.u8_void == StartMenuPlayerNameCallback)
         {
-            PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 9);
+            if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+            {
+                PrintPlayerNameOnWindowShortFont(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 0);
+            }
+            else 
+            {
+                PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 9);
+            }
+            
         }
         else
         {
             StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
-            AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
+            if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+            {
+                AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_SHORT, gStringVar4, 8, (index << 4) + 0, TEXT_SKIP_DRAW, NULL);
+            }
+            else
+            {
+                AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
+            }
+            
         }
 
         index++;
@@ -562,7 +614,14 @@ static bool32 InitStartMenuStep(void)
             sInitStartMenuData[0]++;
         break;
     case 5:
-        sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 9, 16, sNumStartMenuActions, sStartMenuCursorPos);
+        if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE){
+            sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 0, 16, sNumStartMenuActions, sStartMenuCursorPos);
+        }
+        else 
+        {
+            sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 9, 16, sNumStartMenuActions, sStartMenuCursorPos);
+        }
+        
         CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_MAP);
         return TRUE;
     }
@@ -819,6 +878,21 @@ static bool8 StartMenuDebugCallback(void)
 #endif
 
     return TRUE;
+}
+
+static bool8 StartMenuPokePCCallback(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenuWindow();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        EnterPokeStorageFromStartMenu();
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool8 StartMenuSafariZoneRetireCallback(void)
