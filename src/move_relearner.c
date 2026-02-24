@@ -164,6 +164,7 @@ enum {
 #define PALTAG_UI       5526
 
 #define MAX_RELEARNER_MOVES max(MAX_LEVEL_UP_MOVES, 30)
+#define MAX_RELEARNER_MOVES max(MAX_LEVEL_UP_MOVES, 30)
 
 static EWRAM_DATA struct
 {

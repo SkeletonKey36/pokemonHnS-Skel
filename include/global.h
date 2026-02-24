@@ -613,6 +613,7 @@ struct SecretBase
 #include "global.tv.h"
 #include "pokemon.h"
 #include "mom_savings.h"
+#include "mom_savings.h"
 
 struct WarpData
 {

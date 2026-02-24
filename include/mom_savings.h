@@ -21,9 +21,10 @@ struct MomSavingsData
 // Item table structure for sequential gifts
 struct MomGiftSequential
 {
-    u16 itemId;      // Item to purchase
-    u32 threshold;   // When balance reaches this amount
-    u16 cost;        // Cost to deduct from savings
+    u16 itemId;         // Item or decoration ID to purchase
+    u32 threshold;      // When balance reaches this amount
+    u16 cost;           // Cost to deduct from savings
+    bool8 isDecoration; // TRUE if this is a decoration, FALSE if item
 };
 
 // Public function declarations
@@ -31,8 +32,9 @@ void Mom_EnableSaving(bool8 enable);
 bool8 Mom_IsSavingEnabled(void);
 u32 Mom_GetBalance(void);
 bool8 Mom_TryDepositMoney(u32 amount);
+bool8 Mom_AutoDepositFromBattle(u32 amount);
 bool8 Mom_TryWithdrawMoney(u32 amount);
-bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance);
+bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance, bool8 isAutomatic);
 void Mom_EnsureInitialized(void);
 void InitMomSavings(void);
 bool8 Mom_TryTriggerGiftCall(void);

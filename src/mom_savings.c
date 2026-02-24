@@ -4,6 +4,8 @@
 #include "item.h"
 #include "random.h"
 #include "constants/items.h"
+#include "constants/decorations.h"
+#include "constants/vars.h"
 #include "event_data.h"
 #include "string_util.h"
 #include "strings.h"
@@ -20,39 +22,45 @@
 #include "bg.h"
 #include "fieldmap.h"
 #include "constants/map_types.h"
+#include "decoration_inventory.h"
 
 extern const u8 EventScript_MomGiftCall_Item[];
 extern const u8 EventScript_MomGiftCall_Berry[];
+extern const u8 EventScript_MomGiftCall_Decoration[];
 
 // Player wallet maximum (must match MAX_MONEY in money.c)
 #define MAX_PLAYER_MONEY 9999999
 
+// Special marker for dynamic gifts
+#define MOM_GIFT_STARTER_DOLL 0xFFFF  // Placeholder for starter-based doll selection
+
 // Sequential gift table (purchased in order, one-time only)
 // These items are purchased when the player's savings reach specific thresholds
 static const struct MomGiftSequential sMomGifts_Sequential[] = {
-    {ITEM_SUPER_POTION, 900,   600},
-    {ITEM_REPEL,        4000,  270},
-    {ITEM_SUPER_POTION, 7000,  600},
-    {ITEM_SILK_SCARF,   10000, 100},
-    {ITEM_MOON_STONE,   15000, 2100},
-    {ITEM_HYPER_POTION, 19000, 1200},
-    {ITEM_REVIVE,       30000, 1500},
-    {ITEM_CHOICE_BAND,  40000, 100},
-    {ITEM_MASTER_BALL,  50000, 5000},
+    {ITEM_SUPER_POTION,      900,    600,   FALSE},
+    {ITEM_REPEL,             4000,   270,   FALSE},
+    {ITEM_SILK_SCARF,        7000,   600,   FALSE},
+    {MOM_GIFT_STARTER_DOLL,  10000,  1000,   TRUE},   // Dynamic: gives doll matching player's starter
+    {ITEM_MOON_STONE,        15000,  2100,  FALSE},
+    {ITEM_HYPER_POTION,      19000,  1200,  FALSE},
+    {ITEM_LEFTOVERS,         30000,  1500,  FALSE},
+    {ITEM_CHOICE_BAND,       40000,  100,   FALSE},
+    {DECOR_SNORLAX_DOLL,     50000,  22800, TRUE},
+    {ITEM_MASTER_BALL,       100000, 50000, FALSE},
     // Add more items as desired (max 16 due to u16 bitflags)
 };
 /* 
 HGSS ITEM LIST (for reference)
 Trigger	Cost	Item
-$900	$600	Super Potion	Super Potion
-$4000	$270	Repel	Repel
-$7000	$600	Super Potion	Super Potion
-$10000	$100	Silk Scarf	Silk Scarf
-$15000	$3000	Moon Stone	Moon Stone
-$19000	$900	Hyper Potion	Hyper Potion
-$30000	$200	Choice Scarf	Choice Scarf
-$40000	$200	Muscle Band	Muscle Band
-$50000	$200	Focus Sash	Focus Sash
+$900	$600	Super Potion
+$4000	$270	Repel
+$7000	$600	Super Potion
+$10000	$100	Silk Scarf
+$15000	$3000	Moon Stone
+$19000	$900	Hyper Potion
+$30000	$200	Choice Scarf
+$40000	$200	Muscle Band
+$50000	$200	Focus Sash
 */
 
 #define MOM_ITEMS_SEQUENTIAL_COUNT ARRAY_COUNT(sMomGifts_Sequential)
@@ -74,7 +82,7 @@ static const u16 sMomGifts_Berries[] = {
 
 static bool8 Mom_CheckSequentialGifts(u32 balance, u16 *purchasedItem);
 static bool8 Mom_CheckRandomBerries(u32 newBalance, u32 oldBalance, u16 *purchasedItem);
-static void Mom_AddItemToPC(u16 itemId, u16 quantity);
+static void Mom_AddItemToPC(u16 itemId, u16 quantity, bool8 isDecoration);
 
 // Initialize mom's savings data (called on new game)
 void InitMomSavings(void)
@@ -118,6 +126,7 @@ u32 Mom_GetBalance(void)
 }
 
 // Attempt to deposit money into mom's savings
+// isAutomatic: TRUE if from battle winnings, FALSE if manual deposit
 // Returns TRUE if successful
 bool8 Mom_TryDepositMoney(u32 amount)
 {
@@ -134,7 +143,31 @@ bool8 Mom_TryDepositMoney(u32 amount)
         mom->momsMoney = MOM_MAX_MONEY;
     
     // Check if any gifts should be purchased
-    Mom_CheckForGiftPurchase(mom->momsMoney, oldBalance);
+    // Note: Berries are only purchased from automatic battle savings, not manual deposits
+    Mom_CheckForGiftPurchase(mom->momsMoney, oldBalance, FALSE);
+    
+    return TRUE;
+}
+
+// Deposit money from automatic battle savings
+// This is called after winning a battle when savings is enabled
+bool8 Mom_AutoDepositFromBattle(u32 amount)
+{
+    struct MomSavingsData *mom = &gSaveBlock1Ptr->momSavings;
+    
+    // Store old balance for tier comparison
+    u32 oldBalance = mom->momsMoney;
+    
+    // Add money to savings
+    mom->momsMoney += amount;
+    
+    // Check if balance would overflow (max is 999999)
+    if (mom->momsMoney > MOM_MAX_MONEY)
+        mom->momsMoney = MOM_MAX_MONEY;
+    
+    // Check if any gifts should be purchased
+    // Berries can be purchased from automatic deposits
+    Mom_CheckForGiftPurchase(mom->momsMoney, oldBalance, TRUE);
     
     return TRUE;
 }
@@ -157,22 +190,65 @@ bool8 Mom_TryWithdrawMoney(u32 amount)
 
 // Check if mom should purchase a gift based on the new balance
 // This is called after depositing money
+// isAutomatic: TRUE if from automatic battle savings, FALSE if manual deposit
 // Returns TRUE if a gift was purchased
-bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance)
+bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance, bool8 isAutomatic)
 {
     u16 purchasedItem = ITEM_NONE;
     u16 quantity = 1;
+    bool8 isDecoration = FALSE;
+    
+    // Don't purchase new gifts if there's already a pending gift waiting
+    // This prevents the new gift from overwriting the pending one
+    if (FlagGet(FLAG_MOM_HAS_GIFT))
+        return FALSE;
     
     // Try sequential gifts first
     // Sequential gifts are one-time purchases at specific thresholds
     if (Mom_CheckSequentialGifts(newBalance, &purchasedItem))
     {
+        // Check if this is the dynamic starter doll gift
+        if (purchasedItem == MOM_GIFT_STARTER_DOLL)
+        {
+            // Select the appropriate doll based on the player's starter
+            u16 starterChoice = VarGet(VAR_STARTER_MON);
+            switch (starterChoice)
+            {
+                case 0:  // Chikorita
+                    purchasedItem = DECOR_CHIKORITA_DOLL;
+                    break;
+                case 1:  // Cyndaquil
+                    purchasedItem = DECOR_CYNDAQUIL_DOLL;
+                    break;
+                case 2:  // Totodile
+                    purchasedItem = DECOR_TOTODILE_DOLL;
+                    break;
+                default: // Fallback to Togepi if unknown
+                    purchasedItem = DECOR_TOGEPI_DOLL;
+                    break;
+            }
+            isDecoration = TRUE;
+        }
+        else
+        {
+            // Check if this gift is a decoration
+            for (u32 i = 0; i < MOM_ITEMS_SEQUENTIAL_COUNT; i++)
+            {
+                if (sMomGifts_Sequential[i].itemId == purchasedItem)
+                {
+                    isDecoration = sMomGifts_Sequential[i].isDecoration;
+                    break;
+                }
+            }
+        }
+        
         quantity = 1;
-        Mom_AddItemToPC(purchasedItem, quantity);
+        Mom_AddItemToPC(purchasedItem, quantity, isDecoration);
         
         // Set flag/var to trigger mom's phone call
         VarSet(VAR_MOM_GIFT_ITEM, purchasedItem);
-        VarSet(VAR_MOM_GIFT_QUANTITY, quantity);
+        // Use quantity 0 to signal decoration gift (decorations don't have quantities)
+        VarSet(VAR_MOM_GIFT_QUANTITY, isDecoration ? 0 : quantity);
         FlagSet(FLAG_MOM_HAS_GIFT);
         
         return TRUE;
@@ -180,10 +256,11 @@ bool8 Mom_CheckForGiftPurchase(u32 newBalance, u32 oldBalance)
     
     // If no sequential items triggered, try random berries
     // Berry gifts are recurring purchases at multiples of the threshold
-    if (Mom_CheckRandomBerries(newBalance, oldBalance, &purchasedItem))
+    // BUT only from automatic battle savings, not manual deposits
+    if (isAutomatic && Mom_CheckRandomBerries(newBalance, oldBalance, &purchasedItem))
     {
         quantity = MOM_BERRY_QUANTITY;
-        Mom_AddItemToPC(purchasedItem, quantity);
+        Mom_AddItemToPC(purchasedItem, quantity, FALSE);
         
         // Set flag/var to trigger mom's phone call
         VarSet(VAR_MOM_GIFT_ITEM, purchasedItem);
@@ -268,6 +345,12 @@ static bool8 Mom_GiftIsBerry(void)
     return (item >= ITEM_CHERI_BERRY && item <= ITEM_ENIGMA_BERRY);
 }
 
+static bool8 Mom_GiftIsDecoration(void)
+{
+    // Decorations are signaled by quantity == 0
+    return (VarGet(VAR_MOM_GIFT_QUANTITY) == 0);
+}
+
 bool8 Mom_TryTriggerGiftCall(void)
 {
     u8 mapType = gMapHeader.mapType;
@@ -281,8 +364,10 @@ bool8 Mom_TryTriggerGiftCall(void)
     if (mapType != MAP_TYPE_ROUTE && mapType != MAP_TYPE_OCEAN_ROUTE && mapType != MAP_TYPE_CITY && mapType != MAP_TYPE_TOWN)
         return FALSE;
     
-    // All conditions met - trigger the call!
-    if (Mom_GiftIsBerry())
+    // All conditions met - trigger the appropriate call!
+    if (Mom_GiftIsDecoration())
+        ScriptContext_SetupScript(EventScript_MomGiftCall_Decoration);
+    else if (Mom_GiftIsBerry())
         ScriptContext_SetupScript(EventScript_MomGiftCall_Berry);
     else
         ScriptContext_SetupScript(EventScript_MomGiftCall_Item);
@@ -499,9 +584,18 @@ static void MomInput_Open(bool8 isDeposit)
 
 /* Special script functions related to mom's savings (called from event scripts) */
 
-static void Mom_AddItemToPC(u16 itemId, u16 quantity)
+static void Mom_AddItemToPC(u16 itemId, u16 quantity, bool8 isDecoration)
 {
-    AddPCItem(itemId, quantity);
+    if (isDecoration)
+    {
+        // It's a decoration - add to decoration inventory
+        DecorationAdd(itemId);
+    }
+    else
+    {
+        // It's an item - add to PC
+        AddPCItem(itemId, quantity);
+    }
 }
 
 void Special_MomEnableSaving(void)
@@ -519,6 +613,7 @@ void Special_MomGetBalance(void)
     u32 balance = Mom_GetBalance();
     ConvertIntToDecimalStringN(gStringVar1, balance, STR_CONV_MODE_LEFT_ALIGN, 6);
     StringExpandPlaceholders(gStringVar2, gText_PokedollarVar1);
+    gSpecialVar_Result = balance;
 }
 
 void Special_MomDeposit(void)
