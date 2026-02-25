@@ -61,6 +61,7 @@ enum {
     GFXTAG_CURSOR_FILLED,
     GFXTAG_INPUT_ARROW,
     GFXTAG_UNDERSCORE,
+    GFXTAG_SHINY_STAR,
 };
 
 enum {
@@ -72,6 +73,7 @@ enum {
     PALTAG_CURSOR,
     PALTAG_BACK_BUTTON,
     PALTAG_OK_BUTTON,
+    PALTAG_SHINY_STAR,
 };
 
 enum {
@@ -180,6 +182,7 @@ struct NamingScreenData
     u16 monGender;
     u32 monPersonality;
     MainCallback returnCallback;
+    struct Sprite *shinyStarSprite;
 };
 
 EWRAM_DATA static struct NamingScreenData *sNamingScreen = NULL;
@@ -188,6 +191,8 @@ static const u8 sPCIconOff_Gfx[] = INCBIN_U8("graphics/naming_screen/pc_icon_off
 static const u8 sPCIconOn_Gfx[] = INCBIN_U8("graphics/naming_screen/pc_icon_on.4bpp");
 static const u16 sKeyboard_Pal[] = INCBIN_U16("graphics/naming_screen/keyboard.gbapal");
 static const u16 sRival_Pal[] = INCBIN_U16("graphics/naming_screen/rival.gbapal"); // Unused, leftover from FRLG rival
+static const u32 sShinyStarTiles[] = INCBIN_U32("graphics/summary_screen/shiny_icon.4bpp.lz");
+static const u16 sShinyStarPal[] = INCBIN_U16("graphics/summary_screen/heart.gbapal");
 
 static const u8 *const sTransferredToPCMessages[] =
 {
@@ -337,6 +342,7 @@ static const struct SpriteTemplate sSpriteTemplate_Cursor;
 static const struct SpriteTemplate sSpriteTemplate_InputArrow;
 static const struct SpriteTemplate sSpriteTemplate_Underscore;
 static const struct SpriteTemplate sSpriteTemplate_PCIcon;
+static const struct SpriteTemplate sSpriteTemplate_ShinyStarIcon;
 static const u8 *const sNamingScreenKeyboardText[KBPAGE_COUNT][KBROW_COUNT];
 static const struct SpriteSheet sSpriteSheets[];
 static const struct SpritePalette sSpritePalettes[];
@@ -380,6 +386,10 @@ static void SetPageSwapButtonGfx(u8, struct Sprite *, struct Sprite *);
 static void CreateBackOkSprites(void);
 static void CreateTextEntrySprites(void);
 static void CreateInputTargetIcon(void);
+static bool8 ShouldShowShinyIndicator(void);
+static void CreateShinyStarSprite(void);
+static void UpdateShinyStarVisibility(void);
+static void DestroyShinyStarSprite(void);
 static u8 HandleKeyboardEvent(void);
 static u8 SwapKeyboardPage(void);
 static u8 GetInputEvent(void);
@@ -421,6 +431,7 @@ void DoNamingScreen(u8 templateNum, u8 *destBuffer, u16 monSpecies, u16 monGende
         sNamingScreen->monPersonality = monPersonality;
         sNamingScreen->destBuffer = destBuffer;
         sNamingScreen->returnCallback = returnCallback;
+        sNamingScreen->shinyStarSprite = NULL;
 
         if (templateNum == NAMING_SCREEN_PLAYER)
             StartTimer1();
@@ -561,6 +572,7 @@ static void Task_NamingScreen(u8 taskId)
     case STATE_FADE_IN:
         MainState_FadeIn();
         SetSpritesVisible();
+        UpdateShinyStarVisibility();
         SetVBlank();
         break;
     case STATE_WAIT_FADE_IN:
@@ -716,6 +728,7 @@ static bool8 MainState_Exit(void)
         SetMainCallback2(sNamingScreen->returnCallback);
         DestroyTask(FindTaskIdByFunc(Task_NamingScreen));
         FreeAllWindowBuffers();
+        DestroyShinyStarSprite();
         FREE_AND_SET_NULL(sNamingScreen);
     }
     return FALSE;
@@ -1128,6 +1141,8 @@ static void CreateSprites(void)
     CreateBackOkSprites();
     CreateTextEntrySprites();
     CreateInputTargetIcon();
+    CreateShinyStarSprite();
+    UpdateShinyStarVisibility();
 }
 
 static void CreateCursorSprite(void)
@@ -1451,11 +1466,93 @@ static void NamingScreen_CreateRivalIcon(void)
 {
     u8 rivalGfxId;
     u8 spriteId;
-    
+
     //rivalGfxId = GetRivalAvatarGraphicsIdByStateIdAndGender(PLAYER_AVATAR_STATE_NORMAL, gSaveBlock2Ptr->playerGender ^ 1);
     spriteId = CreateObjectGraphicsSprite(OBJ_EVENT_GFX_SILVER, SpriteCallbackDummy, 56, 37, 0);
     gSprites[spriteId].oam.priority = 3;
     StartSpriteAnim(&gSprites[spriteId], 4);
+}
+
+//--------------------------------------------------
+// Shiny Star Sprite Management
+//--------------------------------------------------
+
+static bool8 ShouldShowShinyIndicator(void)
+{
+    // Only show for caught mon or nickname screens
+    if (sNamingScreen->templateNum != NAMING_SCREEN_CAUGHT_MON
+        && sNamingScreen->templateNum != NAMING_SCREEN_NICKNAME)
+        return FALSE;
+
+    // Need personality to check
+    if (sNamingScreen->monPersonality == 0)
+        return FALSE;
+
+    // Check if shiny using player's OT ID and mon's personality
+    u32 otId = (u32)gSaveBlock2Ptr->playerTrainerId[1] << 16
+             | (u32)gSaveBlock2Ptr->playerTrainerId[0];
+
+    return IsShinyOtIdPersonality(otId, sNamingScreen->monPersonality);
+}
+
+static void CreateShinyStarSprite(void)
+{
+    struct SpriteSheet sheet;
+    struct SpritePalette pal;
+    u8 spriteId;
+    void *gfxBuffer;
+
+    if (sNamingScreen->shinyStarSprite != NULL)
+        return;
+
+    // Allocate buffer and decompress graphics (like summary screen does)
+    gfxBuffer = AllocZeroed(0x20 * 2);  // 8x8 tile = 32 bytes, allocate 64 to be safe
+    if (gfxBuffer == NULL)
+        return;
+
+    LZ77UnCompWram(sShinyStarTiles, gfxBuffer);
+
+    // Load sprite sheet and palette
+    sheet.data = gfxBuffer;
+    sheet.size = 0x20 * 2;
+    sheet.tag = GFXTAG_SHINY_STAR;
+
+    pal.data = sShinyStarPal;
+    pal.tag = PALTAG_SHINY_STAR;
+
+    LoadSpriteSheet(&sheet);
+    LoadSpritePalette(&pal);
+
+    // Free the decompression buffer
+    Free(gfxBuffer);
+
+    // Create sprite near the mon icon
+    // Mon icon is at (56, 40), place star to the bottom-right
+    spriteId = CreateSprite(&sSpriteTemplate_ShinyStarIcon, 180, 58, 0);
+    sNamingScreen->shinyStarSprite = &gSprites[spriteId];
+    sNamingScreen->shinyStarSprite->oam.priority = 2;
+
+    // Start hidden, will be shown if mon is shiny
+    sNamingScreen->shinyStarSprite->invisible = TRUE;
+}
+
+static void UpdateShinyStarVisibility(void)
+{
+    if (sNamingScreen->shinyStarSprite == NULL)
+        return;
+
+    sNamingScreen->shinyStarSprite->invisible = !ShouldShowShinyIndicator();
+}
+
+static void DestroyShinyStarSprite(void)
+{
+    if (sNamingScreen->shinyStarSprite != NULL)
+    {
+        DestroySprite(sNamingScreen->shinyStarSprite);
+        FreeSpriteTilesByTag(GFXTAG_SHINY_STAR);
+        FreeSpritePaletteByTag(PALTAG_SHINY_STAR);
+        sNamingScreen->shinyStarSprite = NULL;
+    }
 }
 
 //--------------------------------------------------
@@ -2191,6 +2288,22 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_RIVAL]      = &sRivalNamingScreenTemplate,
 };
 
+static const struct OamData sOam_ShinyStarIcon =
+{
+    .y = 0,
+    .affineMode = ST_OAM_AFFINE_OFF,
+    .objMode = ST_OAM_OBJ_NORMAL,
+    .mosaic = FALSE,
+    .bpp = ST_OAM_4BPP,
+    .shape = SPRITE_SHAPE(8x8),
+    .x = 0,
+    .matrixNum = 0,
+    .size = SPRITE_SIZE(8x8),
+    .tileNum = 0,
+    .priority = 0,
+    .paletteNum = 0,
+};
+
 static const struct OamData sOam_8x8 =
 {
     .y = 0,
@@ -2469,6 +2582,12 @@ static const union AnimCmd sAnim_PCIcon[] =
     ANIMCMD_JUMP(0)
 };
 
+static const union AnimCmd sAnim_ShinyStarIcon[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END,
+};
+
 static const union AnimCmd *const sAnims_Loop[] =
 {
     sAnim_Loop
@@ -2483,6 +2602,11 @@ static const union AnimCmd *const sAnims_Cursor[] =
 static const union AnimCmd *const sAnims_PCIcon[] =
 {
     sAnim_PCIcon
+};
+
+static const union AnimCmd *const sAnims_ShinyStarIcon[] =
+{
+    sAnim_ShinyStarIcon
 };
 
 static const struct SpriteTemplate sSpriteTemplate_PageSwapFrame =
@@ -2584,6 +2708,17 @@ static const struct SpriteTemplate sSpriteTemplate_PCIcon =
     .callback = SpriteCallbackDummy
 };
 
+static const struct SpriteTemplate sSpriteTemplate_ShinyStarIcon =
+{
+    .tileTag = GFXTAG_SHINY_STAR,
+    .paletteTag = PALTAG_SHINY_STAR,
+    .oam = &sOam_ShinyStarIcon,
+    .anims = sAnims_ShinyStarIcon,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy
+};
+
 static const u8 *const sNamingScreenKeyboardText[KBPAGE_COUNT][KBROW_COUNT] =
 {
     [KEYBOARD_LETTERS_LOWER] =
@@ -2636,5 +2771,6 @@ static const struct SpritePalette sSpritePalettes[] =
     {gNamingScreenMenu_Pal[5], PALTAG_CURSOR},
     {gNamingScreenMenu_Pal[4], PALTAG_BACK_BUTTON},
     {gNamingScreenMenu_Pal[4], PALTAG_OK_BUTTON},
+    {sShinyStarPal, PALTAG_SHINY_STAR},
     {}
 };

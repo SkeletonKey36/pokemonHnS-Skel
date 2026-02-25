@@ -244,7 +244,10 @@ BerryBlender_Text_DontHaveAnyBerriesNoneToSpare:
 
 BerryBlender_EventScript_BerryBlender1::
 	lockall
-	goto_if_unset FLAG_GARBAGEFLAG, BerryBlender_EventScript_BlendMasterPresent
+	goto BerryBlender_EventScript_BlendMasterPresent
+
+BerryBlender_EventScript_BerryBlender1_Viridian::
+	lockall
 	setvar NUM_OPPONENTS, 1
 	applymovement LOCALID_EXPERT_M, BerryBlender_Movement_BlendLeaderWalkInPlace
 	waitmovement 0

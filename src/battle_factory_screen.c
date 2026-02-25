@@ -1749,6 +1749,7 @@ static void CreateFrontierFactorySelectableMons(u8 firstMonId)
         gFacilityTrainerMons = gBattleFrontierMons;
     else if (gSaveBlock2Ptr->optionStyle == 0) //on
         gFacilityTrainerMons = gBattleFrontierMonsSplit;
+    
     if (gSaveBlock2Ptr->frontier.lvlMode != FRONTIER_LVL_50)
         level = 50;
     else

@@ -1227,7 +1227,14 @@ static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water)
     u32 randMax;
     u32 rand;
     u32 extraYield;
+    u16 currentMap = gMapHeader.regionMapSectionId;
 
+    // This allows berry trees to be fully watered in rainy routes without player interaction.
+    // Currently, there are no maps in HnS that have WEATHER_RAIN or WEATHER_RAIN_THUNDERSTORM that contain berry trees.
+    // The maps below are Emerald default where there's rain + berry trees.
+    if (currentMap == MAP_ROUTE119 || currentMap == MAP_ROUTE120 || currentMap == MAP_ROUTE123)
+        water == 4;
+        
     if (water == 0)
         return min;
     else
@@ -1256,14 +1263,7 @@ static u8 CalcBerryYield(struct BerryTree *tree)
 
 static u8 GetBerryCountByBerryTreeId(u8 id)
 {
-    struct BerryTree *tree = GetBerryTreeInfo(id);
-    const struct Berry *berry = GetBerryInfo(tree->berry);
-    u16 currentMap = gMapHeader.regionMapSectionId;
-
-    if (currentMap == MAP_ROUTE119 || currentMap == MAP_ROUTE120 || currentMap == MAP_ROUTE123)
-        return berry->maxYield;
-    else
-        return gSaveBlock1Ptr->berryTrees[id].berryYield;
+    return gSaveBlock1Ptr->berryTrees[id].berryYield;
 }
 
 static u16 GetStageDurationByBerryType(u8 berry)

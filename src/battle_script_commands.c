@@ -1209,12 +1209,17 @@ static void Cmd_accuracycheck(void)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
         if (gBattleMons[gBattlerTarget].ability == ABILITY_ILLUMINATE)
             calc = (calc * 90) / 100; // 1.1 illuminate loss
+
         if (gSaveBlock2Ptr->optionStyle == 1)
+        {
             if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_TYPE_PHYSICAL(type))
                 calc = (calc * 80) / 100; // 1.2 hustle loss
-        if (gSaveBlock2Ptr->optionStyle == 0)
+        }
+        else if (gSaveBlock2Ptr->optionStyle == 0)
+        {
             if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_MOVE_PHYSICAL(move))
                 calc = (calc * 80) / 100; // 1.2 hustle loss
+        }
 
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
         {
@@ -2429,6 +2434,7 @@ static void Cmd_datahpupdate(void)
                 if (gSpecialStatuses[gActiveBattler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[gActiveBattler].shellBellDmg = gHpDealt;
                 if (gSaveBlock2Ptr->optionStyle == 0)
+                {
                     if (IS_MOVE_PHYSICAL(gCurrentMove) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2459,7 +2465,9 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
-                if (gSaveBlock2Ptr->optionStyle == 1)
+                }
+                else if (gSaveBlock2Ptr->optionStyle == 1)
+                {
                     if (IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -2490,6 +2498,7 @@ static void Cmd_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].specialBattlerId = gBattlerTarget;
                         }
                     }
+                }
             }
             gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
 
@@ -3877,7 +3886,8 @@ static void Cmd_getexp(void)
                     // Skip Mon if no species, egg, or fainted (0 HP)
                     if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE
                         || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
-                        || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+                        || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0
+                        || ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && i >= 3)) // Double Battle Partner doesn't get Exp.
                         continue;
 
                     // Track the number of Mons getting participation Exp
@@ -4002,7 +4012,8 @@ static void Cmd_getexp(void)
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
             }
-            else if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= GetCurrentPartyLevelCap())
+            else if ((GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= GetCurrentPartyLevelCap())
+                || ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && gBattleStruct->expGetterMonId >= 3))
             {
                 *(&gBattleStruct->sentInPokes) >>= 1;
                 gBattleScripting.getexpState = 5;
