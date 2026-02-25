@@ -45,7 +45,7 @@ CeladonGameCorner_Text_FishingGuru:
 
 CeladonGameCorner_Text_Fisher1:
 	.string "Gahahaha!\p"
-	.string "The coins just keep popping out!\p"
+	.string "The coins just keep coming in!\p"
 	.string "Hm? What, kid? You want to play?\p"
 	.string "I'll share my luck with you!$"
 
@@ -63,5 +63,5 @@ CeladonGameCorner_Text_GymGuide:
 
 CeladonGameCorner_Text_Gramps:
 	.string "Hmmm… The odds are surely\n"
-	.string "better for PIKACHU's line,\l"
+	.string "better putting it all on blue,\l"
 	.string "but... what to do?$"
