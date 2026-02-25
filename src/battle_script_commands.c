@@ -56,14 +56,26 @@
 #include "debug.h"
 #include "tx_randomizer_and_challenges.h"
 
-// --- EXP ALL (Large EXP Share) tuning ---------------------------------------
-// Non-participant share = baseExp * EXPALL_SHARE_NUM / EXPALL_SHARE_DEN
-// Participant share     = normalShare * EXPALL_PARTICIPANT_NUM / EXPALL_PARTICIPANT_DEN
+// --- EXP ALL (Large EXP Share) 1.2.2 tuning ---------------------------------------
+// When Exp All is on, 1/3 of the total yield is distributed equally across all Participants
+// When Exp All is on, 2/3 of the total yield is distributed equally across all valid Mons, regardless of participation
+// This is paired with the baseline total yield being doubled between 1.2.1 and 1.2.2,
+//   which was done because in 1.2.1, with a full party of 6 mons, the party would receive a bonus 140% of the intended total Exp Yield.
+// Alongside the 2/3 distributed across participants, and the intended 7/25 for recipients,
+//   this increased the Total Effective Exp Yield to 235% of what the yield without the Exp All would be.
+// This occurred because the yield given by the Exp All was not *distributed across* the party,
+//   but simply *given*, undivided, effectively multiplying the effective yield of the Exp All by the number of recipients.
 #ifndef EXPALL_TUNING
-#define EXPALL_SHARE_NUM          7
-#define EXPALL_SHARE_DEN          25
-#define EXPALL_PARTICIPANT_NUM    2
+#define EXPALL_SHARE_NUM          2
+#define EXPALL_SHARE_DEN          3
+#define EXPALL_PARTICIPANT_NUM    1
 #define EXPALL_PARTICIPANT_DEN    3
+#else
+// If EXPALL_TUNING was defined elsewhere, use official game Exp All calculations
+#define EXPALL_SHARE_NUM          1
+#define EXPALL_SHARE_DEN          2
+#define EXPALL_PARTICIPANT_NUM    1
+#define EXPALL_PARTICIPANT_DEN    2
 #endif
 // ---------------------------------------------------------------------------
 
@@ -3800,29 +3812,25 @@ static void Cmd_getexp(void)
     s32 i; // also used as stringId
     u8 holdEffect;
     s32 sentIn;
-    s32 viaExpShare = 0;
     u16 *exp = &gBattleStruct->expValue;
 
     gBattlerFainted = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);
-        // Disable EXP gain during the Bug Catching Contest
-    if (FlagGet(FLAG_SYS_BUG_CONTEST_MODE))
-    {
-        // Skip all EXP distribution logic
-        gBattleScripting.getexpState = 6; // jump to "we're done" case
-    }
+
     sentIn = gSentPokesToOpponent[(gBattlerFainted & 2) >> 1];
 
     switch (gBattleScripting.getexpState)
     {
     case 0: // check if should receive exp at all
-        if (GetBattlerSide(gBattlerFainted) != B_SIDE_OPPONENT || (gBattleTypeFlags &
-             (BATTLE_TYPE_LINK
-              | BATTLE_TYPE_RECORDED_LINK
-              | BATTLE_TYPE_TRAINER_HILL
-              | BATTLE_TYPE_FRONTIER
-              | BATTLE_TYPE_SAFARI
-              | BATTLE_TYPE_BATTLE_TOWER
-              | BATTLE_TYPE_EREADER_TRAINER)))
+        if (GetBattlerSide(gBattlerFainted) != B_SIDE_OPPONENT
+            || FlagGet(FLAG_SYS_BUG_CONTEST_MODE)
+            || (gBattleTypeFlags &
+                (BATTLE_TYPE_LINK
+                | BATTLE_TYPE_RECORDED_LINK
+                | BATTLE_TYPE_TRAINER_HILL
+                | BATTLE_TYPE_FRONTIER
+                | BATTLE_TYPE_SAFARI
+                | BATTLE_TYPE_BATTLE_TOWER
+                | BATTLE_TYPE_EREADER_TRAINER)))
         {
             gBattleScripting.getexpState = 6; // goto last case
         }
@@ -3836,117 +3844,119 @@ static void Cmd_getexp(void)
         {
             u16 calculatedExp;
             s32 viaSentIn;
-            gExpShareCheck = FALSE;
+            s32 viaExpShare;
 
-            for (viaSentIn = 0, i = 0; i < PARTY_SIZE; i++)
+            // special for Jaizu, if #define TX_EXP_MULTIPLER_ONLY_ON_NUZLOCKE_AND_RANDOMIZER true, only apply exp multiplier if Nuzlocke or Randomizer are active
+            bool8 tx_multiply = !TX_EXP_MULTIPLER_ONLY_ON_NUZLOCKE_AND_RANDOMIZER || IsNuzlockeActive() || IsRandomizerActivated();
+
+            if (tx_multiply && gSaveBlock1Ptr->tx_Challenges_ExpMultiplier == 3) // tx_randomizer_and_challenges
             {
-                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE
-                    || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
-                    || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0
-                    || ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && i >= 3)) // Double Battle Partner doesn't get Exp.
-                    continue;
-                if (gBitTable[i] & sentIn)
-                    viaSentIn++;
+                calculatedExp = 0;
+                *exp = 0;
+                gExpShareExp = 0;
 
-                item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
-
-                if (item == ITEM_ENIGMA_BERRY)
-                    holdEffect = gSaveBlock1Ptr->enigmaBerry.holdEffect;
-                else
-                    holdEffect = ItemId_GetHoldEffect(item);
-                if ((holdEffect == HOLD_EFFECT_EXP_SHARE) && (FlagGet(FLAG_EXP_SHARE) == FALSE))
-                    viaExpShare++;
+                #ifndef NDEBUG
+                MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp No Exp Challenge Enabled ********");
+                #endif
             }
-
-            calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
-
-            if (gSaveBlock1Ptr->tx_Challenges_ExpMultiplier != 0) //tx_randomizer_and_challenges
+            else
             {
-                if (TX_EXP_MULTIPLER_ONLY_ON_NUZLOCKE_AND_RANDOMIZER) //special for Jaizu
+                // Total Exp Yield of the defeated Mon
+                calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
+                calculatedExp *= 2; // Exp All 1.2.1 more than doubled total Exp Yield on average
+
+                #ifndef NDEBUG
+                MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Original calculatedExp %d ********", calculatedExp);
+                #endif
+
+                if (tx_multiply && gSaveBlock1Ptr->tx_Challenges_ExpMultiplier != 0) // tx_randomizer_and_challenges
+                    calculatedExp *= 1 + (0.5 * gSaveBlock1Ptr->tx_Challenges_ExpMultiplier);
+
+                if (gSaveBlock2Ptr->optionsDifficulty == 0) //exp increase for easy mode
+                    calculatedExp *= 1.2;
+                if (gSaveBlock2Ptr->optionsDifficulty == 2) //exp decrease for hard mode
+                    calculatedExp *= 0.60;
+
+                #ifndef NDEBUG
+                MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Weighted calculatedExp %d ********", calculatedExp);
+                #endif
+
+                for (viaSentIn = 0, viaExpShare = 0, i = 0; i < PARTY_SIZE; i++)
                 {
-                    if (IsNuzlockeActive() || IsRandomizerActivated())
+                    // Skip Mon if no species, egg, or fainted (0 HP)
+                    if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE
+                        || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+                        || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0
+                        || ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && i >= 3)) // Double Battle Partner doesn't get Exp.
+                        continue;
+
+                    // Track the number of Mons getting participation Exp
+                    if (gBitTable[i] & sentIn)
+                        viaSentIn++;
+
+                    // Track the number of Mons getting hold/key item Exp
+                    if (FlagGet(FLAG_EXP_SHARE))
                     {
-                        if (gSaveBlock1Ptr->tx_Challenges_ExpMultiplier == 3)
-                            calculatedExp = 0;
-                        else
-                            calculatedExp *= 1 + 0.5 * gSaveBlock1Ptr->tx_Challenges_ExpMultiplier;
+                        viaExpShare++;
                     }
-                }
-                else
-                {
-                    if (gSaveBlock1Ptr->tx_Challenges_ExpMultiplier == 3)
-                        calculatedExp = 0;
                     else
-                        calculatedExp *= 1 + 0.5 * gSaveBlock1Ptr->tx_Challenges_ExpMultiplier;
-                }
-            }
-
-            if (gSaveBlock2Ptr->optionsDifficulty == 2) //exp decrease for hard mode
-                calculatedExp *= 0.60;
-            if (gSaveBlock2Ptr->optionsDifficulty == 0) //exp increase for easy mode
-                calculatedExp *= 1.2;
-
-            if (FlagGet(FLAG_EXP_SHARE) == FALSE)
-            {
-                if (viaExpShare) // at least one mon is getting exp via exp share
-                {
-                    *exp = SAFE_DIV(calculatedExp / 2, viaSentIn);
-                    if (*exp == 0)
-                        *exp = 1;
-
-                    gExpShareExp = calculatedExp / 2 / viaExpShare;
-                    if (gExpShareExp == 0)
-                        gExpShareExp = 1;
-                }
-                else
-                {
-                    *exp = SAFE_DIV(calculatedExp, viaSentIn);
-                    if (*exp == 0)
-                        *exp = 1;
-                    gExpShareExp = 0;
-                }
-            }
-            else if ((FlagGet(FLAG_EXP_SHARE) == TRUE) && (gSaveBlock2Ptr->optionsDifficulty != 2))
-            {
-                // Participants: scale normal share by EXPALL_PARTICIPANT_NUM / EXPALL_PARTICIPANT_DEN
-                *exp = SAFE_DIV(calculatedExp * EXPALL_PARTICIPANT_NUM,
-                                viaSentIn    * EXPALL_PARTICIPANT_DEN);
-                if (*exp == 0)
-                    *exp = 1;
-
-                // Non-participants (EXP ALL): base * EXPALL_SHARE_NUM / EXPALL_SHARE_DEN
-                gExpShareExp = SAFE_DIV(calculatedExp * EXPALL_SHARE_NUM, EXPALL_SHARE_DEN);
-                if (gExpShareExp == 0 && calculatedExp != 0)
-                    gExpShareExp = 1;
-            }
-            else if ((FlagGet(FLAG_EXP_SHARE) == TRUE) && (gSaveBlock2Ptr->optionsDifficulty == 2))
-            {
-                // Participants: scale normal share by EXPALL_PARTICIPANT_NUM / EXPALL_PARTICIPANT_DEN
-                *exp = SAFE_DIV(calculatedExp * EXPALL_PARTICIPANT_NUM,
-                                viaSentIn    * EXPALL_PARTICIPANT_DEN);
-                if (*exp == 0)
-                    *exp = 1;
-
-                // Non-participants (EXP ALL): base * EXPALL_SHARE_NUM / EXPALL_SHARE_DEN
-                gExpShareExp = SAFE_DIV(calculatedExp * EXPALL_SHARE_NUM, EXPALL_SHARE_DEN);
-                if (gExpShareExp == 0 && calculatedExp != 0)
-                    gExpShareExp = 1;
-            }
-            if (gSaveBlock1Ptr->tx_Challenges_ExpMultiplier == 3)
-            {
-                if (TX_EXP_MULTIPLER_ONLY_ON_NUZLOCKE_AND_RANDOMIZER) //special for Jaizu
-                {
-                    if (IsNuzlockeActive() || IsRandomizerActivated())
                     {
-                        *exp = 0;
-                        gExpShareExp = 0;
+                        // Retrieve item hold effect
+                        item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
+                        if (item == ITEM_ENIGMA_BERRY)
+                            holdEffect = gSaveBlock1Ptr->enigmaBerry.holdEffect;
+                        else
+                            holdEffect = ItemId_GetHoldEffect(item);
+                        
+                        // Track the number of Mons getting hold/key item Exp
+                        if (holdEffect == HOLD_EFFECT_EXP_SHARE)
+                            viaExpShare++;
                     }
                 }
-                else
+
+                s32 participantNumerator = 1;
+                s32 participantDenominator = 1;
+                s32 recipientNumerator = 0;
+                s32 recipientDenominator = 1;
+
+                // At least one Mon is getting Exp via Exp Share
+                if (viaExpShare)
                 {
-                    *exp = 0;
-                    gExpShareExp = 0;
+                    if (FlagGet(FLAG_EXP_SHARE))
+                    {
+                        // One-third of total Exp yield distributed evenly across all participants
+                        participantNumerator = EXPALL_PARTICIPANT_NUM;
+                        participantDenominator = EXPALL_PARTICIPANT_DEN;
+                        // Other two-thirds of total Exp yield distributed evenly across all Mons receiving from Exp All
+                        recipientNumerator = EXPALL_SHARE_NUM;
+                        recipientDenominator = EXPALL_SHARE_DEN;
+                    }
+                    else
+                    {
+                        // Half of total Exp yield distributed evenly across all participants
+                        participantNumerator = 1;
+                        participantDenominator = 2;
+                        // Other half of total Exp yield distributed evenly across all Mons holding Exp Share
+                        recipientNumerator = 1;
+                        recipientDenominator = 2;
+                    } 
                 }
+                    
+                *exp = SAFE_DIV(calculatedExp * participantNumerator, viaSentIn * participantDenominator);
+                if (*exp == 0)
+                    *exp = 1;
+                
+                #ifndef NDEBUG
+                MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Exp per participant %d ********", *exp);
+                #endif
+
+                gExpShareExp = SAFE_DIV(calculatedExp * recipientNumerator, viaExpShare * recipientDenominator);
+                if (gExpShareExp == 0 && viaExpShare)
+                    gExpShareExp = 1;
+
+                #ifndef NDEBUG
+                MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Exp per share %d ********", gExpShareExp);
+                #endif
             }
 
             gBattleScripting.getexpState++;
@@ -3986,54 +3996,48 @@ static void Cmd_getexp(void)
                 holdEffect = gSaveBlock1Ptr->enigmaBerry.holdEffect;
             else
                 holdEffect = ItemId_GetHoldEffect(item);
-            if (holdEffect != HOLD_EFFECT_EXP_SHARE && !(gBattleStruct->sentInPokes & 1) && (FlagGet(FLAG_EXP_SHARE) == FALSE))
+            
+            if (!FlagGet(FLAG_EXP_SHARE) && holdEffect != HOLD_EFFECT_EXP_SHARE && !(gBattleStruct->sentInPokes & 1))
             {
+                // No Exp All, no Exp Share, no Participation, no reason to give this Mon Exp
                 *(&gBattleStruct->sentInPokes) >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
             }
-            else if (gExpShareCheck == ((gBattleStruct->sentInPokes & (1 << gBattleStruct->expGetterMonId)) != 0) && (FlagGet(FLAG_EXP_SHARE) == TRUE))
+            else if ((GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPECIES) == SPECIES_NONE)
+                    || GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG))
             {
+                // No Exp for SPECIES_NONE or Eggs
+                *(&gBattleStruct->sentInPokes) >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
             }
             else if ((GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= GetCurrentPartyLevelCap())
                 || ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && gBattleStruct->expGetterMonId >= 3))
             {
-                if ((FlagGet(FLAG_EXP_SHARE) == FALSE))
-                    *(&gBattleStruct->sentInPokes) >>= 1;
+                *(&gBattleStruct->sentInPokes) >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
 
                 // Added ability to gain EVs for Level 100 or Level Capped Pokemon
                 MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBattlerFainted].species);
             }
-            else if (((FlagGet(FLAG_EXP_SHARE) == TRUE) && (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPECIES)) == SPECIES_NONE)
-            || ((FlagGet(FLAG_EXP_SHARE) == TRUE) && GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG)))
-            {
-                gBattleScripting.getexpState = 5;
-                gBattleMoveDamage = 0; // used for exp
-            }
             else
             {
-                if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP) && !GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG))
+                if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP)
+                    && !GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG))
                 {
-                    if (FlagGet(FLAG_EXP_SHARE) == TRUE)
-                        if (gBattleStruct->sentInPokes & (1 << gBattleStruct->expGetterMonId))
-                            gBattleMoveDamage = *exp;
-                        else if (gExpShareCheck)
-                            gBattleMoveDamage += gExpShareExp;
-                        else
-                            gBattleMoveDamage = 0;
 
-                    if (FlagGet(FLAG_EXP_SHARE) == FALSE)
-                        if (gBattleStruct->sentInPokes & 1)
-                            gBattleMoveDamage = *exp;
-                        else
-                            gBattleMoveDamage = 0;
+                    if (gBattleStruct->sentInPokes & 1)
+                        gBattleMoveDamage = *exp;
+                    else
+                        gBattleMoveDamage = 0;
 
-                    if ((holdEffect == HOLD_EFFECT_EXP_SHARE) && ((FlagGet(FLAG_EXP_SHARE) == FALSE)))
+                    // Give Exp from Exp Share S, Exp All, or Both (stacking is removed)
+                    if (FlagGet(FLAG_EXP_SHARE) || (holdEffect == HOLD_EFFECT_EXP_SHARE))
                         gBattleMoveDamage += gExpShareExp;
+
+                    // Apply Lucky Egg and/or Trainer Battle Exp Multipliers
                     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
@@ -4085,16 +4089,23 @@ static void Cmd_getexp(void)
                     PREPARE_STRING_BUFFER(gBattleTextBuff2, i);
                     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
 
-                    if (FlagGet(FLAG_EXP_SHARE) == FALSE)
+                    // Only Print this Mon's Exp gained if participated, has exp-boosting held item, or gets traded boost
+                    if ((!FlagGet(FLAG_EXP_SHARE) && (holdEffect == HOLD_EFFECT_EXP_SHARE))
+                        || (holdEffect == HOLD_EFFECT_LUCKY_EGG)
+                        || (gBattleStruct->sentInPokes & 1)
+                        || (
+                            IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId])
+                            && !(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3)
+                            && (gSaveBlock2Ptr->optionsDifficulty != 2)))
+                    {
+                        #ifndef NDEBUG
+                        MgbaPrintf(MGBA_LOG_DEBUG, "******** Cmd_getexp Battler %d ********", gBattleStruct->expGetterBattlerId);
+                        #endif
                         PrepareStringBattle(STRINGID_PKMNGAINEDEXP, gBattleStruct->expGetterBattlerId);
-
-                    if (FlagGet(FLAG_EXP_SHARE) == TRUE)
-                        if (gBattleStruct->sentInPokes & (1 << gBattleStruct->expGetterMonId))
-                            PrepareStringBattle(STRINGID_PKMNGAINEDEXP, gBattleStruct->expGetterBattlerId);
+                    }
                     MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBattlerFainted].species);
                 }
-                if ((FlagGet(FLAG_EXP_SHARE) == FALSE))
-                    gBattleStruct->sentInPokes >>= 1;
+                gBattleStruct->sentInPokes >>= 1;
                 gBattleScripting.getexpState++;
             }
         }
@@ -4147,7 +4158,7 @@ static void Cmd_getexp(void)
                     gBattleMons[0].defense = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_DEF);
                     // Speed is duplicated, likely due to a copy-paste error.
                     gBattleMons[0].speed = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPEED);
-                    gBattleMons[0].speed = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPEED);
+                    // gBattleMons[0].speed = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPEED);
                     gBattleMons[0].spAttack = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPATK);
                     gBattleMons[0].spDefense = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPDEF);
                 }
@@ -4164,7 +4175,8 @@ static void Cmd_getexp(void)
 #ifdef BUGFIX
                     gBattleMons[2].spDefense = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPDEF);
 #else
-                    gBattleMons[2].speed = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPEED);
+                    gBattleMons[2].spDefense = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPDEF);
+                    // gBattleMons[2].speed = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPEED);
 #endif
                     gBattleMons[2].spAttack = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPATK);
                 }
@@ -4187,31 +4199,56 @@ static void Cmd_getexp(void)
             gBattleStruct->expGetterMonId++;
             if (gBattleStruct->expGetterMonId < PARTY_SIZE)
                 gBattleScripting.getexpState = 2; // loop again
-            else if (FlagGet(FLAG_EXP_SHARE) == FALSE)
-                gBattleScripting.getexpState = 6; // we're done
-            else if (FlagGet(FLAG_EXP_SHARE) == TRUE)
+            else
             {
-                s32 totalMon = 0;
-                s32 viaSentIn = 0;
-                sentIn = gSentPokesToOpponent[(gBattlerFainted & 2) >> 1];
-                for (viaSentIn = 0, i = 0; i < PARTY_SIZE; i++)  // To see if every mon has seen battle
+                if (FlagGet(FLAG_EXP_SHARE))
                 {
-                    if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
-                    || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
-                        continue;
-                    totalMon++;
-                    if (gBitTable[i] & sentIn)
-                        viaSentIn++;
+                    s32 totalMon = 0;
+                    s32 uniqueYield = 0;
+                    sentIn = gSentPokesToOpponent[(gBattlerFainted & 2) >> 1];
+
+                    // Check if at least one mon only received exp from Exp All
+                    for (i = 0; i < PARTY_SIZE; i++)
+                    {
+                        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE
+                            || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+                            || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0
+                            || (GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) >= GetCurrentPartyLevelCap())) // Gained no exp
+                            continue;
+
+                        totalMon++;
+
+                        item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
+
+                        if (item == ITEM_ENIGMA_BERRY)
+                            holdEffect = gSaveBlock1Ptr->enigmaBerry.holdEffect;
+                        else
+                            holdEffect = ItemId_GetHoldEffect(item);
+
+                        if ((gBitTable[i] & sentIn)                  // Participated
+                        || (holdEffect == HOLD_EFFECT_LUCKY_EGG)    // Exp All yield x1.5
+                        || (
+                            IsTradedMon(&gPlayerParty[i])           // Exp All yield x1.5
+                            && !(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && i >= 3)
+                            && (gSaveBlock2Ptr->optionsDifficulty != 2)))
+                        {
+                            uniqueYield++;
+                        }
+                    }
+
+                    // only print Exp All message if at least one Mon only received exp from Exp All
+                    if (uniqueYield < totalMon)
+                    {
+                        // Ensure the true, effective, Exp All yield is reported
+                        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+                            gExpShareExp = (gExpShareExp * 150) / 100;
+                        
+                        PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gExpShareExp);
+                        PrepareStringBattle(STRINGID_PKMNGAINEDEXPALL, gBattleStruct->expGetterBattlerId);
+                    }
                 }
-                if (!gExpShareCheck && FlagGet(FLAG_EXP_SHARE) && totalMon>viaSentIn){
-                    gExpShareCheck = TRUE;
-                    gBattleStruct->expGetterMonId = 0;
-                    PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gExpShareExp);
-                    PrepareStringBattle(STRINGID_PKMNGAINEDEXPALL, gBattleStruct->expGetterBattlerId);
-                    gBattleScripting.getexpState = 2; // loop again
-                }
-                else
-                    gBattleScripting.getexpState = 6; // we're done
+
+                gBattleScripting.getexpState = 6; // we're done
             }
         }
         break;

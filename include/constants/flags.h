@@ -1343,12 +1343,12 @@
 // Trainer flags occupy 0x500 - 0x85F, the last 9 of which are unused
 // See constants/opponents.h. The values there + FLAG_TRAINER_FLAG_START are the flag IDs
 
-#define TRAINER_FLAGS_START                                         0x500
-#define TRAINER_FLAGS_END                                           (TRAINER_FLAGS_START + MAX_TRAINERS_COUNT - 1) // 0x85F
+#define TRAINER_FLAGS_START                          0x500
+#define TRAINER_FLAGS_END                            (TRAINER_FLAGS_START + MAX_TRAINERS_COUNT - 1) // 0x85F
 
 // System Flags
 
-#define SYSTEM_FLAGS                                   (TRAINER_FLAGS_END + 1) // 0x860
+#define SYSTEM_FLAGS                                 (TRAINER_FLAGS_END + 1) // 0x860
 
 #define FLAG_SYS_POKEMON_GET                         (SYSTEM_FLAGS + 0x0) // FLAG_0x860
 #define FLAG_SYS_POKEDEX_GET                         (SYSTEM_FLAGS + 0x1)
@@ -1370,31 +1370,31 @@
 #define NUM_BADGES                                   (1 + FLAG_BADGE08_GET - FLAG_BADGE01_GET)
 
 // Towns and Cities
-#define FLAG_VISITED_NEWBARK_TOWN                (SYSTEM_FLAGS + 0xF)
-#define FLAG_VISITED_CHERRYGROVE_CITY                  (SYSTEM_FLAGS + 0x10)
+#define FLAG_VISITED_NEWBARK_TOWN                   (SYSTEM_FLAGS + 0xF)
+#define FLAG_VISITED_CHERRYGROVE_CITY               (SYSTEM_FLAGS + 0x10)
 #define FLAG_VISITED_VIOLET_CITY                    (SYSTEM_FLAGS + 0x11)
-#define FLAG_VISITED_AZALEA_TOWN                   (SYSTEM_FLAGS + 0x12)
+#define FLAG_VISITED_AZALEA_TOWN                    (SYSTEM_FLAGS + 0x12)
 #define FLAG_VISITED_GOLDENROD_CITY                 (SYSTEM_FLAGS + 0x13)
-#define FLAG_VISITED_ECRUTEAK_CITY                 (SYSTEM_FLAGS + 0x14)
-#define FLAG_VISITED_OLIVINE_CITY                (SYSTEM_FLAGS + 0x15)
-#define FLAG_VISITED_CIANWOOD_CITY                (SYSTEM_FLAGS + 0x16)
-#define FLAG_VISITED_SAFARI_ZONE_GATE                 (SYSTEM_FLAGS + 0x17)
-#define FLAG_VISITED_MAHOGANY_TOWN                 (SYSTEM_FLAGS + 0x18)
-#define FLAG_VISITED_LAKE_OF_RAGE                           (SYSTEM_FLAGS + 0x19) //25
-#define FLAG_VISITED_BLACKTHORN_CITY                  (SYSTEM_FLAGS + 0x1A)
-#define FLAG_VISITED_INDIGO_PLATEAU               (SYSTEM_FLAGS + 0x1B)
-#define FLAG_VISITED_PALLET_TOWN                           (SYSTEM_FLAGS + 0x1C) 
-#define FLAG_VISITED_VIRIDIAN_CITY                   (SYSTEM_FLAGS + 0x1D)
-#define FLAG_VISITED_PEWTER_CITY                         (SYSTEM_FLAGS + 0x1E) 
-#define FLAG_VISITED_CERULEAN_CITY               (SYSTEM_FLAGS + 0x1F) //49
-#define FLAG_VISITED_VERMILION_CITY                          (SYSTEM_FLAGS + 0x20) 
-#define FLAG_VISITED_LAVENDER_TOWN                (SYSTEM_FLAGS + 0x21)
-#define FLAG_VISITED_CELADON_CITY                  (SYSTEM_FLAGS + 0x22)
-#define FLAG_VISITED_SAFFRON_CITY                  (SYSTEM_FLAGS + 0x23)
-#define FLAG_VISITED_FUCHSIA_CITY               (SYSTEM_FLAGS + 0x24) //48
-#define FLAG_VISITED_CINNABAR_ISLAND                          (SYSTEM_FLAGS + 0x25) 
-#define FLAG_VISITED_MT_SILVER                           (SYSTEM_FLAGS + 0x26) //26
-#define FLAG_VISITED_RECEPTION_GATE                           (SYSTEM_FLAGS + 0x27) // 27
+#define FLAG_VISITED_ECRUTEAK_CITY                  (SYSTEM_FLAGS + 0x14)
+#define FLAG_VISITED_OLIVINE_CITY                   (SYSTEM_FLAGS + 0x15)
+#define FLAG_VISITED_CIANWOOD_CITY                  (SYSTEM_FLAGS + 0x16)
+#define FLAG_VISITED_SAFARI_ZONE_GATE               (SYSTEM_FLAGS + 0x17)
+#define FLAG_VISITED_MAHOGANY_TOWN                  (SYSTEM_FLAGS + 0x18)
+#define FLAG_VISITED_LAKE_OF_RAGE                   (SYSTEM_FLAGS + 0x19) //25
+#define FLAG_VISITED_BLACKTHORN_CITY                (SYSTEM_FLAGS + 0x1A)
+#define FLAG_VISITED_INDIGO_PLATEAU                 (SYSTEM_FLAGS + 0x1B)
+#define FLAG_VISITED_PALLET_TOWN                    (SYSTEM_FLAGS + 0x1C) 
+#define FLAG_VISITED_VIRIDIAN_CITY                  (SYSTEM_FLAGS + 0x1D)
+#define FLAG_VISITED_PEWTER_CITY                    (SYSTEM_FLAGS + 0x1E) 
+#define FLAG_VISITED_CERULEAN_CITY                  (SYSTEM_FLAGS + 0x1F) //49
+#define FLAG_VISITED_VERMILION_CITY                 (SYSTEM_FLAGS + 0x20) 
+#define FLAG_VISITED_LAVENDER_TOWN                  (SYSTEM_FLAGS + 0x21)
+#define FLAG_VISITED_CELADON_CITY                   (SYSTEM_FLAGS + 0x22)
+#define FLAG_VISITED_SAFFRON_CITY                   (SYSTEM_FLAGS + 0x23)
+#define FLAG_VISITED_FUCHSIA_CITY                   (SYSTEM_FLAGS + 0x24) //48
+#define FLAG_VISITED_CINNABAR_ISLAND                (SYSTEM_FLAGS + 0x25) 
+#define FLAG_VISITED_MT_SILVER                      (SYSTEM_FLAGS + 0x26) //26
+#define FLAG_VISITED_RECEPTION_GATE                 (SYSTEM_FLAGS + 0x27) // 27
 
 #define FLAG_SYS_USE_FLASH                          (SYSTEM_FLAGS + 0x28)
 #define FLAG_SYS_USE_STRENGTH                       (SYSTEM_FLAGS + 0x29)
@@ -1403,7 +1403,7 @@
 #define FLAG_SYS_SAFARI_MODE                        (SYSTEM_FLAGS + 0x2C)
 #define FLAG_SYS_CRUISE_MODE                        (SYSTEM_FLAGS + 0x2D)
 
-#define FLAG_SYS_BUG_CONTEST_MODE                           (SYSTEM_FLAGS + 0x2E) 
+#define FLAG_SYS_BUG_CONTEST_MODE                   (SYSTEM_FLAGS + 0x2E) 
 #define FLAG_UNUSED_0x88F                           (SYSTEM_FLAGS + 0x2F) // Unused Flag
 
 #define FLAG_SYS_TV_HOME                            (SYSTEM_FLAGS + 0x30)
@@ -1416,7 +1416,7 @@
 #define FLAG_SYS_CAVE_SHIP                          (SYSTEM_FLAGS + 0x37) // Unused Flag, leftover from R/S debug, presumably used by Emerald's debug too
 #define FLAG_LANDMARK_CAVE_OF_SHOCK                 (SYSTEM_FLAGS + 0x38) 
 #define UNUSED_SYSTEM_FLAG_0x39                     (SYSTEM_FLAGS + 0x39) // Unused Flag
-#define FLAG_SYS_LAKE_OF_RAGE_TIDE                         (SYSTEM_FLAGS + 0x3A)
+#define FLAG_SYS_LAKE_OF_RAGE_TIDE                  (SYSTEM_FLAGS + 0x3A)
 #define FLAG_SYS_RIBBON_GET                         (SYSTEM_FLAGS + 0x3B)
 
 #define FLAG_LANDMARK_FLOWER_SHOP                   (SYSTEM_FLAGS + 0x3C)
@@ -1428,14 +1428,14 @@
 #define FLAG_LANDMARK_TRICK_HOUSE                   (SYSTEM_FLAGS + 0x42)
 #define FLAG_LANDMARK_WINSTRATE_FAMILY              (SYSTEM_FLAGS + 0x43)
 #define FLAG_LANDMARK_GLASS_WORKSHOP                (SYSTEM_FLAGS + 0x44)
-#define FLAG_LANDMARK_BillS_HOUSE                (SYSTEM_FLAGS + 0x45)
+#define FLAG_LANDMARK_BillS_HOUSE                   (SYSTEM_FLAGS + 0x45)
 #define FLAG_LANDMARK_POKEMON_DAYCARE               (SYSTEM_FLAGS + 0x46)
 #define FLAG_LANDMARK_SEAFLOOR_CAVERN               (SYSTEM_FLAGS + 0x47)
 #define FLAG_IS_CHAMPION                            (SYSTEM_FLAGS + 0x48) // 1f Seems to be related to linking.
 #define FLAG_NURSE_UNION_ROOM_REMINDER              (SYSTEM_FLAGS + 0x49) // 20
 #define FLAG_LANDMARK_FIERY_PATH                    (SYSTEM_FLAGS + 0x4A)
 
-#define FLAG_SYS_PC_BILL                         (SYSTEM_FLAGS + 0x4B)
+#define FLAG_SYS_PC_BILL                            (SYSTEM_FLAGS + 0x4B)
 #define FLAG_SYS_MYSTERY_EVENT_ENABLE               (SYSTEM_FLAGS + 0x4C)
 #define FLAG_SYS_ENC_UP_ITEM                        (SYSTEM_FLAGS + 0x4D)
 #define FLAG_SYS_ENC_DOWN_ITEM                      (SYSTEM_FLAGS + 0x4E)
@@ -1507,14 +1507,14 @@
 
 #define FLAG_RECEIVED_POKEDEX_FROM_BIRCH            (SYSTEM_FLAGS + 0x84)
 
-#define FLAG_BADGE09_GET                           (SYSTEM_FLAGS + 0x85) 
-#define FLAG_BADGE10_GET                           (SYSTEM_FLAGS + 0x86)  
-#define FLAG_BADGE11_GET                           (SYSTEM_FLAGS + 0x87)  
-#define FLAG_BADGE12_GET                           (SYSTEM_FLAGS + 0x88)  
-#define FLAG_BADGE13_GET                           (SYSTEM_FLAGS + 0x89)  
-#define FLAG_BADGE14_GET                           (SYSTEM_FLAGS + 0x8A)  
-#define FLAG_BADGE15_GET                           (SYSTEM_FLAGS + 0x8B)  
-#define FLAG_BADGE16_GET                           (SYSTEM_FLAGS + 0x8C)  
+#define FLAG_BADGE09_GET                            (SYSTEM_FLAGS + 0x85) 
+#define FLAG_BADGE10_GET                            (SYSTEM_FLAGS + 0x86)  
+#define FLAG_BADGE11_GET                            (SYSTEM_FLAGS + 0x87)  
+#define FLAG_BADGE12_GET                            (SYSTEM_FLAGS + 0x88)  
+#define FLAG_BADGE13_GET                            (SYSTEM_FLAGS + 0x89)  
+#define FLAG_BADGE14_GET                            (SYSTEM_FLAGS + 0x8A)  
+#define FLAG_BADGE15_GET                            (SYSTEM_FLAGS + 0x8B)  
+#define FLAG_BADGE16_GET                            (SYSTEM_FLAGS + 0x8C)  
 #define FLAG_UNUSED_0x8ED                           (SYSTEM_FLAGS + 0x8D) // Unused Flag
 #define FLAG_UNUSED_0x8EE                           (SYSTEM_FLAGS + 0x8E) // Unused Flag
 #define FLAG_UNUSED_0x8EF                           (SYSTEM_FLAGS + 0x8F) // Unused Flag
@@ -1571,12 +1571,12 @@
 // These flags are cleared once per day
 // The start and end are byte-aligned because the flags are cleared in byte increments
 #define DAILY_FLAGS_START                           (FLAG_UNUSED_0x91F + (8 - FLAG_UNUSED_0x91F % 8))
-#define FLAG_DAILY_BEAT_SILVER                           (DAILY_FLAGS_START + 0x0)  // Unused Flag
+#define FLAG_DAILY_BEAT_SILVER                      (DAILY_FLAGS_START + 0x0)  // Unused Flag
 #define FLAG_DAILY_CONTEST_LOBBY_RECEIVED_BERRY     (DAILY_FLAGS_START + 0x1)
 #define FLAG_DAILY_SECRET_BASE                      (DAILY_FLAGS_START + 0x2)
-#define FLAG_DAILY_HAIRCUT1_RECEIVED                           (DAILY_FLAGS_START + 0x3)  // Sudo2
-#define FLAG_DAILY_HAIRCUT2_RECEIVED                           (DAILY_FLAGS_START + 0x4)  // Sudo3
-#define FLAG_DAILY_BUG_CONTEST_COMPLETED                           (DAILY_FLAGS_START + 0x5)  // Unused Flag
+#define FLAG_DAILY_HAIRCUT1_RECEIVED                (DAILY_FLAGS_START + 0x3)  // Sudo2
+#define FLAG_DAILY_HAIRCUT2_RECEIVED                (DAILY_FLAGS_START + 0x4)  // Sudo3
+#define FLAG_DAILY_BUG_CONTEST_COMPLETED            (DAILY_FLAGS_START + 0x5)  // Unused Flag
 #define FLAG_WONDERTRADE1                           (DAILY_FLAGS_START + 0x6)  // WondertradeFlag (1)
 #define FLAG_WONDERTRADE2                           (DAILY_FLAGS_START + 0x7)  // WondertradeFlag (2)
 #define FLAG_WONDERTRADE3                           (DAILY_FLAGS_START + 0x8)  // WondertradeFlag (3)
@@ -1590,7 +1590,7 @@
 #define FLAG_DAILY_FLOWER_SHOP_RECEIVED_BERRY       (DAILY_FLAGS_START + 0x10)
 #define FLAG_DAILY_BERRY_MASTERS_WIFE               (DAILY_FLAGS_START + 0x11)
 #define FLAG_DAILY_SOOTOPOLIS_RECEIVED_BERRY        (DAILY_FLAGS_START + 0x12)
-#define FLAG_DAILY_DAISY_GROOMED                           (DAILY_FLAGS_START + 0x13) // Unused Flag
+#define FLAG_DAILY_DAISY_GROOMED                    (DAILY_FLAGS_START + 0x13) // Unused Flag
 #define FLAG_DAILY_APPRENTICE_LEAVES                (DAILY_FLAGS_START + 0x14)
 
 #define FLAG_UNUSED_0x935                           (DAILY_FLAGS_START + 0x15) // Unused Flag

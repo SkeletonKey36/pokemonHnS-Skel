@@ -73,7 +73,7 @@
 #define BATTLE_TYPE_RECORDED_LINK      (1 << 25)
 #define BATTLE_TYPE_TRAINER_HILL       (1 << 26)
 #define BATTLE_TYPE_SECRET_BASE        (1 << 27)
-#define BATTLE_TYPE_HO_OH            (1 << 28)
+#define BATTLE_TYPE_HO_OH              (1 << 28)
 #define BATTLE_TYPE_KYOGRE             (1 << 29)
 #define BATTLE_TYPE_RAYQUAZA           (1 << 30)
 #define BATTLE_TYPE_RECORDED_IS_MASTER (1 << 31)
