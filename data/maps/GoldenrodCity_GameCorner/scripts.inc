@@ -243,14 +243,6 @@ GoldenrodCity_GameCorner_EventScript_Gentleman::
 	release
 	end
 
-GoldenrodCity_GameCorner_EventScript_PokefanF::
-	lock
-	faceplayer
-	msgbox GoldenrodCity_GameCorner_Text_PokefanF, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 GoldenrodCity_GameCorner_EventScript_PokefanM2::
 	lock
 	faceplayer
@@ -325,12 +317,6 @@ GoldenrodCity_GameCorner_Text_CooltrainerM:
     .string "Life is a gamble. I'm going to pull\n"
     .string "till I drop!$"
 
-GoldenrodCity_GameCorner_Text_PokefanF:
-    .string "Roulette…\p"
-    .string "I prefer it over the slots because\n"
-    .string "it's easier to figure the odds.\p"
-    .string "But the payout is much lower.$"
-
 GoldenrodCity_GameCorner_Text_CooltrainerF:
     .string "I won't quit until I win!$"
 
@@ -341,7 +327,7 @@ GoldenrodCity_GameCorner_Text_Gentleman:
 
 GoldenrodCity_GameCorner_Text_PokefanM2:
     .string "I couldn't win at the slots, and I\n"
-    .string "blew it on roulette.\p"
+    .string "blew it on VOLTORB FLIP.\p"
     .string "I got so furious, I tossed out my\n"
     .string "COIN CASE in the UNDERGROUND.$"
 
