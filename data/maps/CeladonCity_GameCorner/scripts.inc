@@ -2,31 +2,67 @@ CeladonCity_GameCorner_MapScripts::
 	.byte 0
 
 CeladonGameCorner_EventScript_PokefanM::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_PokefanM, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_Teacher::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_Teacher, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_FishingGuru::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_FishingGuru, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_Fisher1::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_Fisher1, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_Fisher2::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_Fisher2, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_GymGuide::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_GymGuide, MSGBOX_NPC
+	closemessage
+	release
 	end
 
 CeladonGameCorner_EventScript_Gramps::
+	lock
+	faceplayer
 	msgbox CeladonGameCorner_Text_Gramps, MSGBOX_NPC
+	closemessage
+	release
+	end
+
+CeladonGameCorner_EventScript_PokefanF::
+	lock
+	faceplayer
+	msgbox CeladonGameCorner_Text_PokefanF, MSGBOX_DEFAULT
+	closemessage
+	release
 	end
 
 CeladonGameCorner_Text_PokefanM:
@@ -60,6 +96,12 @@ CeladonGameCorner_Text_GymGuide:
 	.string "I'm trying to get enough coins for\n"
 	.string "a prize POKéMON.\p"
 	.string "But I don't have enough coins yet…$"
+
+CeladonGameCorner_Text_PokefanF:
+    .string "Roulette…\p"
+    .string "I prefer it over the slots because\n"
+    .string "it's easier to figure the odds.\p"
+    .string "But the payout is much lower.$"
 
 CeladonGameCorner_Text_Gramps:
 	.string "Hmmm… The odds are surely\n"
