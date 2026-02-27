@@ -95,6 +95,9 @@ enum {
     MENU_TRADE1,
     MENU_TRADE2,
     MENU_TOSS,
+    MENU_FIELD_MOVES_SUBMENU,
+    // MENU_RESTORE,
+    // MENU_FOLLOWER,
     MENU_FIELD_MOVES
 };
 
@@ -114,6 +117,7 @@ enum {
     ACTIONS_TRADE,
     ACTIONS_SPIN_TRADE,
     ACTIONS_TAKEITEM_TOSS,
+    ACTIONS_FIELD_MOVES,
 };
 
 // In CursorCb_FieldMove, field moves <= FIELD_MOVE_WATERFALL are assumed to line up with the badge flags.
@@ -197,7 +201,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[8];
+    u8 actions[8]; // The list of actions to show for the currently selected mon. Terminated by ACTIONS_NONE. (Used by the selection & field moves submenu)
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -479,6 +483,7 @@ static void CursorCb_Register(u8);
 static void CursorCb_Trade1(u8);
 static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
+static void CursorCb_FieldMovesSubmenu(u8);
 static void CursorCb_FieldMove(u8);
 static bool8 SetUpFieldMove_Surf(void);
 static bool8 SetUpFieldMove_Fly(void);
@@ -2589,6 +2594,9 @@ static u8 DisplaySelectionWindow(u8 windowType)
     case SELECTWINDOW_ACTIONS:
         SetWindowTemplateFields(&window, 2, 19, 19 - (sPartyMenuInternal->numActions * 2), 10, sPartyMenuInternal->numActions * 2, 14, 0x2E9);
         break;
+    case SELECTWINDOW_FIELD_MOVES:
+        SetWindowTemplateFields(&window, 2, 19, 19 - (sPartyMenuInternal->numActions * 2), 10, sPartyMenuInternal->numActions * 2, 14, 0x2E9);
+        break;
     case SELECTWINDOW_ITEM:
         window = sItemGiveTakeWindowTemplate;
         break;
@@ -2609,7 +2617,7 @@ static u8 DisplaySelectionWindow(u8 windowType)
 
     for (i = 0; i < sPartyMenuInternal->numActions; i++)
     {
-        u8 fontColorsId = (sPartyMenuInternal->actions[i] >= MENU_FIELD_MOVES) ? 4 : 3;
+        u8 fontColorsId = (sPartyMenuInternal->actions[i] == MENU_FIELD_MOVES_SUBMENU || sPartyMenuInternal->actions[i] >= MENU_FIELD_MOVES) ? 4 : 3;
         AddTextPrinterParameterized4(sPartyMenuInternal->windowId[0], FONT_NORMAL, cursorDimension, (i * 16) + 1, letterSpacing, 0, sFontColorTable[fontColorsId], 0, sCursorOptions[sPartyMenuInternal->actions[i]].text);
     }
 
@@ -2652,6 +2660,91 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
     {
         SetPartyMonFieldSelectionActions(mons, slotId);
     }
+    else if (action == ACTIONS_FIELD_MOVES)
+    {
+        // Build the field moves submenu from the currently available field moves
+        // This matches the original logic but in a submenu format
+        u8 j;
+        bool8 hasFlashAlready = FALSE;
+        bool8 hasFlyAlready = FALSE;
+
+        sPartyMenuInternal->numActions = 0;
+
+        if (HMsOverwriteOptionActive()) // tx_randomizer_and_challenges
+        {
+            if (slotId == 0)
+            {
+                // Slot 0: Add ALL field moves the mon knows (including FLY/FLASH)
+                for (i = 0; i < MAX_MON_MOVES; i++)
+                {
+                    for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
+                    {
+                        if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
+                        {
+                            if (sFieldMoves[j] == MOVE_FLY)
+                                hasFlyAlready = TRUE;
+                            if (sFieldMoves[j] == MOVE_FLASH)
+                                hasFlashAlready = TRUE;
+                            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+                            break;
+                        }
+                    }
+                }
+                // Add from bag if player has the HM and mon doesn't already know it
+                if (CheckBagHasItem(ITEM_HM02, 1) && !hasFlyAlready)
+                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
+                if (CheckBagHasItem(ITEM_HM05, 1) && !hasFlashAlready)
+                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+            }
+            else
+            {
+                // Other slots: Exclude FLY/FLASH from known moves
+                for (i = 0; i < MAX_MON_MOVES; i++)
+                {
+                    for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
+                    {
+                        if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
+                        {
+                            if (sFieldMoves[j] != MOVE_FLY)
+                                if (sFieldMoves[j] != MOVE_FLASH)
+                                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+                            break;
+                        }
+                    }
+                }
+                // Add FLY/FLASH if mon can learn them
+                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01))
+                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
+                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+            }
+        }
+        else
+        {
+            // Standard logic: Exclude FLY/FLASH from known moves
+            for (i = 0; i < MAX_MON_MOVES; i++)
+            {
+                for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
+                {
+                    if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
+                    {
+                        if (sFieldMoves[j] != MOVE_FLY)
+                            if (sFieldMoves[j] != MOVE_FLASH)
+                                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+                        break;
+                    }
+                }
+            }
+            // Add FLY/FLASH if mon can learn them
+            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01))
+                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
+            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+        }
+        
+        // Add cancel option
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL2);
+    }
     else
     {
         sPartyMenuInternal->numActions = sPartyMenuActionCounts[action];
@@ -2663,77 +2756,98 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
 static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 {
     u8 i, j;
+    bool8 hasAnyFieldMove = FALSE;
     bool8 hasFlashAlready = FALSE;
-    bool8 hasFlyAlread = FALSE;
+    bool8 hasFlyAlready = FALSE;
 
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
 
+    // Determine if Field Moves submenu should be shown by predicting if it would have any items
     if (HMsOverwriteOptionActive()) //tx_randomizer_and_challenges  
     {
         if (slotId == 0)
         {
+            // Slot 0: Check if mon knows ANY field move (including FLY/FLASH)
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
                 for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
                 {
                     if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
                     {
-                        
                         if (sFieldMoves[j] == MOVE_FLY)
-                            hasFlyAlread = TRUE;
+                            hasFlyAlready = TRUE;
                         if (sFieldMoves[j] == MOVE_FLASH)
                             hasFlashAlready = TRUE;
-                        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+                        hasAnyFieldMove = TRUE;
                         break;
                     }
                 }
+                if (hasAnyFieldMove)
+                    break;
             }
-            if (CheckBagHasItem(ITEM_HM02, 1) && (sPartyMenuInternal->numActions < 5) && !hasFlyAlread)
-                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
-            if (CheckBagHasItem(ITEM_HM05, 1) && (sPartyMenuInternal->numActions < 5) && !hasFlashAlready)
-                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+            // Also check if player has HMs in bag that mon doesn't already know
+            if (!hasAnyFieldMove)
+            {
+                if ((CheckBagHasItem(ITEM_HM02, 1) && !hasFlyAlready) || 
+                    (CheckBagHasItem(ITEM_HM05, 1) && !hasFlashAlready))
+                    hasAnyFieldMove = TRUE;
+            }
         }
         else
         {
+            // Other slots: Check if mon knows any field move EXCEPT FLY/FLASH
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
                 for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
                 {
                     if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
-                    {   
-                    if (sFieldMoves[j] != MOVE_FLY) // If Mon already knows FLY, prevent it from being added to action list
-                        if (sFieldMoves[j] != MOVE_FLASH) // If Mon already knows FLASH, prevent it from being added to action list
-                        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
-                        break;
+                    {
+                        if (sFieldMoves[j] != MOVE_FLY && sFieldMoves[j] != MOVE_FLASH)
+                        {
+                            hasAnyFieldMove = TRUE;
+                            break;
+                        }
                     }
                 }
+                if (hasAnyFieldMove)
+                    break;
             }
-            if (sPartyMenuInternal->numActions < 5 && CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01)) // If Mon can learn HM02 and action list consists of < 4 moves, add FLY to action list
-                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
-            if (sPartyMenuInternal->numActions < 5 && CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01)) // If Mon can learn HM05 and action list consists of < 4 moves, add FLASH to action list
-                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+            // Also check if mon can learn HM02 or HM05
+            if (!hasAnyFieldMove)
+            {
+                if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01) || 
+                    CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+                    hasAnyFieldMove = TRUE;
+            }
         }
     }
     else
     {
+        // Standard logic: Check if mon knows any field move EXCEPT FLY/FLASH
         for (i = 0; i < MAX_MON_MOVES; i++)
         {
             for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
             {
                 if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == sFieldMoves[j])
                 {
-                    if (sFieldMoves[j] != MOVE_FLY) // If Mon already knows FLY, prevent it from being added to action list
-                        if (sFieldMoves[j] != MOVE_FLASH) // If Mon already knows FLASH, prevent it from being added to action list
-                            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
-                            break;
+                    if (sFieldMoves[j] != MOVE_FLY && sFieldMoves[j] != MOVE_FLASH)
+                    {
+                        hasAnyFieldMove = TRUE;
+                        break;
+                    }
                 }
             }
+            if (hasAnyFieldMove)
+                break;
         }
-        if (sPartyMenuInternal->numActions < 5 && CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01)) // If Mon can learn HM02 and action list consists of < 4 moves, add FLY to action list
-            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 5 + MENU_FIELD_MOVES);
-        if (sPartyMenuInternal->numActions < 5 && CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01)) // If Mon can learn HM05 and action list consists of < 4 moves, add FLASH to action list
-            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, 1 + MENU_FIELD_MOVES);
+        // Also check if mon can learn HM02 or HM05
+        if (!hasAnyFieldMove)
+        {
+            if (CanMonLearnTMHM(&mons[slotId], ITEM_HM02 - ITEM_TM01) || 
+                CanMonLearnTMHM(&mons[slotId], ITEM_HM05 - ITEM_TM01))
+                hasAnyFieldMove = TRUE;
+        }
     }
     if (!InBattlePike())
     {
@@ -2743,6 +2857,10 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MAIL);
         else
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_ITEM);
+    }
+    if (hasAnyFieldMove)
+    {
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_FIELD_MOVES_SUBMENU);
     }
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL1);
 }
@@ -3599,13 +3717,17 @@ static void Task_HandleLoseMailMessageYesNoInput(u8 taskId)
     }
 }
 
-static void CursorCb_Cancel2(u8 taskId)
+static void Task_ReturnToActionsMenu(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
-
-    PlaySE(SE_SELECT);
-    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    
+    // Wait one frame to ensure previous window is fully cleared
+    if (gTasks[taskId].data[15] == 0)
+    {
+        gTasks[taskId].data[15]++;
+        return;
+    }
+    
     SetPartyMonSelectionActions(gPlayerParty, gPartyMenu.slotId, GetPartyMenuActionsType(mon));
     if (gPartyMenu.menuType != PARTY_MENU_TYPE_STORE_PYRAMID_HELD_ITEMS)
     {
@@ -3619,8 +3741,56 @@ static void CursorCb_Cancel2(u8 taskId)
         DisplayPartyMenuStdMessage(PARTY_MSG_ALREADY_HOLDING_ONE);
     }
     gTasks[taskId].data[0] = 0xFF;
+    gTasks[taskId].data[15] = 0; // Reset for potential future use
     gTasks[taskId].func = Task_HandleSelectionMenuInput;
 }
+
+static void CursorCb_Cancel2(u8 taskId)
+{
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    bool8 fromFieldMovesSubmenu = FALSE;
+    u8 i;
+
+    // Check if we're coming from field moves submenu by looking for field move actions
+    for (i = 0; i < sPartyMenuInternal->numActions; i++)
+    {
+        if (sPartyMenuInternal->actions[i] >= MENU_FIELD_MOVES && sPartyMenuInternal->actions[i] < MENU_FIELD_MOVES + FIELD_MOVES_COUNT)
+        {
+            fromFieldMovesSubmenu = TRUE;
+            break;
+        }
+    }
+
+    PlaySE(SE_SELECT);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    
+    // Field moves submenu needs delay due to dynamic sizing at same position
+    if (fromFieldMovesSubmenu)
+    {
+        gTasks[taskId].data[15] = 0;
+        gTasks[taskId].func = Task_ReturnToActionsMenu;
+    }
+    else
+    {
+        // Item/Mail submenus can transition immediately (different position)
+        SetPartyMonSelectionActions(gPlayerParty, gPartyMenu.slotId, GetPartyMenuActionsType(mon));
+        if (gPartyMenu.menuType != PARTY_MENU_TYPE_STORE_PYRAMID_HELD_ITEMS)
+        {
+            DisplaySelectionWindow(SELECTWINDOW_ACTIONS);
+            DisplayPartyMenuStdMessage(PARTY_MSG_DO_WHAT_WITH_MON);
+        }
+        else
+        {
+            DisplaySelectionWindow(SELECTWINDOW_ITEM);
+            CopyItemName(GetMonData(mon, MON_DATA_HELD_ITEM), gStringVar2);
+            DisplayPartyMenuStdMessage(PARTY_MSG_ALREADY_HOLDING_ONE);
+        }
+        gTasks[taskId].data[0] = 0xFF;
+        gTasks[taskId].func = Task_HandleSelectionMenuInput;
+    }
+}
+
 
 static void CursorCb_SendMon(u8 taskId)
 {
@@ -3818,6 +3988,35 @@ static void Task_HandleSpinTradeYesNoInput(u8 taskId)
         break;
     }
 }
+
+static void Task_DisplayFieldMovesMenu(u8 taskId)
+{
+    // Wait one frame to ensure previous window is fully cleared
+    if (gTasks[taskId].data[15] == 0)
+    {
+        gTasks[taskId].data[15]++;
+        return;
+    }
+    
+    SetPartyMonSelectionActions(gPlayerParty, gPartyMenu.slotId, ACTIONS_FIELD_MOVES);
+    DisplaySelectionWindow(SELECTWINDOW_FIELD_MOVES);
+    DisplayPartyMenuStdMessage(PARTY_MSG_DO_WHAT_WITH_MON);
+    gTasks[taskId].data[0] = 0xFF;
+    gTasks[taskId].data[15] = 0; // Reset for potential future use
+    gTasks[taskId].func = Task_HandleSelectionMenuInput;
+}
+
+static void CursorCb_FieldMovesSubmenu(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    
+    // Wait one frame before displaying the new menu to ensure old content is cleared
+    gTasks[taskId].data[15] = 0;
+    gTasks[taskId].func = Task_DisplayFieldMovesMenu;
+}
+
 
 static void CursorCb_FieldMove(u8 taskId)
 {
