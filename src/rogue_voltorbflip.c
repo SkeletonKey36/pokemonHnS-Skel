@@ -100,6 +100,8 @@ enum
     WIN_INFO_BLUE_Y,
     WIN_INFO_PURPLE_Y,
 
+    WIN_LEVEL_DISPLAY,
+
     WIN_COUNT,
 };
 
@@ -404,6 +406,16 @@ static const struct WindowTemplate sVoltorbFlipWinTemplates[WIN_COUNT + 1] =
         .height = 3,
         .paletteNum = 15,
         .baseBlock = 82,
+    },
+    [WIN_LEVEL_DISPLAY] =
+    {
+        .bg = 0,
+        .tilemapLeft = 22,
+        .tilemapTop = 1 + 3 * 3,
+        .width = 7,
+        .height = 2,
+        .paletteNum = 15,
+        .baseBlock = 91,
     },
     [WIN_COUNT] = DUMMY_WIN_TEMPLATE,
 };
@@ -859,21 +871,21 @@ static void Task_VoltorbFlipWaitForKeyPress(u8 taskId)
 
     if (JOY_NEW(L_BUTTON))
     {
+        PlaySE(SE_SELECT);
         if(sVoltorbFlipState->cursorWriteValue > 0)
-        {
-            PlaySE(SE_SELECT);
             --sVoltorbFlipState->cursorWriteValue;
-            DrawNoteTiles();
-        }
+        else
+            sVoltorbFlipState->cursorWriteValue = CARD_VALUE_COUNT;
+        DrawNoteTiles();
     }
     if (JOY_NEW(R_BUTTON))
     {
+        PlaySE(SE_SELECT);
         if(sVoltorbFlipState->cursorWriteValue < CARD_VALUE_COUNT)
-        {
-            PlaySE(SE_SELECT);
             ++sVoltorbFlipState->cursorWriteValue;
-            DrawNoteTiles();
-        }
+        else
+            sVoltorbFlipState->cursorWriteValue = 0;
+        DrawNoteTiles();
     }
 
     if (JOY_NEW(A_BUTTON))
@@ -1136,6 +1148,22 @@ static void PrintRowInfo(u8 window, u8 totalValue, u8 totalVoltorbs)
     CopyWindowToVram(window, COPYWIN_FULL);
 }
 
+static void PrintLevelInfo(u8 window, u8 level)
+{
+    u8 text[16];
+    FillWindowPixelBuffer(window, PIXEL_FILL(0));
+
+    // Display "Lv.X"
+    StringCopy(text, sTextWhite);
+    StringAppend(text, gText_Level);
+    ConvertUIntToDecimalStringN(gStringVar4, level, STR_CONV_MODE_LEFT_ALIGN, 1);
+    StringAppend(text, gStringVar4);
+    PrintVoltorbFlipText(window, FONT_SMALL, text, 2, 1);
+
+    PutWindowTilemap(window);
+    CopyWindowToVram(window, COPYWIN_FULL);
+}
+
 static u8 CountRow(u8 y, bool8 countValue)
 {
     u8 x;
@@ -1207,6 +1235,9 @@ static void DisplayVoltorbFlipText(void)
             CountColumn(i, FALSE)
         );
     }
+
+    // Display level - need to edit background for proper placement
+    // PrintLevelInfo(WIN_LEVEL_DISPLAY, VarGet(VAR_FLIP_LEVEL));
 }
 
 static void DrawBoardCardTiles(void)
