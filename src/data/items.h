@@ -2865,17 +2865,6 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_DexNav,
     },
 
-    [ITEM_0F0] =
-    {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
-        .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
-    },
-
     [ITEM_0F1] =
     {
         .name = _("????????"),
@@ -7751,17 +7740,6 @@ const struct Item gItems2[] =
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_DexNav,
-    },
-
-    [ITEM_0F0] =
-    {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
-        .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
 
     [ITEM_0F1] =
