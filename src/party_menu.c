@@ -2683,6 +2683,19 @@ static void RemoveLevelUpStatsWindow(void)
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
 }
 
+// Returns the party index of the first alive, non-egg Pokemon (the one that follows the player)
+// Returns PARTY_SIZE if no valid follower exists
+static u8 GetFirstLiveMonIndex(void)
+{
+    u32 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (gPlayerParty[i].hp > 0 && !(gPlayerParty[i].box.isEgg || gPlayerParty[i].box.isBadEgg))
+            return i;
+    }
+    return PARTY_SIZE; // No valid follower
+}
+
 static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 action)
 {
     u8 i;
@@ -2893,7 +2906,8 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
     {
         AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_FIELD_MOVES_SUBMENU);
     }
-    if (slotId == 0)
+    // Show follower option on whichever Pokemon is actually following the player
+    if (slotId == GetFirstLiveMonIndex())
     {
         AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_PKMN_FOLLOWER);
     }
