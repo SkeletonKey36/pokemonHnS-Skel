@@ -16,8 +16,10 @@
 #include "strings.h"
 #include "string_util.h"
 #include "text.h"
+#include "text_window.h"
 #include "overworld.h"
 #include "menu.h"
+#include "main_menu.h"
 #include "pokedex.h"
 #include "constants/rgb.h"
 #include "constants/coins.h"
@@ -101,6 +103,7 @@ enum
     WIN_INFO_PURPLE_Y,
 
     WIN_LEVEL_DISPLAY,
+    WIN_QUIT_MESSAGE,
 
     WIN_COUNT,
 };
@@ -137,10 +140,14 @@ EWRAM_DATA static struct Vflip *sVflip = NULL;
 extern const u8 gText_DexNational[];
 extern const u8 gText_DexHoenn[];
 extern const u8 gText_PokedexDiploma[];
+extern const u8 gText_Level[];
+extern const u8 gText_QuitTheGame[];
 
 static void MainCB2(void);
 static void Task_VoltorbFlipFadeIn(u8);
 static void Task_VoltorbFlipWaitForKeyPress(u8);
+static void Task_VoltorbFlipAskQuit(u8);
+static void Task_VoltorbFlipHandleQuitInput(u8);
 static void Task_VoltorbFlipVictory(u8);
 static void Task_VoltorbFlipLoss(u8);
 static void Task_VoltorbFlipFadeOut(u8);
@@ -410,12 +417,22 @@ static const struct WindowTemplate sVoltorbFlipWinTemplates[WIN_COUNT + 1] =
     [WIN_LEVEL_DISPLAY] =
     {
         .bg = 0,
-        .tilemapLeft = 22,
-        .tilemapTop = 1 + 3 * 3,
+        .tilemapLeft = 23,
+        .tilemapTop = 7,
         .width = 7,
         .height = 2,
         .paletteNum = 15,
         .baseBlock = 91,
+    },
+    [WIN_QUIT_MESSAGE] =
+    {
+        .bg = 0,
+        .tilemapLeft = 6,
+        .tilemapTop = 7,
+        .width = 10,
+        .height = 2,
+        .paletteNum = 15,
+        .baseBlock = 400,
     },
     [WIN_COUNT] = DUMMY_WIN_TEMPLATE,
 };
@@ -461,7 +478,7 @@ static const struct OamData sOamData_Coins =
     .shape = SPRITE_SHAPE(32x16),
     .size = SPRITE_SIZE(32x16),
 	.tileNum = 0,
-    .priority = 0,
+    .priority = 1,
 };
 
 static const struct SpriteTemplate sSpriteTemplate_Coins =
@@ -498,7 +515,7 @@ static const struct OamData sOam_CreditDigit =
     .shape = SPRITE_SHAPE(8x16),
     .size = SPRITE_SIZE(8x16),
 	.tileNum = 0,
-    .priority = 0,
+    .priority = 1,
 };
 
 static const struct SpriteTemplate sSpriteTemplate_CreditDigit =
@@ -524,7 +541,7 @@ static const struct OamData sPointerSpriteOamData =
     .matrixNum = 0,
     .size = SPRITE_SIZE(32x32),
     .tileNum = 0,
-    .priority = 0,
+    .priority = 1,
     .paletteNum = 1,
     .affineParam = 0,
 };
@@ -581,23 +598,6 @@ static const struct SpriteTemplate sPointerSprite =
     .callback = SpriteCallbackDummy
 };
 
-//static const struct OamData sPointerSpriteOamData =
-//{
-//    .x = 0,
-//    .y = 0,
-//    .affineMode = ST_OAM_AFFINE_OFF,
-//    .objMode = ST_OAM_OBJ_NORMAL,
-//    .mosaic = 0,
-//    .bpp = ST_OAM_4BPP,
-//    .shape = SPRITE_SHAPE(32x32),
-//    .matrixNum = 0,
-//    .size = SPRITE_SIZE(32x32),
-//    .tileNum = 0,
-//    .priority = 0,
-//    .paletteNum = 1,
-//    .affineParam = 0,
-//};
-
 static void SetCreditDigits(u16 num)
 {
     int i;
@@ -615,7 +615,7 @@ static void SetCreditDigits(u16 num)
             // Set tileNum for CreditSpriteId1
             gSprites[sVflip->CreditSpriteId1].oam.tileNum = digit * 2;
 
-            gSprites[sVflip->CreditSpriteId1].oam.priority = 0;
+            gSprites[sVflip->CreditSpriteId1].oam.priority = 1;
         }
         else if (i == 1)
         {
@@ -624,7 +624,7 @@ static void SetCreditDigits(u16 num)
             // Set tileNum for CreditSpriteId2
             gSprites[sVflip->CreditSpriteId2].oam.tileNum = digit * 2;
 
-            gSprites[sVflip->CreditSpriteId2].oam.priority = 0;
+            gSprites[sVflip->CreditSpriteId2].oam.priority = 1;
         }
         else if (i == 2)
         {
@@ -633,7 +633,7 @@ static void SetCreditDigits(u16 num)
             // Set tileNum for CreditSpriteId3
             gSprites[sVflip->CreditSpriteId3].oam.tileNum = digit * 2;
 
-            gSprites[sVflip->CreditSpriteId3].oam.priority = 0;
+            gSprites[sVflip->CreditSpriteId3].oam.priority = 1;
         }
         else if (i == 3)
         {
@@ -642,7 +642,7 @@ static void SetCreditDigits(u16 num)
             // Set tileNum for CreditSpriteId4
             gSprites[sVflip->CreditSpriteId4].oam.tileNum = digit * 2;
 
-            gSprites[sVflip->CreditSpriteId4].oam.priority = 0;
+            gSprites[sVflip->CreditSpriteId4].oam.priority = 1;
         }
 
         // Reduce num for the next digit
@@ -673,25 +673,25 @@ static void CreateCreditSprites(void)
 		if (i == 0)
 		{
 			sVflip->CreditSpriteId1 = CreateSprite(&sSpriteTemplate_CreditDigit, 185, 146, 0);
-			gSprites[sVflip->CreditSpriteId1].oam.priority = 0;
+			gSprites[sVflip->CreditSpriteId1].oam.priority = 1;
 			gSprites[sVflip->CreditSpriteId1].invisible = FALSE;
 		}
 		else if (i == 1)
 		{
 			sVflip->CreditSpriteId2 = CreateSprite(&sSpriteTemplate_CreditDigit, (8 + 185), 146, 0);
-			gSprites[sVflip->CreditSpriteId2].oam.priority = 0;
+			gSprites[sVflip->CreditSpriteId2].oam.priority = 1;
 			gSprites[sVflip->CreditSpriteId2].invisible = FALSE;
 		}
 		else if (i == 2)
 		{
 			sVflip->CreditSpriteId3 = CreateSprite(&sSpriteTemplate_CreditDigit, (16 + 185), 146, 0);
-			gSprites[sVflip->CreditSpriteId3].oam.priority = 0;
+			gSprites[sVflip->CreditSpriteId3].oam.priority = 1;
 			gSprites[sVflip->CreditSpriteId3].invisible = FALSE;
 		}
 		else if (i == 3)
 		{
 			sVflip->CreditSpriteId4 = CreateSprite(&sSpriteTemplate_CreditDigit, (24 + 185), 146, 0);
-			gSprites[sVflip->CreditSpriteId4].oam.priority = 0;
+			gSprites[sVflip->CreditSpriteId4].oam.priority = 1;
 			gSprites[sVflip->CreditSpriteId4].invisible = FALSE;
 		}
     }
@@ -762,6 +762,9 @@ void CB2_ShowVoltorbFlip(void)
     InitVoltorbFlipSprites();
     InitVoltorbFlipWindow();
 	
+    // Load window border graphics
+    LoadUserWindowBorderGfx(0, 0x214, BG_PLTT_ID(14));
+	
     ResetTempTileDataBuffers();
     DecompressAndCopyTileDataToVram(1, &sVoltorbFlipTiles, 0, 0, 0);
     while (FreeTempTileDataBuffersIfPossible())
@@ -804,11 +807,7 @@ static void Task_VoltorbFlipWaitForKeyPress(u8 taskId)
 
     if (JOY_NEW(B_BUTTON))
     {
-        VarSet(VAR_RESULT, FALSE);
-		VarSet(VAR_FLIP_LEVEL, 0);
-
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-        gTasks[taskId].func = Task_VoltorbFlipFadeOut;
+        gTasks[taskId].func = Task_VoltorbFlipAskQuit;
         return;
     }
 
@@ -993,6 +992,38 @@ static void Task_VoltorbFlipWaitForKeyPress(u8 taskId)
 	//AnimateSprites;
 }
 
+static void Task_VoltorbFlipAskQuit(u8 taskId)
+{
+    gSprites[sVoltorbFlipState->outlineSprite].invisible = TRUE;
+    gSprites[sVoltorbFlipState->pointerSprite].invisible = TRUE;
+    DrawStdFrameWithCustomTileAndPalette(WIN_QUIT_MESSAGE, FALSE, 0x214, 0xE);
+    AddTextPrinterParameterized(WIN_QUIT_MESSAGE, FONT_NORMAL, gText_QuitTheGame, 0, 1, 0, 0);
+    CopyWindowToVram(WIN_QUIT_MESSAGE, COPYWIN_FULL);
+    CreateYesNoMenuParameterized(0x15, 9, 0x214, 0x280, 0xE, 0xF);
+    gTasks[taskId].func = Task_VoltorbFlipHandleQuitInput;
+}
+
+static void Task_VoltorbFlipHandleQuitInput(u8 taskId)
+{
+    s8 input = Menu_ProcessInputNoWrapClearOnChoose();
+    
+    if (input == 0) // Yes - quit
+    {
+        ClearStdWindowAndFrameToTransparent(WIN_QUIT_MESSAGE, TRUE);
+        VarSet(VAR_RESULT, FALSE);
+        VarSet(VAR_FLIP_LEVEL, 0);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gTasks[taskId].func = Task_VoltorbFlipFadeOut;
+    }
+    else if (input == 1 || input == MENU_B_PRESSED) // No - continue playing
+    {
+        ClearStdWindowAndFrameToTransparent(WIN_QUIT_MESSAGE, TRUE);
+        gSprites[sVoltorbFlipState->outlineSprite].invisible = FALSE;
+        gSprites[sVoltorbFlipState->pointerSprite].invisible = FALSE;
+        gTasks[taskId].func = Task_VoltorbFlipWaitForKeyPress;
+    }
+}
+
 static void Task_VoltorbFlipVictory(u8 taskId)
 {
     if(gTasks[taskId].data[0] == 0)
@@ -1155,8 +1186,8 @@ static void PrintLevelInfo(u8 window, u8 level)
 
     // Display "Lv.X"
     StringCopy(text, sTextWhite);
-    StringAppend(text, gText_Level);
-    ConvertUIntToDecimalStringN(gStringVar4, level, STR_CONV_MODE_LEFT_ALIGN, 1);
+    StringAppend(text, gText_Level2);
+    ConvertUIntToDecimalStringN(gStringVar4, level + 1, STR_CONV_MODE_RIGHT_ALIGN, 1);
     StringAppend(text, gStringVar4);
     PrintVoltorbFlipText(window, FONT_SMALL, text, 2, 1);
 
@@ -1237,7 +1268,7 @@ static void DisplayVoltorbFlipText(void)
     }
 
     // Display level - need to edit background for proper placement
-    // PrintLevelInfo(WIN_LEVEL_DISPLAY, VarGet(VAR_FLIP_LEVEL));
+    PrintLevelInfo(WIN_LEVEL_DISPLAY, VarGet(VAR_FLIP_LEVEL));
 }
 
 static void DrawBoardCardTiles(void)
@@ -1312,6 +1343,9 @@ static void InitVoltorbFlipWindow(void)
 
     FillWindowPixelBuffer(WIN_INFO_RED_X, PIXEL_FILL(0));
     PutWindowTilemap(WIN_INFO_RED_X);
+    
+    FillWindowPixelBuffer(WIN_LEVEL_DISPLAY, PIXEL_FILL(0));
+    PutWindowTilemap(WIN_LEVEL_DISPLAY);
 }
 
 static void PrintVoltorbFlipText(u8 win, u8 font, u8 const* text, u8 x, u8 y)
@@ -1320,14 +1354,6 @@ static void PrintVoltorbFlipText(u8 win, u8 font, u8 const* text, u8 x, u8 y)
 
     AddTextPrinterParameterized4(win, font, x, y, 0, 0, color, TEXT_SKIP_DRAW, text);
 }
-
-//static void A()
-//{
-//    FillWindowPixelBuffer(WIN_TITLE_COUNTERS, PIXEL_FILL(0));
-//    PutWindowTilemap(WIN_TITLE_COUNTERS);
-//
-//    CopyWindowToVram(WIN_TITLE_COUNTERS, COPYWIN_FULL);
-//}
 
 static void DrawCardTiles(u8 x, u8 y)
 {
