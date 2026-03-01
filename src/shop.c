@@ -1303,8 +1303,7 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)
         {
             // Show "##BP" right-aligned in the list
             u8 *ptr = ConvertIntToDecimalStringN(gStringVar4, GetBPCostForItem((u16)itemId), STR_CONV_MODE_LEFT_ALIGN, 4);
-            StringCopy(ptr, gText_Space);
-            StringAppend(ptr, gText_BP);
+            StringCopy(ptr, gText_BP);
             x = GetStringRightAlignXOffset(FONT_NARROW, gStringVar4, 120);
             AddTextPrinterParameterized4(windowId, FONT_NARROW, x, y, 0, 0, sShopBuyMenuTextColors[COLORID_ITEM_LIST], TEXT_SKIP_DRAW, gStringVar4);
             return;
