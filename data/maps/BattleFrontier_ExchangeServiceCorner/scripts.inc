@@ -69,11 +69,13 @@ BattleFrontier_ExchangeServiceCorner_EventScript_BagFull::
 BattleFrontier_ExchangeServiceCorner_EventScript_DecorClerk1::
 	lock
 	faceplayer
-	setvar VAR_TEMP_2, EXCHANGE_CORNER_DECOR1_CLERK
-	call BattleFrontier_ExchangeServiceCorner_EventScript_ClerkWelcome
-	goto BattleFrontier_ExchangeServiceCorner_EventScript_ChooseDecor1
+	msgbox BattleFrontier_ExchangeServiceCorner_Text_WelcomePleaseChoosePrize, MSGBOX_DEFAULT
+	special CreateBPDecorShop1
+	waitstate
+	release
 	end
 
+@ --- LEGACY SCROLLABLE MULTICHOICE CODE (kept for reference, no longer called) ---
 BattleFrontier_ExchangeServiceCorner_EventScript_ChooseDecor1::
 	setvar VAR_0x8004, SCROLL_MULTI_BF_EXCHANGE_CORNER_DECOR_VENDOR_1
 	special ShowFrontierExchangeCornerItemIconWindow
@@ -178,11 +180,13 @@ BattleFrontier_ExchangeServiceCorner_EventScript_TotodileDoll::
 BattleFrontier_ExchangeServiceCorner_EventScript_DecorClerk2::
 	lock
 	faceplayer
-	setvar VAR_TEMP_2, EXCHANGE_CORNER_DECOR2_CLERK
-	call BattleFrontier_ExchangeServiceCorner_EventScript_ClerkWelcome
-	goto BattleFrontier_ExchangeServiceCorner_EventScript_ChooseDecor2
+	msgbox BattleFrontier_ExchangeServiceCorner_Text_WelcomePleaseChoosePrize, MSGBOX_DEFAULT
+	special CreateBPDecorShop2
+	waitstate
+	release
 	end
 
+@ --- LEGACY SCROLLABLE MULTICHOICE CODE (kept for reference, no longer called) ---
 BattleFrontier_ExchangeServiceCorner_EventScript_ChooseDecor2::
 	setvar VAR_0x8004, SCROLL_MULTI_BF_EXCHANGE_CORNER_DECOR_VENDOR_2
 	special ShowFrontierExchangeCornerItemIconWindow
@@ -242,11 +246,13 @@ BattleFrontier_ExchangeServiceCorner_EventScript_BlastoiseDoll::
 BattleFrontier_ExchangeServiceCorner_EventScript_VitaminClerk::
 	lock
 	faceplayer
-	setvar VAR_TEMP_2, EXCHANGE_CORNER_VITAMIN_CLERK
-	call BattleFrontier_ExchangeServiceCorner_EventScript_ClerkWelcome
-	goto BattleFrontier_ExchangeServiceCorner_EventScript_ChooseVitamin
+	msgbox BattleFrontier_ExchangeServiceCorner_Text_WelcomePleaseChoosePrize, MSGBOX_DEFAULT
+	special CreateBPVitaminShop
+	waitstate
+	release
 	end
 
+@ --- LEGACY SCROLLABLE MULTICHOICE CODE (kept for reference, no longer called) ---
 BattleFrontier_ExchangeServiceCorner_EventScript_ChooseVitamin::
 	setvar VAR_0x8004, SCROLL_MULTI_BF_EXCHANGE_CORNER_VITAMIN_VENDOR
 	special ShowFrontierExchangeCornerItemIconWindow
@@ -329,11 +335,13 @@ BattleFrontier_ExchangeServiceCorner_EventScript_Upgrade::
 BattleFrontier_ExchangeServiceCorner_EventScript_HoldItemClerk::
 	lock
 	faceplayer
-	setvar VAR_TEMP_2, EXCHANGE_CORNER_HOLD_ITEM_CLERK
-	call BattleFrontier_ExchangeServiceCorner_EventScript_ClerkWelcome
-	goto BattleFrontier_ExchangeServiceCorner_EventScript_ChooseHoldItem
+	msgbox BattleFrontier_ExchangeServiceCorner_Text_WelcomePleaseChoosePrize, MSGBOX_DEFAULT
+	special CreateBPHoldItemShop
+	waitstate
+	release
 	end
 
+@ --- LEGACY SCROLLABLE MULTICHOICE CODE (kept for reference, no longer called) ---
 BattleFrontier_ExchangeServiceCorner_EventScript_ChooseHoldItem::
 	setvar VAR_0x8004, SCROLL_MULTI_BF_EXCHANGE_CORNER_HOLD_ITEM_VENDOR
 	special ShowFrontierExchangeCornerItemIconWindow
