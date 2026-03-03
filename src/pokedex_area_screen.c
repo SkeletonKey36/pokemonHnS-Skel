@@ -96,7 +96,12 @@ struct
     /*0x6E0*/ u16 numAreaMarkerSprites;
     /*0x6E2*/ u16 alteringCaveCounter;
     /*0x6E4*/ u16 alteringCaveId;
-    /*0x6E8*/ u8 *screenSwitchState;
+    /*0x6E6*/ u8 areaViewTimeMode;   // 0 = day, 1 = night
+    /*0x6E7*/ u8 indDaySpriteId;      // sprite ID of the sun-stone indicator (MAX_SPRITES = not created)
+    /*0x6E8*/ u8 indNightSpriteId;    // sprite ID of the moon-stone indicator
+    /*0x6E9*/ u8 _pad6E9;
+    /*0x6EA*/ u16 _pad6EA;
+    /*0x6EC*/ u8 *screenSwitchState;
     /*0x6EC*/ struct RegionMap regionMap;
     /*0xF70*/ u8 charBuffer[64];
     /*0xFB0*/ struct Sprite * areaUnknownSprites[3];
@@ -119,6 +124,8 @@ static void Task_HandlePokedexAreaScreenInput(u8);
 static void ResetPokedexAreaMapBg(void);
 static void DestroyAreaScreenSprites(void);
 static void LoadHGSSScreenSelectBarSubmenu(void);
+static void CreateAreaIndicatorSprites(void);
+static void RefreshAreaGlowForTimeMode(void);
 
 static const u32 sAreaGlow_Pal[] = INCBIN_U32("graphics/pokedex/area_glow.gbapal");
 static const u32 sAreaGlow_Gfx[] = INCBIN_U32("graphics/pokedex/area_glow.4bpp.lz");
@@ -663,6 +670,45 @@ static const struct SpriteTemplate sAreaMarkerSpriteTemplate =
 static const u16 sAreaMarkerPalette[] = INCBIN_U16("graphics/pokedex/area_marker.gbapal");
 static const u8 sAreaMarkerTiles[] = INCBIN_U8("graphics/pokedex/area_marker.4bpp");
 
+// Day / night indicator graphics.  Each PNG is 32x32 storing a stacked 64x16
+// graphic: top 32x16 = left half, bottom 32x16 = right half.  Two 32x16 sprites
+// are placed side-by-side on screen; the right sprite uses tileNum + 8.
+#define TAG_AREA_DAY_IND   4
+#define TAG_AREA_NIGHT_IND 5
+
+static const u8  sDayIndicatorTiles[]   = INCBIN_U8("graphics/pokedex/area_indicator_day.4bpp");
+static const u8  sNightIndicatorTiles[] = INCBIN_U8("graphics/pokedex/area_indicator_night.4bpp");
+
+// Each half of the 64x16 indicator is a 32x16 OAM object.
+static const struct OamData sIndicatorOamData =
+{
+    .shape    = SPRITE_SHAPE(32x16),
+    .size     = SPRITE_SIZE(32x16),
+    .priority = 0,
+};
+// Both indicator templates share TAG_AREA_UNKNOWN's palette, which is loaded
+// before the fade-in begins so no mid-fade palette flash occurs.
+static const struct SpriteTemplate sDayIndicatorTemplate =
+{
+    .tileTag     = TAG_AREA_DAY_IND,
+    .paletteTag  = TAG_AREA_UNKNOWN,
+    .oam         = &sIndicatorOamData,
+    .anims       = gDummySpriteAnimTable,
+    .images      = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback    = SpriteCallbackDummy,
+};
+static const struct SpriteTemplate sNightIndicatorTemplate =
+{
+    .tileTag     = TAG_AREA_NIGHT_IND,
+    .paletteTag  = TAG_AREA_UNKNOWN,
+    .oam         = &sIndicatorOamData,
+    .anims       = gDummySpriteAnimTable,
+    .images      = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback    = SpriteCallbackDummy,
+};
+
 static const struct SpritePalette sAreaUnknownSpritePalette =
 {
     .data = gPokedexAreaScreenAreaUnknown_Pal, .tag = TAG_AREA_UNKNOWN
@@ -795,19 +841,46 @@ static void FindMapsWithMon(u16 species)
         }
 
         // Add regular species to the area map
-        for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(UNDEFINED); i++)
         {
-            if (MapHasSpecies(&gWildMonHeaders[i], species))
+            u16 slotIndex = 0;
+            for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(UNDEFINED); i++)
             {
-                switch (gWildMonHeaders[i].mapGroup)
+                // Track which time-slot offset we're at within a run of same-map headers.
+                // Consecutive headers sharing mapGroup+mapNum are day/night variants:
+                //   slotIndex 0 = day table, slotIndex 1 = night table.
+                if (i > 0
+                    && gWildMonHeaders[i].mapGroup == gWildMonHeaders[i-1].mapGroup
+                    && gWildMonHeaders[i].mapNum   == gWildMonHeaders[i-1].mapNum)
+                    slotIndex++;
+                else
+                    slotIndex = 0;
+
+                // When the time system is active, only process the header for the
+                // currently viewed time mode.  Single-slot maps (slotIndex always
+                // stays 0 because the next entry belongs to a different map) are
+                // always shown in both day and night views.
+                if (VarGet(VAR_TIME_BASED_ENCOUNTER) >= 1)
                 {
-                case MAP_GROUP_TOWNS_AND_ROUTES:
-                    SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
-                case MAP_GROUP_DUNGEONS:
-                case MAP_GROUP_SPECIAL_AREA:
-                    SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
+                    bool8 isMultiSlot = (slotIndex > 0)
+                        || (gWildMonHeaders[i+1].mapGroup != MAP_GROUP(UNDEFINED)
+                            && gWildMonHeaders[i].mapGroup == gWildMonHeaders[i+1].mapGroup
+                            && gWildMonHeaders[i].mapNum   == gWildMonHeaders[i+1].mapNum);
+                    if (isMultiSlot && slotIndex != sPokedexAreaScreen->areaViewTimeMode)
+                        continue;
+                }
+
+                if (MapHasSpecies(&gWildMonHeaders[i], species))
+                {
+                    switch (gWildMonHeaders[i].mapGroup)
+                    {
+                    case MAP_GROUP_TOWNS_AND_ROUTES:
+                        SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                        break;
+                    case MAP_GROUP_DUNGEONS:
+                    case MAP_GROUP_SPECIAL_AREA:
+                        SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                        break;
+                    }
                 }
             }
         }
@@ -1098,6 +1171,12 @@ void ShowPokedexAreaScreen(u16 species, u8 *screenSwitchState)
     sPokedexAreaScreen->species = species;
     sPokedexAreaScreen->screenSwitchState = screenSwitchState;
     screenSwitchState[0] = 0;
+
+    // Open on whichever time mode is currently active in-game.
+    sPokedexAreaScreen->areaViewTimeMode = (VarGet(VAR_TIME_BASED_ENCOUNTER) == 2) ? 1 : 0;
+    sPokedexAreaScreen->indDaySpriteId   = MAX_SPRITES; // sentinel: indicator sprites not yet created
+    sPokedexAreaScreen->indNightSpriteId = MAX_SPRITES;
+
     taskId = CreateTask(Task_ShowPokedexAreaScreen, 0);
     gTasks[taskId].tState = 0;
 }
@@ -1154,6 +1233,7 @@ static void Task_ShowPokedexAreaScreen(u8 taskId)
         ShowBg(2);
         ShowBg(3); // TryShowPokedexAreaMap will have done this already
         SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
+        CreateAreaIndicatorSprites(); // show stone sprite indicator if time system is active
         break;
     case 11:
         gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
@@ -1177,7 +1257,21 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
             return;
         break;
     case 1:
-        if (JOY_NEW(B_BUTTON))
+        if (JOY_NEW(START_BUTTON))
+        {
+            // Toggle day/night encounter view.  Play failure sound if the time
+            // system is not active for this save.
+            if (VarGet(VAR_TIME_BASED_ENCOUNTER) == 0)
+            {
+                PlaySE(SE_FAILURE);
+                return;
+            }
+            sPokedexAreaScreen->areaViewTimeMode ^= 1; // 0 (day) <-> 1 (night)
+            PlaySE(SE_DEX_PAGE);
+            RefreshAreaGlowForTimeMode();
+            return;
+        }
+        else if (JOY_NEW(B_BUTTON))
         {
             // This was originally intended to go back to the info screen (Original Emerald Behavior),
             // gTasks[taskId].data[1] = 1;
@@ -1274,6 +1368,18 @@ static void DestroyAreaScreenSprites(void)
 {
     u16 i;
 
+    // Destroy stone indicator sprites (each indicator is two side-by-side 32x16 sprites)
+    if (sPokedexAreaScreen->indDaySpriteId != MAX_SPRITES)
+    {
+        DestroySprite(&gSprites[sPokedexAreaScreen->indDaySpriteId]);
+        DestroySprite(&gSprites[sPokedexAreaScreen->indDaySpriteId + 1]);
+        DestroySprite(&gSprites[sPokedexAreaScreen->indNightSpriteId]);
+        DestroySprite(&gSprites[sPokedexAreaScreen->indNightSpriteId + 1]);
+    }
+    FreeSpriteTilesByTag(TAG_AREA_DAY_IND);
+    FreeSpriteTilesByTag(TAG_AREA_NIGHT_IND);
+    // Palette is shared with TAG_AREA_UNKNOWN; freed below with the rest of its resources.
+
     // Destroy area marker sprites
     FreeSpriteTilesByTag(TAG_AREA_MARKER);
     FreeSpritePaletteByTag(TAG_AREA_MARKER);
@@ -1337,4 +1443,96 @@ static void LoadHGSSScreenSelectBarSubmenu(void)
 {
     CopyToBgTilemapBuffer(1, sPokedexPlusHGSS_ScreenSelectBarSubmenu_Tilemap, 0, 0);
     CopyBgTilemapBufferToVram(1);
+}
+
+// Creates two 64x16 indicator graphics in the bottom-left corner, each split
+// into a left and right 32x16 sprite.  The right half uses tileNum + 8.
+// Only the sprites matching the current areaViewTimeMode are made visible.
+// Sprite IDs are consecutive: day_left, day_right, night_left, night_right.
+static void CreateAreaIndicatorSprites(void)
+{
+    u8 spriteId;
+    struct SpriteSheet sheet;
+    bool8 dayInvis, nightInvis;
+
+    if (VarGet(VAR_TIME_BASED_ENCOUNTER) == 0)
+        return;
+
+    // Day indicator — 32x32 PNG stores two stacked 32x16 halves (left on top, right below).
+    // Palette shared with TAG_AREA_UNKNOWN (loaded before the fade)
+    sheet = (struct SpriteSheet){ sDayIndicatorTiles, 0x200, TAG_AREA_DAY_IND };
+    LoadSpriteSheet(&sheet);
+    sPokedexAreaScreen->indDaySpriteId = CreateSprite(&sDayIndicatorTemplate, 20, 148, 0);
+    spriteId = CreateSprite(&sDayIndicatorTemplate, 52, 148, 0); // right half
+    if (spriteId != MAX_SPRITES)
+        gSprites[spriteId].oam.tileNum += 8;
+
+    // Night indicator
+    sheet = (struct SpriteSheet){ sNightIndicatorTiles, 0x200, TAG_AREA_NIGHT_IND };
+    LoadSpriteSheet(&sheet);
+    sPokedexAreaScreen->indNightSpriteId = CreateSprite(&sNightIndicatorTemplate, 20, 148, 0);
+    spriteId = CreateSprite(&sNightIndicatorTemplate, 52, 148, 0); // right half
+    if (spriteId != MAX_SPRITES)
+        gSprites[spriteId].oam.tileNum += 8;
+
+    // Set initial visibility: only the current time-mode indicator is shown
+    if (sPokedexAreaScreen->indDaySpriteId != MAX_SPRITES)
+    {
+        dayInvis   = (sPokedexAreaScreen->areaViewTimeMode != 0);
+        nightInvis = (sPokedexAreaScreen->areaViewTimeMode == 0);
+        gSprites[sPokedexAreaScreen->indDaySpriteId].invisible       = dayInvis;
+        gSprites[sPokedexAreaScreen->indDaySpriteId + 1].invisible   = dayInvis;
+        gSprites[sPokedexAreaScreen->indNightSpriteId].invisible     = nightInvis;
+        gSprites[sPokedexAreaScreen->indNightSpriteId + 1].invisible = nightInvis;
+    }
+}
+
+// Toggles between day and night encounter view without leaving the area screen.
+// Rebuilds all encounter data, re-uploads the glow tilemap, and recreates marker sprites.
+static void RefreshAreaGlowForTimeMode(void)
+{
+    u16 i;
+
+    // Re-scan encounter headers for the new time mode and rebuild the glow tilemap.
+    // LoadBgTilemap schedules a direct DMA to VRAM — do NOT call CopyBgTilemapBufferToVram
+    // afterwards, as that would overwrite the fresh write with the stale info-screen buffer.
+    FindMapsWithMon(sPokedexAreaScreen->species);
+    BuildAreaGlowTilemap();
+    LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
+
+    // Destroy old marker sprites and recreate them for the new data.
+    FreeSpriteTilesByTag(TAG_AREA_MARKER);
+    FreeSpritePaletteByTag(TAG_AREA_MARKER);
+    for (i = 0; i < sPokedexAreaScreen->numAreaMarkerSprites; i++)
+        DestroySprite(sPokedexAreaScreen->areaMarkerSprites[i]);
+    sPokedexAreaScreen->numAreaMarkerSprites = 0;
+    CreateAreaMarkerSprites();
+
+    // Destroy and recreate "Area Unknown" sprites for the new result set.
+    // The sprites may be NULL (not created on initial load if encounters existed),
+    // so we always rebuild rather than just toggling visibility.
+    // NOTE: Do NOT free the palette here — the indicator sprites share TAG_AREA_UNKNOWN's
+    // palette slot, and freeing it would cause them to flash black for a frame.
+    // The palette is static and unchanged between day/night, so there's no need to reload it.
+    FreeSpriteTilesByTag(TAG_AREA_UNKNOWN);
+    for (i = 0; i < ARRAY_COUNT(sPokedexAreaScreen->areaUnknownSprites); i++)
+    {
+        if (sPokedexAreaScreen->areaUnknownSprites[i])
+            DestroySprite(sPokedexAreaScreen->areaUnknownSprites[i]);
+        sPokedexAreaScreen->areaUnknownSprites[i] = NULL;
+    }
+    LoadAreaUnknownGraphics();
+    CreateAreaUnknownSprites();
+
+    // Restart the glow/marker animation and flip the indicator sprite visibility.
+    StartAreaGlow();
+    if (sPokedexAreaScreen->indDaySpriteId != MAX_SPRITES)
+    {
+        bool8 dayInvis   = (sPokedexAreaScreen->areaViewTimeMode != 0);
+        bool8 nightInvis = (sPokedexAreaScreen->areaViewTimeMode == 0);
+        gSprites[sPokedexAreaScreen->indDaySpriteId].invisible       = dayInvis;
+        gSprites[sPokedexAreaScreen->indDaySpriteId + 1].invisible   = dayInvis;
+        gSprites[sPokedexAreaScreen->indNightSpriteId].invisible     = nightInvis;
+        gSprites[sPokedexAreaScreen->indNightSpriteId + 1].invisible = nightInvis;
+    }
 }
