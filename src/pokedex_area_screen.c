@@ -96,11 +96,11 @@ struct
     /*0x6E0*/ u16 numAreaMarkerSprites;
     /*0x6E2*/ u16 alteringCaveCounter;
     /*0x6E4*/ u16 alteringCaveId;
-    /*0x6E6*/ u8 areaViewTimeMode;   // 0 = day, 1 = night
-    /*0x6E7*/ u8 indDaySpriteId;      // sprite ID of the sun-stone indicator (MAX_SPRITES = not created)
-    /*0x6E8*/ u8 indNightSpriteId;    // sprite ID of the moon-stone indicator
-    /*0x6E9*/ u8 _pad6E9;
-    /*0x6EA*/ u16 _pad6EA;
+    /*0x6E6*/ u8 areaViewTimeMode;    // 0 = day, 1 = night
+    /*0x6E7*/ u8 indDaySpriteId;      // sprite ID of the day-mode indicator (MAX_SPRITES = not created)
+    /*0x6E8*/ u8 indNightSpriteId;    // sprite ID of the night-mode indicator
+    /*0x6E9*/ u8 _pad6E9;             // alignment padding
+    /*0x6EA*/ u16 _pad6EA;            // alignment padding
     /*0x6EC*/ u8 *screenSwitchState;
     /*0x6EC*/ struct RegionMap regionMap;
     /*0xF70*/ u8 charBuffer[64];
@@ -1306,8 +1306,12 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
     case 0:
         if (gPaletteFade.active)
             return;
-        // Fade-in just completed — apply day/night tint to OBJ palettes once.
-        // BG 7+8 were pre-tinted before the fade and are already correct.
+        // Fade-in just completed — restore BG 7+8 from ROM, re-apply any night
+        // tint (idempotent for day mode), and sync the OBJ area-marker palette.
+        // Night mode: BG 7+8 unfaded was pre-tinted so the fade targeted the
+        // correct colors; ApplyTimeModeToAreaMapPalette re-tints both buffers.
+        // Day mode: no pre-tint was applied; function restores ROM palette and
+        // skips tinting, leaving both buffers clean.
         ApplyTimeModeToAreaMapPalette();
         break;
     case 1:
@@ -1576,9 +1580,10 @@ static void ApplyTimeModeToAreaMapPalette(void)
 
 // Advances the multi-frame time-mode toggle refresh one step per frame.
 // Called from Task_HandlePokedexAreaScreenInput while data[2] != 0.
-// Two frames total:
+// Three frames total:
 //   Frame 1 — swap all pre-built caches (encounters + glow tilemap) and DMA.
-//   Frame 2 — rebuild sprites and apply palette tint.
+//   Frame 2 — rebuild marker sprites and area-unknown sprites.
+//   Frame 3 — restart glow animation, flip indicator sprites, apply palette tint.
 static void ContinueTimeModeRefresh(u8 taskId)
 {
     u16 i;
