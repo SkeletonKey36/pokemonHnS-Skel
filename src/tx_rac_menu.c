@@ -66,7 +66,6 @@ enum
     MENUITEM_FEATURES_FRONTIER_BANS,
     //MENUITEM_FEATURES_UNLIMITED_WT,
     //MENUITEM_FEATURES_EASY_FEEBAS,
-    MENUITEM_FEATURES_PC_FROM_START,
     MENUITEM_FEATURES_NEXT,
     MENUITEM_FEATURES_COUNT,
 };
@@ -328,7 +327,6 @@ static void DrawChoices_Features_FrontierBans(int selection, int y);
 static void DrawChoices_Mode_New_Effectiveness(int selection, int y);
 static void DrawChoices_Difficulty_Escape_Rope_Dig(int selection, int y);
 static void DrawChoices_Features_Shiny_Colors(int selection, int y);
-static void DrawChoices_Features_PC_From_Start(int selection, int y);
 
 static void PrintCurrentSelections(void);
 
@@ -392,7 +390,6 @@ struct // MENU_FEATURES
     //[MENUITEM_FEATURES_UNLIMITED_WT]          = {DrawChoices_Features_Unlimited_WT,         ProcessInput_Options_Two},
     [MENUITEM_FEATURES_FRONTIER_BANS]         = {DrawChoices_Features_FrontierBans,         ProcessInput_Options_Two},
     [MENUITEM_FEATURES_SHINY_COLOR]           = {DrawChoices_Features_Shiny_Colors,          ProcessInput_Options_Two},
-    [MENUITEM_FEATURES_PC_FROM_START]         = {DrawChoices_Features_PC_From_Start,         ProcessInput_Options_Two},
     [MENUITEM_FEATURES_NEXT]                  = {NULL, NULL},
 };
 
@@ -520,7 +517,6 @@ static const u8 sText_EasyFeebas[]          = _("{COLOR 3}{SHADOW 3}EASIER FEEBA
 static const u8 sText_Unlimited_WT[]        = _("{COLOR 3}{SHADOW 3}UNLIMITED WT");
 static const u8 sText_FrontierBans[]        = _("FRONTIER BANS");
 static const u8 sText_Shiny_Colors[]        = _("SHINY COLORS");
-static const u8 sText_PC_From_Start[]       = _("START MENU PC");
 
 // Menu left side option names text
 static const u8 *const sOptionMenuItemsNamesFeatures[MENUITEM_FEATURES_COUNT] =
@@ -532,7 +528,6 @@ static const u8 *const sOptionMenuItemsNamesFeatures[MENUITEM_FEATURES_COUNT] =
     //[MENUITEM_FEATURES_UNLIMITED_WT]              = sText_Unlimited_WT,
     [MENUITEM_FEATURES_FRONTIER_BANS]             = sText_FrontierBans,
     [MENUITEM_FEATURES_SHINY_COLOR]               = sText_Shiny_Colors,
-    [MENUITEM_FEATURES_PC_FROM_START]             = sText_PC_From_Start,
     [MENUITEM_FEATURES_NEXT]                      = sText_Next,
 };
 
@@ -850,8 +845,6 @@ static const u8 sText_Description_Features_FrontierBans_Unban[]       = _("All l
 static const u8 sText_Description_Features_FrontierBans_Ban[]         = _("Powerful legendary {PKMN} are banned\nin the BATTLE FRONTIER. Default.");
 static const u8 sText_Description_Features_Shiny_Colors_Original[]    = _("Original shiny color palette for all\nPOKéMON. Default.");
 static const u8 sText_Description_Features_Shiny_Colors_Modern[]      = _("Some shiny POKéMON have brand new\ncolor palettes.");
-static const u8 sText_Description_Features_No_PC_From_Start[]         = _("The PC is not accessible from\nthe START menu.");
-static const u8 sText_Description_Features_PC_From_Start[]            = _("The PC is accessible from the\nSTART menu.");
 
 static const u8 sText_Description_Features_Next[]                     = _("Continue to Randomizer options.");
 
@@ -864,7 +857,6 @@ static const u8 *const sOptionMenuItemDescriptionsFeatures[MENUITEM_FEATURES_COU
     //[MENUITEM_FEATURES_UNLIMITED_WT]          = {sText_Description_Features_Unlimited_WT_On,        sText_Description_Features_Unlimited_WT_Off,      sText_Empty,                                        sText_Empty,                                        sText_Empty},
     [MENUITEM_FEATURES_FRONTIER_BANS]         = {sText_Description_Features_FrontierBans_Ban,       sText_Description_Features_FrontierBans_Unban,    sText_Empty,                                        sText_Empty,                                        sText_Empty},
     [MENUITEM_FEATURES_SHINY_COLOR]           = {sText_Description_Features_Shiny_Colors_Original,  sText_Description_Features_Shiny_Colors_Modern,    sText_Empty,                                        sText_Empty,                                        sText_Empty},
-    [MENUITEM_FEATURES_PC_FROM_START]         = {sText_Description_Features_No_PC_From_Start,       sText_Description_Features_PC_From_Start,          sText_Empty,                                        sText_Empty,                                        sText_Empty},
     [MENUITEM_FEATURES_NEXT]                  = {sText_Description_Features_Next,                   sText_Empty,                                      sText_Empty,                                        sText_Empty,                                        sText_Empty},
 };
 
@@ -1062,7 +1054,6 @@ static const u8 *const sOptionMenuItemDescriptionsDisabledFeatures[MENUITEM_FEAT
     //[MENUITEM_FEATURES_UNLIMITED_WT]          = sText_Description_Disabled_Feature,
     [MENUITEM_FEATURES_FRONTIER_BANS]         = sText_Empty,
     [MENUITEM_FEATURES_SHINY_COLOR]           = sText_Empty,
-    [MENUITEM_FEATURES_PC_FROM_START]         = sText_Empty,
     [MENUITEM_FEATURES_NEXT]                  = sText_Empty,
 };
 
@@ -1549,7 +1540,6 @@ void CB2_InitTxRandomizerChallengesMenu(void)
         //sOptions->sel_features[MENUITEM_FEATURES_UNLIMITED_WT]           = gSaveBlock1Ptr->tx_Features_Unlimited_WT;
         sOptions->sel_features[MENUITEM_FEATURES_FRONTIER_BANS]          = gSaveBlock1Ptr->tx_Features_FrontierBans;
         sOptions->sel_features[MENUITEM_FEATURES_SHINY_COLOR]            = gSaveBlock1Ptr->tx_Features_ShinyColors;
-        sOptions->sel_features[MENUITEM_FEATURES_PC_FROM_START]          = gSaveBlock1Ptr->tx_Features_PCFromStart;
         
         //MENU RANDOMIZER
         sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON]                     = FALSE;
@@ -1905,7 +1895,6 @@ void SaveData_TxRandomizerAndChallenges(void)
     //gSaveBlock1Ptr->tx_Features_Unlimited_WT                = sOptions->sel_features[MENUITEM_FEATURES_UNLIMITED_WT]; 
     gSaveBlock1Ptr->tx_Features_FrontierBans                = sOptions->sel_features[MENUITEM_FEATURES_FRONTIER_BANS]; 
     gSaveBlock1Ptr->tx_Features_ShinyColors                 = sOptions->sel_features[MENUITEM_FEATURES_SHINY_COLOR];
-    gSaveBlock1Ptr->tx_Features_PCFromStart               = sOptions->sel_features[MENUITEM_FEATURES_PC_FROM_START];
     // MENU_RANDOMIZER
     if (sOptions->sel_randomizer[MENUITEM_RANDOM_OFF_ON] == TRUE)
     {
@@ -3241,26 +3230,6 @@ static void DrawChoices_Features_Shiny_Colors(int selection, int y)
     DrawOptionMenuChoice(sText_Off, 104, y, styles[0], active);
     DrawOptionMenuChoice(sText_On, GetStringRightAlignXOffset(1, sText_On, 198), y, styles[1], active);
 }
-
-static void DrawChoices_Features_PC_From_Start(int selection, int y)
-{
-    bool8 active = CheckConditions(MENUITEM_FEATURES_PC_FROM_START);
-    u8 styles[2] = {0};
-    styles[selection] = 1;
-
-    if (selection == 0)
-    {
-        gSaveBlock1Ptr->tx_Features_PCFromStart = 0; // Pokemon Box is unavailable from the start menu
-    }
-    else
-    {
-        gSaveBlock1Ptr->tx_Features_PCFromStart = 1; // Pokemon Box is available from the start menu
-    }
-
-    DrawOptionMenuChoice(sText_Off, 104, y, styles[0], active);
-    DrawOptionMenuChoice(sText_On, GetStringRightAlignXOffset(1, sText_On, 198), y, styles[1], active);
-}
-
 
 // Background tilemap
 #define TILE_TOP_CORNER_L 0x1A2 // 418

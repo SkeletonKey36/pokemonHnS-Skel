@@ -377,7 +377,7 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
     
-    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
+    if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
     {
         AddStartMenuAction(MENU_ACTION_POKEPC);
     }
@@ -406,7 +406,7 @@ static void BuildDebugStartMenu(void)
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
     
-    if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
+    if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && !IsPlayerInEliteFourOrChampionRoom())
     {
         AddStartMenuAction(MENU_ACTION_POKEPC);
     }
@@ -544,7 +544,7 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
     {
         if (sStartMenuItems[sCurrentStartMenuActions[index]].func.u8_void == StartMenuPlayerNameCallback)
         {
-            if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+            if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
             {
                 PrintPlayerNameOnWindowShortFont(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 0);
             }
@@ -557,7 +557,7 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
         else
         {
             StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
-            if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+            if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
             {
                 AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_SHORT, gStringVar4, 8, (index << 4) + 0, TEXT_SKIP_DRAW, NULL);
             }
@@ -614,7 +614,7 @@ static bool32 InitStartMenuStep(void)
             sInitStartMenuData[0]++;
         break;
     case 5:
-        if (gSaveBlock1Ptr->tx_Features_PCFromStart == TRUE && FlagGet(FLAG_SYS_POKEMON_GET) == TRUE){
+        if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE){
             sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 0, 16, sNumStartMenuActions, sStartMenuCursorPos);
         }
         else 
