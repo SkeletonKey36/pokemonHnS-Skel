@@ -42,7 +42,7 @@ enum DecorationCategory
 
 enum DecorationCategory_HnS
 {
-    DECORCAT_DOLL,
+    DECORCAT_DOLL = DECORCAT_CUSHION + 1,
     DECORCAT_COUNT,
 };
 
