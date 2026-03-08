@@ -40,7 +40,7 @@ extern const u8 EventScript_MomGiftCall_Decoration[];
 static const struct MomGiftSequential sMomGifts_Sequential[] = {
     {ITEM_SUPER_POTION,      900,    600,   FALSE},
     {ITEM_REPEL,             4000,   270,   FALSE},
-    {ITEM_SILK_SCARF,        7000,   600,   FALSE},
+    {ITEM_PP_UP,             7000,   2000,   FALSE},
     {MOM_GIFT_STARTER_DOLL,  10000,  1000,   TRUE},   // Dynamic: gives doll matching player's starter
     {ITEM_MOON_STONE,        15000,  2100,  FALSE},
     {ITEM_HYPER_POTION,      19000,  1200,  FALSE},
