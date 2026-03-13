@@ -415,7 +415,7 @@ static u8 PickWildMonNature(void)
         && GetMonAbility(&gPlayerParty[0]) == ABILITY_SYNCHRONIZE
         && Random() % 2 == 0)
         {
-            return GetMonData(&gPlayerParty[0], MON_DATA_PERSONALITY) % NUM_NATURES;
+            return GetNature(&gPlayerParty[0], TRUE);
         }
     }
     else if (gSaveBlock1Ptr->tx_Mode_Synchronize == 1)
@@ -423,7 +423,7 @@ static u8 PickWildMonNature(void)
         if (!GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG)
         && GetMonAbility(&gPlayerParty[0]) == ABILITY_SYNCHRONIZE)
         {
-            return GetMonData(&gPlayerParty[0], MON_DATA_PERSONALITY) % NUM_NATURES;
+            return GetNature(&gPlayerParty[0], TRUE);
         }
     }
     // random nature
