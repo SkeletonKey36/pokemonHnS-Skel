@@ -6463,7 +6463,7 @@ static void Cmd_getmoneyreward(void)
         {
             u32 depositAmount = money / 4;  // 25% of earnings
             RemoveMoney(&gSaveBlock1Ptr->money, depositAmount);
-            Mom_TryDepositMoney(depositAmount);
+            Mom_AutoDepositFromBattle(depositAmount);
             gBattleCommunication[MULTISTRING_CHOOSER] = 1;
         }
         else
